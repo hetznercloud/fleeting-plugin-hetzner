@@ -150,15 +150,20 @@ func (g *InstanceGroup) ConnectInfo(ctx context.Context, id string) (provider.Co
 			info.OS = "darwin"
 		default:
 			info.OS = "linux"
+			switch info.Arch {
+			case "arm64_mac", "x86_64_mac":
+				info.OS = "darwin"
+			}
 		}
 	}
 
-	fmt.Println("platform", instance.Platform)
-
 	if info.Arch == "" {
 		info.Arch = strings.ToLower(aws.StringValue(instance.Architecture))
-		if info.Arch == "x86_64" {
+		switch {
+		case strings.HasPrefix(info.Arch, "x86_64"): // x86_64, x86_64_mac
 			info.Arch = "amd64"
+		case strings.HasPrefix(info.Arch, "arm64"): // arm64, arm64_mac
+			info.Arch = "arm64"
 		}
 	}
 
