@@ -111,7 +111,10 @@ access your ASG via the AWS SDK.
         },
         {
             "Effect": "Allow",
-            "Action": "ec2-instance-connect:SendSSHPublicKey",
+            "Action": [
+                "ec2:GetPasswordData",
+                "ec2-instance-connect:SendSSHPublicKey"
+            ],
             "Resource": "arn:aws:ec2:YOUR_AWS_REGION:YOUR_AWS_ACCOUNT_ID:instance/*",
             "Condition": {
                 "StringEquals": {
