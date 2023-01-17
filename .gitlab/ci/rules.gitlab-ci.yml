@@ -1,0 +1,91 @@
+####################
+# Changes patterns #
+####################
+
+.code-backstage-patterns: &code-backstage-patterns
+  - ".gitlab-ci.yml"
+  - ".golangci.yml"
+  - ".gitlab/ci/**/*"
+  - ".gitattributes"
+  - "Makefile*"
+  - "**/*.go"
+  - "{ci,scripts,tests}/**/*"
+  - "**/testdata/**/*"
+  - "go.*"
+  - "VERSION"
+
+##############
+# Conditions #
+##############
+
+.if-default-branch: &if-default-branch
+  if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+.if-latest-release-tag: &if-latest-release-tag
+  if: $CI_COMMIT_TAG == "latest"
+
+.if-release-candidate-tag: &if-release-candidate-tag
+  if: $CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+-rc[0-9]+/
+
+.if-stable-release-tag: &if-stable-release-tag
+  if: $CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+$/
+
+.if-merge-request-pipeline: &if-merge-request-pipeline
+  if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+.if-stable-ref: &if-stable-ref
+  if: $CI_COMMIT_REF_NAME =~ /\A[0-9]+-[0-9]+-stable\z/
+
+.if-release-ref: &if-release-ref
+  if: $CI_COMMIT_REF_NAME =~ /\Av[0-9]+\.[0-9]+\.[0-9]+(-rc[0-9]+)?\z/
+
+.if-latest-ref: &if-latest-ref
+  if: $CI_COMMIT_REF_NAME == "latest"
+
+.if-stable-release-ref: &if-stable-release-ref
+  if: $CI_COMMIT_REF_NAME =~ /\Av[0-9]+\.[0-9]+\.[0-9]+?\z/
+
+.if-beta-release-ref: &if-beta-release-ref
+  if: $CI_COMMIT_REF_NAME =~ /\Av[0-9]+\.[0-9]+\.[0-9]+-rc[0-9]+\z/
+
+########################
+# Default branch rules #
+########################
+
+.rules:default-branch-only:no_docs:
+  rules:
+  - <<: *if-default-branch
+    changes: *code-backstage-patterns
+
+.rules:default-branch-only:no_docs:always:
+  rules:
+  - <<: *if-default-branch
+    changes: *code-backstage-patterns
+    when: always
+
+#######################
+# Merge Request rules #
+#######################
+
+.rules:merge_request_pipelines:
+  rules:
+  - <<: *if-merge-request-pipeline
+
+.rules:merge_request_or_release:
+  rules:
+  - <<: *if-merge-request-pipeline
+  - <<: *if-default-branch
+  - <<: *if-stable-ref
+  - <<: *if-release-ref
+  - <<: *if-latest-ref
+
+#################
+# Release rules #
+#################
+
+.rules:release:all:
+  rules:
+  - <<: *if-default-branch
+  - <<: *if-release-candidate-tag
+  - <<: *if-stable-release-tag
+  - <<: *if-latest-release-tag
