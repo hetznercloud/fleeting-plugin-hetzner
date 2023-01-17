@@ -42,3 +42,7 @@ all-2:$(TARGETS)
 .PHONY: clean
 clean:
 	rm -fr $(OUT_PATH)
+
+.PHONY: upload-binaries
+upload-binaries:
+	ci/upload-binaries.sh
