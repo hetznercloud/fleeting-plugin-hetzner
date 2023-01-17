@@ -1,0 +1,10 @@
+binaries:
+  stage: build
+  image: golang:$GO_VERSION
+  extends:
+    - .rules:release:all
+  script:
+    - make all
+  artifacts:
+    paths:
+      - ${OUT_PATH}/${CI_PROJECT_NAME}-*

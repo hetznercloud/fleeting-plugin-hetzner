@@ -1,3 +1,7 @@
+stages:
+  - build
+
 include:
   - local: /.gitlab/ci/common.gitlab-ci.yml
   - local: /.gitlab/ci/rules.gitlab-ci.yml
+  - local: /.gitlab/ci/build.gitlab-ci.yml
