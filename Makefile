@@ -46,3 +46,7 @@ clean:
 .PHONY: upload-binaries
 upload-binaries:
 	ci/upload-binaries.sh
+
+.PHONY: release
+release:
+	ci/release.sh
