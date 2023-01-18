@@ -169,6 +169,9 @@ func (g *InstanceGroup) ConnectInfo(ctx context.Context, id string) (provider.Co
 
 	if info.Username == "" {
 		info.Username = "ec2-user"
+		if info.OS == "windows" {
+			info.Username = "Administrator"
+		}
 	}
 
 	info.InternalAddr = aws.StringValue(instance.PrivateIpAddress)
