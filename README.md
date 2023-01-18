@@ -64,16 +64,15 @@ The following parameters configure the connector to the AWS EC2 instance
 | `protocol`               | string | Optional. Possible Values: `ssh` or `winrm` |
 | `username`               | string | Optional. Default: `ec2-user`. The user will have access to the instance.|
 | `password`               | string | Optional. |
-| `key_path`               | string | Optional. Path to the private ssh key file|
+| `key_path`               | string | Path to the private key file. This parameter is required for Windows instances |
 | `use_static_credentials` | bool   | Optional. Default: `false` |
 | `keepalive`              | int64 | Optional. |
 | `timeout`                | int64 | Optional. |
 
 The connector detects `os`, `arch` and `protocol` based on the information of the instance provided by AWS API.
 The plugin uses a dynamically created key to connected to the instance. You need to set the username if the login
-user is not `ec2-user`, e.g. in case of Ubuntu.
-
-You need to set `password` or `key_path` if `use_static_credentials` is set to true.
+user is not `ec2-user`, e.g. in case of Ubuntu it is `ubuntu`. `Administrator` will be assumed for Windows instances as `username` if not set.
+You need to set `password` or `key_path` if `use_static_credentials` is set to true for non Windows instances.
 
 ## Setting an IAM policy for the runner
 
@@ -128,3 +127,20 @@ access your ASG via the AWS SDK.
 
 The IAM policy for `ec2-instance-connect:SendSSHPublicKey` is only necessary if the configuration `use_static_credentials`
 is set to `true` (default).
+
+The IAM policy for `ec2:GetPasswordData` is only necessary if the EC2 instances runs on Windows.
+
+## WinRM
+
+Gitlab Runner does use Basic authentication via WinRM-HTTP (TCP/5985) to connect to the EC2 instance.
+The Windows AMIs provided by AWS doesn't allow WinRM access by default.
+
+The Windows AMI for the EC2 instance shall be adjusted to be used with Gitlab Runner.
+The Windows firewall shall be open for WinRM-HTTP (TCP/5985). The WinRM service shall be
+configured to allow Basic authentication via an unencrypted connection (WinRM-HTTP).
+
+```powershell
+netsh advfirewall firewall add rule name="WinRM-HTTP" dir=in localport=5985 protocol=TCP action=allow
+winrm set winrm/config/service/auth '@{Basic="true"}'
+winrm set winrm/config/service '@{AllowUnencrypted="true"}'
+```
