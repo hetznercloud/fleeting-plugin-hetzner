@@ -39,6 +39,14 @@ $(TARGETS):
 MAKEFLAGS += -j
 all-2:$(TARGETS)
 
+.PHONY: test
+test:
+	go test ./...
+
+.PHONY: shellcheck
+shellcheck:
+	shellcheck $(shell find ci -name "*.sh")
+
 .PHONY: clean
 clean:
 	rm -fr $(OUT_PATH)
