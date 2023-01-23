@@ -50,3 +50,10 @@ upload-binaries:
 .PHONY: release
 release:
 	ci/release.sh
+
+.PHONY: do-release
+do-release:
+	git tag $(VERSION)
+	git push origin $(VERSION)
+	git tag --force latest
+	git push origin latest --force
