@@ -1,13 +1,11 @@
 # Fleeting Plugin AWS
 
-This is a go plugin for fleeting on AWS. It is intended to be run by GitLab Runner, and cannot be run directly.
+This is a [fleeting](https://gitlab.com/gitlab-org/fleeting/fleeting) plugin for AWS.
 
 [![Pipeline Status](https://gitlab.com/gitlab-org/fleeting/fleeting-plugin-aws/badges/main/pipeline.svg)](https://gitlab.com/gitlab-org/fleeting/fleeting-plugin-aws/commits/main)
 [![Go Report Card](https://goreportcard.com/badge/gitlab.com/gitlab-org/fleeting/fleeting-plugin-aws)](https://goreportcard.com/report/gitlab.com/gitlab-org/fleeting/fleeting-plugin-aws)
 
 ## Building the plugin
-
-To run Gitlab Runner with this plugin, generate an executable binary and place it on your system's PATH.
 
 To generate the binary, ensure `$GOPATH/bin` is on your PATH, then use `go install`:
 
@@ -24,26 +22,7 @@ asdf reshim
 
 ## Plugin Configuration
 
-The configuration of the plugin is part of the runner configuration in the usual way using `config.toml`.
-
-### Example
-
-This example illustrates the parameters set in the `config.toml` file for the plugin:
-
-```toml
-[runners.autoscaler.plugin_config]
-      name = "gitlab-taskrunner-asg"
-
-      profile          = "default"                     # optional, default is 'default'
-      config_file      = "/home/user/.aws/config"      # optional, default is '~/.aws/config'
-      credentials_file = "/home/user/.aws/credentials" # optional, default is '~/.aws/credentials'
-[runners.autoscaler.connector_config]
-      username = "ubuntu"
-```
-
-### The `[runners.autoscaler.plugin_config]` section
-
-The following parameters configure the plugin for fleeting on AWS.
+The following parameters are supported:
 
 | Parameter             | Type   | Description |
 |-----------------------|--------|-------------|
@@ -52,40 +31,32 @@ The following parameters configure the plugin for fleeting on AWS.
 | `config_file`    | string | Optional. Path to the AWS config file ([AWS Configuration and credential file settings](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)). |
 | `credentials_file`    | string | Optional. Path to the AWS credential file ([AWS Configuration and credential file settings](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)). |
 
-The credentials don't needed to be set if the runner is on AWS and the runner instance
-has the IAM permission assigned. See [Recommended IAM Policy](#recommended-iam-policy)
+The credentials don't need to be set if the plugin is running on an instance inside AWS
+with the IAM permission assigned. See [Recommended IAM Policy](#recommended-iam-policy)
 
-### The `[runners.autoscaler.connector_config]` section
+### Default connector config
 
-The following parameters configure the connector to the AWS EC2 instance
+| Parameter                | Default  |
+|--------------------------|----------|
+| `os`                     | `linux`  |
+| `protocol`               | `ssh` or `winrm` if Windows OS is detected |
+| `username`               | `ec2-user` or `Administrator` if Windows OS is detected |
+| `use_static_credentials` | `false`  |
 
-| Parameter                | Type   | Description |
-|--------------------------|--------|-------------|
-| `os`                     | string | Optional. Possible Values: `linux` (Default), `windows` or `darwin`. |
-| `arch`                   | string | Optional. Possible Values: `x86_64` or `arm64` |
-| `protocol`               | string | Optional. Possible Values: `ssh` or `winrm` |
-| `username`               | string | Optional. Default: `ec2-user`. The user will have access to the instance.|
-| `password`               | string | Optional. |
-| `key_path`               | string | Path to the private key file. This parameter is required for Windows instances |
-| `use_static_credentials` | bool   | Optional. Default: `false` |
-| `keepalive`              | int64 | Optional. |
-| `timeout`                | int64 | Optional. |
+For Windows instances, if `use_static_credentials` is false, the password field is populated with a password that AWS provisions.
 
-The connector detects `os`, `arch` and `protocol` based on the information of the instance provided by AWS API.
-The plugin uses a dynamically created key to connected to the instance. You need to set the username if the login
-user is not `ec2-user`, e.g. in case of Ubuntu it is `ubuntu`. `Administrator` will be assumed for Windows instances as `username` if not set.
-You need to set `password` or `key_path` if `use_static_credentials` is set to true for non Windows instances.
+For other instances, if `use_static_credentials` is false, credentials will be set using [SendSSHPublicKey](https://docs.aws.amazon.com/ec2-instance-connect/latest/APIReference/API_SendSSHPublicKey.html), either using the specified key or dynamically creating one.
 
-## Setting an IAM policy for the runner
+## Setting an IAM policy
 
 ### Our recommendations
 
 - Grant least privilege
-- Create an IAM group with a policy like the example below and assign each AWS runner user to the group
+- Create an IAM group with a policy like the example below and assign each AWS user to the group
 - Use policy conditions for extra security. This will depend on your setup.
-- Do not share AWS access keys among runners. One runner = one user = one access key
+- Do not share AWS access keys to separate deployments.
 
-Create the runner's user with an `AWS Credential Type` of `Access key - Programmatic access`, enabling the runner to
+Create an `AWS Credential Type` of `Access key - Programmatic access`, enabling the plugin to
 access your ASG via the AWS SDK.
 
 #### Recommended IAM Policy
@@ -128,21 +99,27 @@ access your ASG via the AWS SDK.
 ```
 
 The IAM policy for `ec2-instance-connect:SendSSHPublicKey` is only necessary if the configuration `use_static_credentials`
-is set to `true` (default).
+is set to `false` (default).
 
 The IAM policy for `ec2:GetPasswordData` is only necessary if the EC2 instances runs on Windows.
 
 ## WinRM
 
-Gitlab Runner does use Basic authentication via WinRM-HTTP (TCP/5985) to connect to the EC2 instance.
-The Windows AMIs provided by AWS doesn't allow WinRM access by default.
+The fleeting connector can use Basic authentication via WinRM-HTTP (TCP/5985) to connect to the EC2 instance.
+The Windows AMIs provided by AWS don't allow WinRM access by default.
 
-The Windows AMI for the EC2 instance shall be adjusted to be used with Gitlab Runner.
-The Windows firewall shall be open for WinRM-HTTP (TCP/5985). The WinRM service shall be
-configured to allow Basic authentication via an unencrypted connection (WinRM-HTTP).
+The following startup script can enable a WinRM connection:
 
 ```powershell
 netsh advfirewall firewall add rule name="WinRM-HTTP" dir=in localport=5985 protocol=TCP action=allow
 winrm set winrm/config/service/auth '@{Basic="true"}'
 winrm set winrm/config/service '@{AllowUnencrypted="true"}'
 ```
+
+This adjusts the firewall, and allows Basic authentication via an unencrypted connection (WinRM-HTTP).
+
+## Examples
+
+### GitLab Runner
+
+GitLab Runner has examples on using this plugin for the [Instance executor](https://docs.gitlab.com/runner/executors/instance.html#examples) and [Docker Autoscaler executor](https://docs.gitlab.com/runner/executors/docker_autoscaler.html#examples).
