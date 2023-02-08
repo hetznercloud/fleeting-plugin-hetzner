@@ -61,7 +61,5 @@ release:
 
 .PHONY: do-release
 do-release:
-	git tag $(VERSION)
+	git tag -s $(VERSION) -m "Version $(VERSION)"
 	git push origin $(VERSION)
-	git tag --force latest
-	git push origin latest --force

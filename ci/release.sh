@@ -10,15 +10,8 @@ set -e
 args=( create --name "Release $CI_COMMIT_TAG" --tag-name "$CI_COMMIT_TAG" )
 while read -r BIN
 do
-    args+=( --assets-link "{\"name\":\"${BIN}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${CI_COMMIT_TAG}/${BIN}\"}" )
+    # Note: change "filepath" to "direct_asset_path" when https://gitlab.com/gitlab-org/release-cli/-/issues/165 is fixed.
+    args+=( --assets-link "{\"name\":\"${BIN}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${CI_COMMIT_TAG}/${BIN}\", \"filepath\":\"/${BIN}\"}" )
 done < manifest.txt
-
-
-# It's not possible to update an existing release to point to new artifacts, so
-# we have to delete the existing latest release before creating a new one.
-if [[ "${CI_COMMIT_TAG}" == "latest" ]]
-then
-  curl --request DELETE --header "JOB-TOKEN: $CI_JOB_TOKEN" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/releases/latest"
-fi
 
 release-cli "${args[@]}"
