@@ -21,26 +21,20 @@
 .if-default-branch: &if-default-branch
   if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-.if-release-candidate-tag: &if-release-candidate-tag
-  if: $CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+-rc[0-9]+/
+.if-stable-branch: &if-stable-branch
+  if: $CI_COMMIT_REF_NAME =~ /^[0-9]+-[0-9]+-stable$/
 
 .if-stable-release-tag: &if-stable-release-tag
   if: $CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+$/
 
+.if-release-candidate-tag: &if-release-candidate-tag
+  if: $CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+-rc[0-9]+/
+
+.if-release-tag: &if-release-tag
+  if: $CI_COMMIT_REF_NAME =~ /^v[0-9]+\.[0-9]+\.[0-9]+(-rc[0-9]+)?$/
+
 .if-merge-request-pipeline: &if-merge-request-pipeline
   if: $CI_PIPELINE_SOURCE == "merge_request_event"
-
-.if-stable-ref: &if-stable-ref
-  if: $CI_COMMIT_REF_NAME =~ /\A[0-9]+-[0-9]+-stable\z/
-
-.if-release-ref: &if-release-ref
-  if: $CI_COMMIT_REF_NAME =~ /\Av[0-9]+\.[0-9]+\.[0-9]+(-rc[0-9]+)?\z/
-
-.if-stable-release-ref: &if-stable-release-ref
-  if: $CI_COMMIT_REF_NAME =~ /\Av[0-9]+\.[0-9]+\.[0-9]+?\z/
-
-.if-beta-release-ref: &if-beta-release-ref
-  if: $CI_COMMIT_REF_NAME =~ /\Av[0-9]+\.[0-9]+\.[0-9]+-rc[0-9]+\z/
 
 ########################
 # Default branch rules #
@@ -69,8 +63,8 @@
   rules:
   - <<: *if-merge-request-pipeline
   - <<: *if-default-branch
-  - <<: *if-stable-ref
-  - <<: *if-release-ref
+  - <<: *if-stable-release-tag
+  - <<: *if-release-tag
 
 #################
 # Release rules #
