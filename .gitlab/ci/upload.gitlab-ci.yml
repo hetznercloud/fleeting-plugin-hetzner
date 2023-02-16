@@ -1,0 +1,13 @@
+upload-binaries:
+  stage: upload
+  image: alpine:latest
+  extends:
+    - .rules:release:all
+  dependencies:
+    - binaries
+  script:
+    - apk add curl make
+    - make upload-binaries
+  artifacts:
+    paths:
+      - manifest.txt

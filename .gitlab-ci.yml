@@ -1,0 +1,13 @@
+stages:
+  - test
+  - build
+  - upload
+  - release
+
+include:
+  - local: /.gitlab/ci/common.gitlab-ci.yml
+  - local: /.gitlab/ci/rules.gitlab-ci.yml
+  - local: /.gitlab/ci/build.gitlab-ci.yml
+  - local: /.gitlab/ci/test.gitlab-ci.yml
+  - local: /.gitlab/ci/upload.gitlab-ci.yml
+  - local: /.gitlab/ci/release.gitlab-ci.yml

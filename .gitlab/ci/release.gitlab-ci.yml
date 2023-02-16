@@ -1,0 +1,10 @@
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  dependencies:
+    - upload-binaries
+  extends:
+    - .rules:release:all
+  script:
+    - apk add make bash curl
+    - make release
