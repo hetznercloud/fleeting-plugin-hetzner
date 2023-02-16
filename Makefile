@@ -14,9 +14,13 @@ build:
 	@mkdir -p $(OUT_PATH)
 	go build -a -ldflags $(GO_LDFLAGS) -o $(OUT_PATH)/$(NAME) ./cmd/$(NAME)/...
 
+.PHONY: .mods
+.mods:
+	@go mod download
+
 TARGETS = $(foreach OSARCH,$(OS_ARCHS),${OUT_PATH}/$(NAME)-$(subst /,-,$(OSARCH)))
 
-$(TARGETS):
+$(TARGETS): .mods
 	@mkdir -p $(OUT_PATH)
 	GOOS=$(firstword $(subst -, ,$(subst $(OUT_PATH)/$(NAME)-,,$@))) \
 			 GOARCH=$(lastword $(subst .exe,,$(subst -, ,$(subst $(OUT_PATH)/$(NAME)-,,$@)))) \
