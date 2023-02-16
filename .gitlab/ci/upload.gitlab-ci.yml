@@ -6,8 +6,10 @@ upload-binaries:
   dependencies:
     - binaries
   script:
-    - apk add curl make
+    - apk add curl gnupg make
     - make upload-release
+  environment:
+    name: upload
   artifacts:
     paths:
       - manifest.txt
