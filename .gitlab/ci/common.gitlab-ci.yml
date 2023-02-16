@@ -5,5 +5,5 @@ default:
 variables:
   GO_VERSION: 1.18.9
   CGO_ENABLED: 0
-  OUT_PATH: bin
+  OUT_PATH: out
   PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/releases"

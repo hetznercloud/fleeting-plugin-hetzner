@@ -1,8 +1,12 @@
 .DEFAULT_GOAL := build
-NAME ?= $(shell basename $(shell pwd))
+
+export NAME ?= $(shell basename $(shell pwd))
 export VERSION := v$(shell cat VERSION)
-export OUT_PATH ?= bin
+export OUT_PATH ?= out
 export CGO_ENABLED ?= 0
+
+export CHECKSUMS_FILE_NAME := release.sha256
+export CHECKSUMS_FILE := $(OUT_PATH)/$(CHECKSUMS_FILE_NAME)
 
 OS_ARCHS ?= darwin/amd64 darwin/arm64 \
 			freebsd/amd64 freebsd/arm64 freebsd/386 freebsd/arm \
@@ -41,9 +45,18 @@ shellcheck:
 clean:
 	rm -fr $(OUT_PATH)
 
-.PHONY: upload-binaries
-upload-binaries:
-	ci/upload-binaries.sh
+.PHONY: upload-release
+upload-release: sign-checksums-file
+upload-release:
+	ci/upload-release.sh
+
+.PHONY: sign-checksums-file
+sign-checksums-file: generate-checksums-file
+	ci/sign-checksums-file.sh
+
+.PHONY: generate-checksums-file
+generate-checksums-file:
+	ci/generate-checksums-file.sh
 
 .PHONY: release
 release:
