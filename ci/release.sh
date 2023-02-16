@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # This script assumes it is running within a
 # registry.gitlab.com/gitlab-org/release-cli:latest image, or at least that
 # `release-cli` is installed and in $PATH. Also note that this is very much a
 # bash script and does not run under plain sh.
 
-set -e
+set -eo pipefail
 
 args=( create --name "Release $CI_COMMIT_TAG" --tag-name "$CI_COMMIT_TAG" )
 while read -r BIN
