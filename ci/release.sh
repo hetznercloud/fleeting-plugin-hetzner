@@ -7,11 +7,11 @@
 
 set -eo pipefail
 
-args=( create --name "Release $CI_COMMIT_TAG" --tag-name "$CI_COMMIT_TAG" )
-while read -r BIN
+args=( create --name "Release ${CI_COMMIT_TAG}" --tag-name "${CI_COMMIT_TAG}" )
+while read -r FILE
 do
-    # Note: change "filepath" to "direct_asset_path" when https://gitlab.com/gitlab-org/release-cli/-/issues/165 is fixed.
-    args+=( --assets-link "{\"name\":\"${BIN}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${CI_COMMIT_TAG}/${BIN}\", \"filepath\":\"/${BIN}\"}" )
+    # TODO: change "filepath" to "direct_asset_path" when https://gitlab.com/gitlab-org/release-cli/-/issues/165 is fixed.
+    args+=( --assets-link "{\"name\":\"${FILE}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${CI_COMMIT_TAG}/${FILE}\", \"filepath\":\"/${FILE}\"}" )
 done < manifest.txt
 
 release-cli "${args[@]}"
