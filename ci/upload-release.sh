@@ -2,7 +2,7 @@
 
 set -e
 
-OUT_PATH="${OUT_PATH:-bin}"
+OUT_PATH="${OUT_PATH:-out}"
 
 for FILE in "${OUT_PATH}"/*
 do

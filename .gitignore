@@ -6,4 +6,4 @@
 .tool-versions
 
 # build artifacts
-bin/*
+out/*

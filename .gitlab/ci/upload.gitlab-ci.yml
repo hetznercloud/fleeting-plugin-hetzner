@@ -7,7 +7,7 @@ upload-binaries:
     - binaries
   script:
     - apk add curl make
-    - make upload-binaries
+    - make upload-release
   artifacts:
     paths:
       - manifest.txt

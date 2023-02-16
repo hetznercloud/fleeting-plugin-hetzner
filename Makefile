@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := build
 NAME ?= $(shell basename $(shell pwd))
 export VERSION := v$(shell cat VERSION)
-export OUT_PATH ?= bin
+export OUT_PATH ?= out
 export CGO_ENABLED ?= 0
 
 OS_ARCHS ?= darwin/amd64 darwin/arm64 \
@@ -37,9 +37,14 @@ shellcheck:
 clean:
 	rm -fr $(OUT_PATH)
 
-.PHONY: upload-binaries
-upload-binaries:
-	ci/upload-binaries.sh
+.PHONY: upload-release
+upload-release: generate-checksums-file
+upload-release:
+	ci/upload-release.sh
+
+.PHONY: generate-checksums-file
+generate-checksums-file:
+	ci/generate-checksums-file.sh
 
 .PHONY: release
 release:
