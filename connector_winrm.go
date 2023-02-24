@@ -8,21 +8,26 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"golang.org/x/crypto/ssh"
 
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
 )
 
-func (g *InstanceGroup) winrm(ctx context.Context, info *provider.ConnectInfo, instance *ec2.Instance) error {
+func (g *InstanceGroup) winrm(ctx context.Context, info *provider.ConnectInfo, instance types.Instance) error {
+	if len(info.Key) == 0 {
+		return fmt.Errorf("dynamically created windows passwords are encrypted with a keypair, but no keypair has been provided")
+	}
+
 	var out *ec2.GetPasswordDataOutput
 	var err error
 
 	for i := 0; i < 120; i++ {
-		g.log.Debug("fetching password data", "instance", aws.StringValue(instance.InstanceId), "try", i+1)
+		g.log.Debug("fetching password data", "instance", instance.InstanceId, "try", i+1)
 
-		out, err = g.ec2.GetPasswordDataWithContext(ctx, &ec2.GetPasswordDataInput{
+		out, err = g.ec2.GetPasswordData(ctx, &ec2.GetPasswordDataInput{
 			InstanceId: instance.InstanceId,
 		})
 		if err != nil {
@@ -32,14 +37,14 @@ func (g *InstanceGroup) winrm(ctx context.Context, info *provider.ConnectInfo, i
 			return ctx.Err()
 		}
 
-		if aws.StringValue(out.PasswordData) == "" {
+		if aws.ToString(out.PasswordData) == "" {
 			time.Sleep(5 * time.Second)
 			continue
 		}
 		break
 	}
 
-	if aws.StringValue(out.PasswordData) == "" {
+	if aws.ToString(out.PasswordData) == "" {
 		return fmt.Errorf("password data empty")
 	}
 
@@ -53,7 +58,7 @@ func (g *InstanceGroup) winrm(ctx context.Context, info *provider.ConnectInfo, i
 		return fmt.Errorf("unable to get decrypter from key")
 	}
 
-	decodedKey, err := base64.StdEncoding.DecodeString(aws.StringValue(out.PasswordData))
+	decodedKey, err := base64.StdEncoding.DecodeString(aws.ToString(out.PasswordData))
 	if err != nil {
 		return fmt.Errorf("decoding key: %w", err)
 	}

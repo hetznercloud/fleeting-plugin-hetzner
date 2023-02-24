@@ -6,11 +6,12 @@ import (
 	"path"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/autoscaling"
-	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/aws/aws-sdk-go/service/ec2instanceconnect"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/autoscaling"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/aws/aws-sdk-go-v2/service/ec2instanceconnect"
 	"github.com/hashicorp/go-hclog"
 
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
@@ -19,44 +20,47 @@ import (
 var _ provider.InstanceGroup = (*InstanceGroup)(nil)
 
 type InstanceGroup struct {
-	CredentialsProfile string `json:"credentials_profile"`
-	CredentialsFile    string `json:"credentials_file"`
-	Name               string `json:"name"`
-	Region             string `json:"region"`
+	Profile         string `json:"profile"`
+	ConfigFile      string `json:"config_file"`
+	CredentialsFile string `json:"credentials_file"`
+	Name            string `json:"name"`
 
 	log        hclog.Logger
-	autoscaler *autoscaling.AutoScaling
-	ec2        *ec2.EC2
-	ec2connect *ec2instanceconnect.EC2InstanceConnect
+	autoscaler *autoscaling.Client
+	ec2        *ec2.Client
+	ec2connect *ec2instanceconnect.Client
 	size       int
 
 	settings provider.Settings
 }
 
 func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings provider.Settings) (provider.ProviderInfo, error) {
-	g.log = log.With("region", g.Region, "name", g.Name)
-	g.settings = settings
+	var opts []func(*config.LoadOptions) error
 
-	options := session.Options{
-		Profile: g.CredentialsProfile,
+	if g.Profile != "" {
+		opts = append(opts, config.WithSharedConfigProfile(g.Profile))
 	}
 	if g.CredentialsFile != "" {
-		options.SharedConfigFiles = append(options.SharedConfigFiles, g.CredentialsFile)
+		opts = append(opts, config.WithSharedConfigFiles([]string{g.ConfigFile}))
+	}
+	if g.CredentialsFile != "" {
+		opts = append(opts, config.WithSharedCredentialsFiles([]string{g.CredentialsFile}))
 	}
 
-	sess, err := session.NewSessionWithOptions(options)
+	cfg, err := config.LoadDefaultConfig(ctx, opts...)
 	if err != nil {
-		return provider.ProviderInfo{}, fmt.Errorf("creating aws session: %w", err)
+		return provider.ProviderInfo{}, fmt.Errorf("creating aws config: %w", err)
 	}
 
-	cfg := aws.NewConfig().WithRegion(g.Region)
+	g.autoscaler = autoscaling.NewFromConfig(cfg)
+	g.ec2 = ec2.NewFromConfig(cfg)
+	g.ec2connect = ec2instanceconnect.NewFromConfig(cfg)
 
-	g.autoscaler = autoscaling.New(sess, cfg)
-	g.ec2 = ec2.New(sess, cfg)
-	g.ec2connect = ec2instanceconnect.New(sess, cfg)
+	g.log = log.With("region", cfg.Region, "name", g.Name)
+	g.settings = settings
 
 	return provider.ProviderInfo{
-		ID:      path.Join("aws", g.Region, g.Name),
+		ID:      path.Join("aws", cfg.Region, g.Name),
 		MaxSize: 1000,
 	}, nil
 }
@@ -64,7 +68,16 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state provider.State)) error {
 	g.size = 0
 
-	return g.autoscaler.DescribeAutoScalingInstancesPages(&autoscaling.DescribeAutoScalingInstancesInput{}, func(output *autoscaling.DescribeAutoScalingInstancesOutput, b bool) bool {
+	var next *string
+	for {
+		output, err := g.autoscaler.DescribeAutoScalingInstances(ctx, &autoscaling.DescribeAutoScalingInstancesInput{
+			MaxRecords: aws.Int32(50),
+			NextToken:  next,
+		})
+		if err != nil {
+			return err
+		}
+
 		for _, instance := range output.AutoScalingInstances {
 			if *instance.AutoScalingGroupName == g.Name {
 				state := provider.StateCreating
@@ -84,14 +97,18 @@ func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state
 			}
 		}
 
-		return !b
-	})
+		if output.NextToken == nil {
+			break
+		}
+	}
+
+	return nil
 }
 
 func (g *InstanceGroup) Increase(ctx context.Context, delta int) (int, error) {
-	_, err := g.autoscaler.SetDesiredCapacity(&autoscaling.SetDesiredCapacityInput{
+	_, err := g.autoscaler.SetDesiredCapacity(ctx, &autoscaling.SetDesiredCapacityInput{
 		AutoScalingGroupName: aws.String(g.Name),
-		DesiredCapacity:      aws.Int64(int64(g.size + delta)),
+		DesiredCapacity:      aws.Int32(int32(g.size + delta)),
 		HonorCooldown:        aws.Bool(false),
 	})
 	if err != nil {
@@ -110,7 +127,7 @@ func (g *InstanceGroup) Decrease(ctx context.Context, instances []string) ([]str
 		instance := instances[0]
 		instances = instances[1:]
 
-		_, err := g.autoscaler.TerminateInstanceInAutoScalingGroup(&autoscaling.TerminateInstanceInAutoScalingGroupInput{
+		_, err := g.autoscaler.TerminateInstanceInAutoScalingGroup(ctx, &autoscaling.TerminateInstanceInAutoScalingGroupInput{
 			InstanceId:                     aws.String(instance),
 			ShouldDecrementDesiredCapacity: aws.Bool(true),
 		})
@@ -129,8 +146,8 @@ func (g *InstanceGroup) Decrease(ctx context.Context, instances []string) ([]str
 func (g *InstanceGroup) ConnectInfo(ctx context.Context, id string) (provider.ConnectInfo, error) {
 	info := provider.ConnectInfo{ConnectorConfig: g.settings.ConnectorConfig}
 
-	output, err := g.ec2.DescribeInstancesWithContext(ctx, &ec2.DescribeInstancesInput{
-		InstanceIds: aws.StringSlice([]string{id}),
+	output, err := g.ec2.DescribeInstances(ctx, &ec2.DescribeInstancesInput{
+		InstanceIds: []string{id},
 	})
 	if err != nil {
 		return info, fmt.Errorf("fetching instance: %w", err)
@@ -143,26 +160,24 @@ func (g *InstanceGroup) ConnectInfo(ctx context.Context, id string) (provider.Co
 	instance := output.Reservations[0].Instances[0]
 
 	if info.OS == "" {
-		switch strings.ToLower(aws.StringValue(instance.Platform)) {
-		case "windows":
-			info.OS = "windows"
-		case "macos":
+		switch {
+		case instance.Architecture == types.ArchitectureValuesX8664Mac ||
+			instance.Architecture == types.ArchitectureValuesArm64Mac:
 			info.OS = "darwin"
+		case strings.EqualFold(string(instance.Platform), string(types.PlatformValuesWindows)):
+			info.OS = "windows"
 		default:
 			info.OS = "linux"
-			switch info.Arch {
-			case "arm64_mac", "x86_64_mac":
-				info.OS = "darwin"
-			}
 		}
 	}
 
 	if info.Arch == "" {
-		info.Arch = strings.ToLower(aws.StringValue(instance.Architecture))
-		switch {
-		case strings.HasPrefix(info.Arch, "x86_64"): // x86_64, x86_64_mac
+		switch instance.Architecture {
+		case types.ArchitectureValuesI386:
+			info.Arch = "386"
+		case types.ArchitectureValuesX8664, types.ArchitectureValuesX8664Mac:
 			info.Arch = "amd64"
-		case strings.HasPrefix(info.Arch, "arm64"): // arm64, arm64_mac
+		case types.ArchitectureValuesArm64, types.ArchitectureValuesArm64Mac:
 			info.Arch = "arm64"
 		}
 	}
@@ -174,8 +189,8 @@ func (g *InstanceGroup) ConnectInfo(ctx context.Context, id string) (provider.Co
 		}
 	}
 
-	info.InternalAddr = aws.StringValue(instance.PrivateIpAddress)
-	info.ExternalAddr = aws.StringValue(instance.PublicIpAddress)
+	info.InternalAddr = aws.ToString(instance.PrivateIpAddress)
+	info.ExternalAddr = aws.ToString(instance.PublicIpAddress)
 
 	if info.UseStaticCredentials {
 		return info, nil
