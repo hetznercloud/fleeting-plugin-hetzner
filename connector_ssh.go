@@ -8,10 +8,11 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/aws/aws-sdk-go/service/ec2instanceconnect"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/aws/aws-sdk-go-v2/service/ec2instanceconnect"
 	"golang.org/x/crypto/ssh"
 
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
@@ -22,7 +23,7 @@ type PrivPub interface {
 	Public() crypto.PublicKey
 }
 
-func (g *InstanceGroup) ssh(ctx context.Context, info *provider.ConnectInfo, instance *ec2.Instance) error {
+func (g *InstanceGroup) ssh(ctx context.Context, info *provider.ConnectInfo, instance types.Instance) error {
 	var key PrivPub
 	var err error
 
@@ -55,7 +56,7 @@ func (g *InstanceGroup) ssh(ctx context.Context, info *provider.ConnectInfo, ins
 		return fmt.Errorf("generating ssh public key: %w", err)
 	}
 
-	_, err = g.ec2connect.SendSSHPublicKeyWithContext(ctx, &ec2instanceconnect.SendSSHPublicKeyInput{
+	result, err := g.ec2connect.SendSSHPublicKey(ctx, &ec2instanceconnect.SendSSHPublicKeyInput{
 		AvailabilityZone: instance.Placement.AvailabilityZone,
 		InstanceId:       instance.InstanceId,
 		InstanceOSUser:   &info.Username,
@@ -64,6 +65,12 @@ func (g *InstanceGroup) ssh(ctx context.Context, info *provider.ConnectInfo, ins
 	if err != nil {
 		return fmt.Errorf("sending ssh key: %w", err)
 	}
+	if !result.Success {
+		return fmt.Errorf("sending ssh key: operation failed")
+	}
+
+	expires := time.Now().Add(60 * time.Second)
+	info.Expires = &expires
 
 	return nil
 }

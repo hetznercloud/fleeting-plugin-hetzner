@@ -32,9 +32,11 @@ This example illustrates the parameters set in the `config.toml` file for the pl
 
 ```toml
 [runners.autoscaler.plugin_config]
-      credentials_file = "/home/user/.aws/credentials"
       name = "gitlab-taskrunner-asg"
-      region = "us-east-1"
+
+      profile          = "default"                     # optional, default is 'default'
+      config_file      = "/home/user/.aws/config"      # optional, default is '~/.aws/config'
+      credentials_file = "/home/user/.aws/credentials" # optional, default is '~/.aws/credentials'
 [runners.autoscaler.connector_config]
       username = "ubuntu"
 ```
@@ -45,10 +47,10 @@ The following parameters configure the plugin for fleeting on AWS.
 
 | Parameter             | Type   | Description |
 |-----------------------|--------|-------------|
-| `credentials_profile` | string | Optional. AWS profile-name ([Named profiles for the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html)). Conflicts with `credentials_file`. |
-| `credentials_file`    | string | Optional. Path to the AWS credential file ([AWS Configuration and credential file settings](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)). Conflicts with `credentials_profile`. |
 | `name`                | string | Name of the Auto Scaling Group |
-| `region`              | string | Name of the region of the Auto Scaling Group |
+| `profile` | string | Optional. AWS profile-name ([Named profiles for the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html)). |
+| `config_file`    | string | Optional. Path to the AWS config file ([AWS Configuration and credential file settings](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)). |
+| `credentials_file`    | string | Optional. Path to the AWS credential file ([AWS Configuration and credential file settings](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)). |
 
 The credentials don't needed to be set if the runner is on AWS and the runner instance
 has the IAM permission assigned. See [Recommended IAM Policy](#recommended-iam-policy)
