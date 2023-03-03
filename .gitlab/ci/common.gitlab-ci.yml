@@ -3,7 +3,7 @@ default:
     - gitlab-org
 
 variables:
-  GO_VERSION: 1.18.9
+  GO_VERSION: 1.19.6
   CGO_ENABLED: 0
   OUT_PATH: out
   PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/releases"
