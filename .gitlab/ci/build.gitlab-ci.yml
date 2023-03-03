@@ -8,3 +8,6 @@ binaries:
   artifacts:
     paths:
       - ${OUT_PATH}/${CI_PROJECT_NAME}-*
+  tags:
+    - saas-linux-large-amd64
+  needs: []
