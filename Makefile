@@ -30,7 +30,7 @@ $(TARGETS): .mods
 			 GOARCH=$(lastword $(subst .exe,,$(subst -, ,$(subst $(OUT_PATH)/$(NAME)-,,$@)))) \
 			 go build -a -ldflags $(GO_LDFLAGS) -o $@ ./cmd/$(NAME)/...
 
-MAKEFLAGS += -j
+MAKEFLAGS += -j$(shell nproc)
 all:$(TARGETS)
 
 .PHONY: test
