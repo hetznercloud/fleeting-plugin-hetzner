@@ -7,3 +7,14 @@ variables:
   CGO_ENABLED: 0
   OUT_PATH: out
   PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/releases"
+
+.go-cache:
+  variables:
+    GOCACHE: $CI_PROJECT_DIR/.gocache
+  before_script:
+  - mkdir -p "${GOCACHE}"
+  cache:
+    paths:
+    - $CI_PROJECT_DIR/.gocache/
+    key: "${CI_JOB_NAME_SLUG}"
+
