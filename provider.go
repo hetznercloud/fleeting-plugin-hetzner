@@ -40,7 +40,7 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 	if g.Profile != "" {
 		opts = append(opts, config.WithSharedConfigProfile(g.Profile))
 	}
-	if g.CredentialsFile != "" {
+	if g.ConfigFile != "" {
 		opts = append(opts, config.WithSharedConfigFiles([]string{g.ConfigFile}))
 	}
 	if g.CredentialsFile != "" {
