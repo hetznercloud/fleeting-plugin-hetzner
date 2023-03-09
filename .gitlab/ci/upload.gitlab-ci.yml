@@ -2,7 +2,7 @@ upload-binaries:
   stage: upload
   image: alpine:latest
   extends:
-    - .rules:release:all
+    - .rules:upload
   dependencies:
     - binaries
   script:
