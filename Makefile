@@ -20,7 +20,7 @@ build:
 
 .PHONY: .mods
 .mods:
-	@go mod download
+	go mod download
 
 TARGETS = $(foreach OSARCH,$(OS_ARCHS),${OUT_PATH}/$(NAME)-$(subst /,-,$(OSARCH)))
 
@@ -34,7 +34,7 @@ MAKEFLAGS += -j$(shell nproc)
 all:$(TARGETS)
 
 .PHONY: test
-test:
+test: .mods
 	go test ./...
 
 .PHONY: shellcheck
