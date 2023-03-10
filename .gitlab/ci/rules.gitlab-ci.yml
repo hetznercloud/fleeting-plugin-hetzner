@@ -63,15 +63,21 @@
   rules:
   - <<: *if-merge-request-pipeline
   - <<: *if-default-branch
-  - <<: *if-stable-release-tag
+  - <<: *if-stable-branch
   - <<: *if-release-tag
 
 #################
 # Release rules #
 #################
 
-.rules:release:all:
+.rules:upload:
   rules:
   - <<: *if-default-branch
+  - <<: *if-stable-branch
+  - <<: *if-release-candidate-tag
+  - <<: *if-stable-release-tag
+
+.rules:release:all:
+  rules:
   - <<: *if-release-candidate-tag
   - <<: *if-stable-release-tag
