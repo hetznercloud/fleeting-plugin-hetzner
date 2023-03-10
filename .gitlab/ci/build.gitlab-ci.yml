@@ -3,6 +3,7 @@ binaries:
   image: golang:$GO_VERSION
   extends:
     - .rules:merge_request_or_release
+    - .go-cache
   script:
     - make all
   artifacts:
