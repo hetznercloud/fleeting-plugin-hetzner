@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	NAME      = "fleeintg-plugin-aws"
+	NAME      = "fleeting-plugin-aws"
 	VERSION   = "dev"
 	REVISION  = "HEAD"
 	REFERENCE = "HEAD"
