@@ -60,8 +60,10 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 	g.settings = settings
 
 	return provider.ProviderInfo{
-		ID:      path.Join("aws", cfg.Region, g.Name),
-		MaxSize: 1000,
+		ID:        path.Join("aws", cfg.Region, g.Name),
+		MaxSize:   1000,
+		Version:   Version.String(),
+		BuildInfo: Version.BuildInfo(),
 	}, nil
 }
 

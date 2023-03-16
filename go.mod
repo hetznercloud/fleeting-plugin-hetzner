@@ -9,7 +9,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.78.0
 	github.com/aws/aws-sdk-go-v2/service/ec2instanceconnect v1.15.0
 	github.com/hashicorp/go-hclog v1.4.0
-	gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20230131195851-9d90f0aee0e7
+	gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20230315211154-eb24c2383aef
 	golang.org/x/crypto v0.5.0
 )
 

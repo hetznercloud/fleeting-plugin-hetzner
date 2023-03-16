@@ -27,6 +27,22 @@ type VersionInfo struct {
 }
 
 func (v *VersionInfo) String() string {
+	return v.Version
+}
+
+func (v *VersionInfo) BuildInfo() string {
+	return fmt.Sprintf(
+		"sha=%s; ref=%s; go=%s; built_at=%s; os_arch=%s/%s",
+		v.Revision,
+		v.Reference,
+		v.GOVersion,
+		v.BuiltAt,
+		v.OS,
+		v.Architecture,
+	)
+}
+
+func (v *VersionInfo) Full() string {
 	version := fmt.Sprintf("Name:         %s\n", v.Name)
 	version += fmt.Sprintf("Version:      %s\n", v.Version)
 	version += fmt.Sprintf("Git revision: %s\n", v.Revision)
