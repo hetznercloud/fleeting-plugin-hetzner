@@ -56,7 +56,7 @@ func (g *InstanceGroup) ssh(ctx context.Context, info *provider.ConnectInfo, ins
 		return fmt.Errorf("generating ssh public key: %w", err)
 	}
 
-	result, err := g.ec2connect.SendSSHPublicKey(ctx, &ec2instanceconnect.SendSSHPublicKeyInput{
+	result, err := g.client.SendSSHPublicKey(ctx, &ec2instanceconnect.SendSSHPublicKeyInput{
 		AvailabilityZone: instance.Placement.AvailabilityZone,
 		InstanceId:       instance.InstanceId,
 		InstanceOSUser:   &info.Username,

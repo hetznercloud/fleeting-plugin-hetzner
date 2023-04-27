@@ -11,13 +11,15 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/autoscaling"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
-	"github.com/aws/aws-sdk-go-v2/service/ec2instanceconnect"
 	"github.com/hashicorp/go-hclog"
 
+	"gitlab.com/gitlab-org/fleeting/fleeting-plugin-aws/internal/awsclient"
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
 )
 
 var _ provider.InstanceGroup = (*InstanceGroup)(nil)
+
+var newClient = awsclient.New
 
 type InstanceGroup struct {
 	Profile         string `json:"profile"`
@@ -25,11 +27,9 @@ type InstanceGroup struct {
 	CredentialsFile string `json:"credentials_file"`
 	Name            string `json:"name"`
 
-	log        hclog.Logger
-	autoscaler *autoscaling.Client
-	ec2        *ec2.Client
-	ec2connect *ec2instanceconnect.Client
-	size       int
+	log    hclog.Logger
+	client awsclient.Client
+	size   int
 
 	settings provider.Settings
 }
@@ -52,10 +52,7 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 		return provider.ProviderInfo{}, fmt.Errorf("creating aws config: %w", err)
 	}
 
-	g.autoscaler = autoscaling.NewFromConfig(cfg)
-	g.ec2 = ec2.NewFromConfig(cfg)
-	g.ec2connect = ec2instanceconnect.NewFromConfig(cfg)
-
+	g.client = newClient(cfg)
 	g.log = log.With("region", cfg.Region, "name", g.Name)
 	g.settings = settings
 
@@ -78,7 +75,7 @@ func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state
 
 	var next *string
 	for {
-		output, err := g.autoscaler.DescribeAutoScalingInstances(ctx, &autoscaling.DescribeAutoScalingInstancesInput{
+		output, err := g.client.DescribeAutoScalingInstances(ctx, &autoscaling.DescribeAutoScalingInstancesInput{
 			MaxRecords: aws.Int32(50),
 			NextToken:  next,
 		})
@@ -87,11 +84,11 @@ func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state
 		}
 
 		for _, instance := range output.AutoScalingInstances {
-			if *instance.AutoScalingGroupName == g.Name {
+			if aws.ToString(instance.AutoScalingGroupName) == g.Name {
 				state := provider.StateCreating
 
 				// Terminating, Terminating:*, Terminated
-				if strings.HasPrefix(*instance.LifecycleState, "Terminat") {
+				if strings.HasPrefix(aws.ToString(instance.LifecycleState), "Terminat") {
 					state = provider.StateDeleting
 				}
 
@@ -112,7 +109,7 @@ func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state
 }
 
 func (g *InstanceGroup) Increase(ctx context.Context, delta int) (int, error) {
-	_, err := g.autoscaler.SetDesiredCapacity(ctx, &autoscaling.SetDesiredCapacityInput{
+	_, err := g.client.SetDesiredCapacity(ctx, &autoscaling.SetDesiredCapacityInput{
 		AutoScalingGroupName: aws.String(g.Name),
 		DesiredCapacity:      aws.Int32(int32(g.size + delta)),
 		HonorCooldown:        aws.Bool(false),
@@ -135,7 +132,7 @@ func (g *InstanceGroup) Decrease(ctx context.Context, instances []string) ([]str
 		instance := instances[0]
 		instances = instances[1:]
 
-		_, err := g.autoscaler.TerminateInstanceInAutoScalingGroup(ctx, &autoscaling.TerminateInstanceInAutoScalingGroupInput{
+		_, err := g.client.TerminateInstanceInAutoScalingGroup(ctx, &autoscaling.TerminateInstanceInAutoScalingGroupInput{
 			InstanceId:                     aws.String(instance),
 			ShouldDecrementDesiredCapacity: aws.Bool(true),
 		})
@@ -153,14 +150,14 @@ func (g *InstanceGroup) Decrease(ctx context.Context, instances []string) ([]str
 }
 
 func (g *InstanceGroup) updateCapacity(ctx context.Context, initial bool) error {
-	desc, err := g.autoscaler.DescribeAutoScalingGroups(ctx, &autoscaling.DescribeAutoScalingGroupsInput{
+	desc, err := g.client.DescribeAutoScalingGroups(ctx, &autoscaling.DescribeAutoScalingGroupsInput{
 		AutoScalingGroupNames: []string{g.Name},
 	})
 	if err != nil {
 		return fmt.Errorf("describing autoscaling groups: %w", err)
 	}
-	if len(desc.AutoScalingGroups) == 0 {
-		return fmt.Errorf("autoscaler details not returned")
+	if len(desc.AutoScalingGroups) != 1 {
+		return fmt.Errorf("unexpected number of autoscaling groups returned: %v", len(desc.AutoScalingGroups))
 	}
 
 	capacity := desc.AutoScalingGroups[0].DesiredCapacity
@@ -181,7 +178,7 @@ func (g *InstanceGroup) updateCapacity(ctx context.Context, initial bool) error 
 func (g *InstanceGroup) ConnectInfo(ctx context.Context, id string) (provider.ConnectInfo, error) {
 	info := provider.ConnectInfo{ConnectorConfig: g.settings.ConnectorConfig}
 
-	output, err := g.ec2.DescribeInstances(ctx, &ec2.DescribeInstancesInput{
+	output, err := g.client.DescribeInstances(ctx, &ec2.DescribeInstancesInput{
 		InstanceIds: []string{id},
 	})
 	if err != nil {
