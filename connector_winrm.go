@@ -27,7 +27,7 @@ func (g *InstanceGroup) winrm(ctx context.Context, info *provider.ConnectInfo, i
 	for i := 0; i < 120; i++ {
 		g.log.Debug("fetching password data", "instance", instance.InstanceId, "try", i+1)
 
-		out, err = g.ec2.GetPasswordData(ctx, &ec2.GetPasswordDataInput{
+		out, err = g.client.GetPasswordData(ctx, &ec2.GetPasswordDataInput{
 			InstanceId: instance.InstanceId,
 		})
 		if err != nil {
