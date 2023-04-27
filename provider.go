@@ -59,6 +59,10 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 	g.log = log.With("region", cfg.Region, "name", g.Name)
 	g.settings = settings
 
+	if err := g.updateCapacity(ctx, true); err != nil {
+		return provider.ProviderInfo{}, err
+	}
+
 	return provider.ProviderInfo{
 		ID:        path.Join("aws", cfg.Region, g.Name),
 		MaxSize:   1000,
@@ -68,7 +72,9 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 }
 
 func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state provider.State)) error {
-	g.size = 0
+	if err := g.updateCapacity(ctx, false); err != nil {
+		return err
+	}
 
 	var next *string
 	for {
@@ -87,8 +93,6 @@ func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state
 				// Terminating, Terminating:*, Terminated
 				if strings.HasPrefix(*instance.LifecycleState, "Terminat") {
 					state = provider.StateDeleting
-				} else {
-					g.size += 1
 				}
 
 				if *instance.LifecycleState == "InService" {
@@ -117,6 +121,8 @@ func (g *InstanceGroup) Increase(ctx context.Context, delta int) (int, error) {
 		return 0, fmt.Errorf("increase instances: %w", err)
 	}
 
+	g.size += delta
+
 	return delta, nil
 }
 
@@ -136,6 +142,7 @@ func (g *InstanceGroup) Decrease(ctx context.Context, instances []string) ([]str
 		if err != nil {
 			return instances, err
 		}
+		g.size--
 
 		if len(instances) == 0 {
 			break
@@ -143,6 +150,32 @@ func (g *InstanceGroup) Decrease(ctx context.Context, instances []string) ([]str
 	}
 
 	return nil, nil
+}
+
+func (g *InstanceGroup) updateCapacity(ctx context.Context, initial bool) error {
+	desc, err := g.autoscaler.DescribeAutoScalingGroups(ctx, &autoscaling.DescribeAutoScalingGroupsInput{
+		AutoScalingGroupNames: []string{g.Name},
+	})
+	if err != nil {
+		return fmt.Errorf("describing autoscaling groups: %w", err)
+	}
+	if len(desc.AutoScalingGroups) == 0 {
+		return fmt.Errorf("autoscaler details not returned")
+	}
+
+	capacity := desc.AutoScalingGroups[0].DesiredCapacity
+
+	var size int
+	if capacity != nil {
+		size = int(*capacity)
+	}
+
+	if !initial && size != g.size {
+		g.log.Error("out-of-sync capacity", "expected", g.size, "actual", size)
+	}
+	g.size = size
+
+	return nil
 }
 
 func (g *InstanceGroup) ConnectInfo(ctx context.Context, id string) (provider.ConnectInfo, error) {
