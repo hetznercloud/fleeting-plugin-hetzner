@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/autoscaling"
+	asgtypes "github.com/aws/aws-sdk-go-v2/service/autoscaling/types"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/hashicorp/go-hclog"
@@ -56,7 +57,7 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 	g.log = log.With("region", cfg.Region, "name", g.Name)
 	g.settings = settings
 
-	if err := g.updateCapacity(ctx, true); err != nil {
+	if _, err := g.getInstances(ctx, true); err != nil {
 		return provider.ProviderInfo{}, err
 	}
 
@@ -69,40 +70,23 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 }
 
 func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state provider.State)) error {
-	if err := g.updateCapacity(ctx, false); err != nil {
+	instances, err := g.getInstances(ctx, false)
+	if err != nil {
 		return err
 	}
 
-	var next *string
-	for {
-		output, err := g.client.DescribeAutoScalingInstances(ctx, &autoscaling.DescribeAutoScalingInstancesInput{
-			MaxRecords: aws.Int32(50),
-			NextToken:  next,
-		})
-		if err != nil {
-			return err
+	for _, instance := range instances {
+		state := provider.StateCreating
+
+		switch instance.LifecycleState {
+		case asgtypes.LifecycleStateTerminated, asgtypes.LifecycleStateTerminating, asgtypes.LifecycleStateTerminatingProceed, asgtypes.LifecycleStateTerminatingWait:
+			state = provider.StateDeleting
+
+		case asgtypes.LifecycleStateInService:
+			state = provider.StateRunning
 		}
 
-		for _, instance := range output.AutoScalingInstances {
-			if aws.ToString(instance.AutoScalingGroupName) == g.Name {
-				state := provider.StateCreating
-
-				// Terminating, Terminating:*, Terminated
-				if strings.HasPrefix(aws.ToString(instance.LifecycleState), "Terminat") {
-					state = provider.StateDeleting
-				}
-
-				if *instance.LifecycleState == "InService" {
-					state = provider.StateRunning
-				}
-
-				update(*instance.InstanceId, state)
-			}
-		}
-
-		if output.NextToken == nil {
-			break
-		}
+		update(*instance.InstanceId, state)
 	}
 
 	return nil
@@ -149,19 +133,20 @@ func (g *InstanceGroup) Decrease(ctx context.Context, instances []string) ([]str
 	return nil, nil
 }
 
-func (g *InstanceGroup) updateCapacity(ctx context.Context, initial bool) error {
+func (g *InstanceGroup) getInstances(ctx context.Context, initial bool) ([]asgtypes.Instance, error) {
 	desc, err := g.client.DescribeAutoScalingGroups(ctx, &autoscaling.DescribeAutoScalingGroupsInput{
 		AutoScalingGroupNames: []string{g.Name},
 	})
 	if err != nil {
-		return fmt.Errorf("describing autoscaling groups: %w", err)
+		return nil, fmt.Errorf("describing autoscaling groups: %w", err)
 	}
 	if len(desc.AutoScalingGroups) != 1 {
-		return fmt.Errorf("unexpected number of autoscaling groups returned: %v", len(desc.AutoScalingGroups))
+		return nil, fmt.Errorf("unexpected number of autoscaling groups returned: %v", len(desc.AutoScalingGroups))
 	}
 
-	capacity := desc.AutoScalingGroups[0].DesiredCapacity
-
+	// detect out-of-sync capacity changes
+	group := desc.AutoScalingGroups[0]
+	capacity := group.DesiredCapacity
 	var size int
 	if capacity != nil {
 		size = int(*capacity)
@@ -172,7 +157,7 @@ func (g *InstanceGroup) updateCapacity(ctx context.Context, initial bool) error 
 	}
 	g.size = size
 
-	return nil
+	return group.Instances, nil
 }
 
 func (g *InstanceGroup) ConnectInfo(ctx context.Context, id string) (provider.ConnectInfo, error) {
