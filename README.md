@@ -106,7 +106,6 @@ access your ASG via the AWS SDK.
             "Effect": "Allow",
             "Action": [
                 "autoscaling:DescribeAutoScalingGroups",
-                "autoscaling:DescribeAutoScalingInstances",
                 "ec2:DescribeInstances"
             ],
             "Resource": "*"
