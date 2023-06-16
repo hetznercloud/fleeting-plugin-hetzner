@@ -112,25 +112,20 @@ func (g *InstanceGroup) Decrease(ctx context.Context, instances []string) ([]str
 		return nil, nil
 	}
 
-	for {
-		instance := instances[0]
-		instances = instances[1:]
-
+	var succeeded []string
+	for _, instance := range instances {
 		_, err := g.client.TerminateInstanceInAutoScalingGroup(ctx, &autoscaling.TerminateInstanceInAutoScalingGroupInput{
 			InstanceId:                     aws.String(instance),
 			ShouldDecrementDesiredCapacity: aws.Bool(true),
 		})
 		if err != nil {
-			return instances, err
+			return succeeded, err
 		}
 		g.size--
-
-		if len(instances) == 0 {
-			break
-		}
+		succeeded = append(succeeded, instance)
 	}
 
-	return nil, nil
+	return succeeded, nil
 }
 
 func (g *InstanceGroup) getInstances(ctx context.Context, initial bool) ([]asgtypes.Instance, error) {
