@@ -147,6 +147,12 @@ func (g *InstanceGroup) getInstances(ctx context.Context, initial bool) ([]asgty
 		size = int(*capacity)
 	}
 
+	if initial {
+		if !aws.ToBool(group.NewInstancesProtectedFromScaleIn) {
+			g.log.Error("new instances are not protected from scale in and should be")
+		}
+	}
+
 	if !initial && size != g.size {
 		g.log.Error("out-of-sync capacity", "expected", g.size, "actual", size)
 	}
