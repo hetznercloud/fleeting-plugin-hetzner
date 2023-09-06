@@ -52,6 +52,7 @@ For other instances, if `use_static_credentials` is false, credentials will be s
 - Group size desired and minimal capacity should be zero.
 - Maximum capacity should be equal or more than the configured fleeting Max Size option.
 - Scaling policy should be set to `None`.
+- Process `AZRebalance` should be suspended.
 - Instance scale-in protection should be enabled.
 
 ## Setting an IAM policy
