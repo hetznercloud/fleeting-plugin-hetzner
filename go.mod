@@ -10,8 +10,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ec2instanceconnect v1.15.0
 	github.com/hashicorp/go-hclog v1.4.0
 	github.com/stretchr/testify v1.7.2
-	gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20230315211154-eb24c2383aef
-	golang.org/x/crypto v0.5.0
+	gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20231004135402-f4a038980974
+	golang.org/x/crypto v0.13.0
 )
 
 require (
@@ -36,10 +36,9 @@ require (
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/stretchr/objx v0.1.0 // indirect
-	golang.org/x/net v0.7.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
-	golang.org/x/text v0.7.0 // indirect
+	golang.org/x/net v0.10.0 // indirect
+	golang.org/x/sys v0.12.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 	google.golang.org/genproto v0.0.0-20230223222841-637eb2293923 // indirect
 	google.golang.org/grpc v1.53.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect

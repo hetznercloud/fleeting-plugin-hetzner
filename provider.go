@@ -231,3 +231,7 @@ func (g *InstanceGroup) ConnectInfo(ctx context.Context, id string) (provider.Co
 
 	return info, err
 }
+
+func (g *InstanceGroup) Shutdown(ctx context.Context) error {
+	return nil
+}
