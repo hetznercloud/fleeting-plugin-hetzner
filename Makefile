@@ -43,7 +43,7 @@ all:$(TARGETS)
 
 .PHONY: test
 test: .mods
-	go test ./...
+	go test -v -timeout=30m ./...
 
 .PHONY: shellcheck
 shellcheck:
