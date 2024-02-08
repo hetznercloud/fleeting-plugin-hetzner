@@ -42,6 +42,7 @@ with the IAM permission assigned. See [Recommended IAM Policy](#recommended-iam-
 | `protocol`               | `ssh` or `winrm` if Windows OS is detected |
 | `username`               | `ec2-user` or `Administrator` if Windows OS is detected |
 | `use_static_credentials` | `false`  |
+| `key_path`               | None. This is the path for the private key file used to connect to the runner **manager** machine. Required for Windows OS. |
 
 For Windows instances, if `use_static_credentials` is false, the password field is populated with a password that AWS provisions.
 
