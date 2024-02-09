@@ -1,16 +1,16 @@
-# Fleeting Plugin AWS
+# Fleeting Plugin Hetzner
 
-This is a [fleeting](https://gitlab.com/gitlab-org/fleeting/fleeting) plugin for AWS.
+This is a [fleeting](https://gitlab.com/gitlab-org/fleeting/fleeting) plugin for Hetzner.
 
-[![Pipeline Status](https://gitlab.com/gitlab-org/fleeting/fleeting-plugin-aws/badges/main/pipeline.svg)](https://gitlab.com/gitlab-org/fleeting/fleeting-plugin-aws/commits/main)
-[![Go Report Card](https://goreportcard.com/badge/gitlab.com/gitlab-org/fleeting/fleeting-plugin-aws)](https://goreportcard.com/report/gitlab.com/gitlab-org/fleeting/fleeting-plugin-aws)
+[![Pipeline Status](https://gitlab.com/hiboxsystems/fleeting-plugin-hetzner/badges/main/pipeline.svg)](https://gitlab.com/hiboxsystems/fleeting-plugin-hetzner/commits/main)
+[![Go Report Card](https://goreportcard.com/badge/gitlab.com/hiboxsystems/fleeting-plugin-hetzner)](https://goreportcard.com/report/gitlab.com/hiboxsystems/fleeting-plugin-hetzner)
 
 ## Building the plugin
 
-To generate the binary, ensure `$GOPATH/bin` is on your PATH, then use `go install`:
+To generate the binary, ensure `$GOPATH/bin` is on your PATH, then use `go build`:
 
 ```shell
-cd cmd/fleeting-plugin-aws/
+cd cmd/fleeting-plugin-hetzner/
 go build 
 ```
 
@@ -19,6 +19,8 @@ If you are managing go versions with asdf, run this after generating the binary:
 ```shell
 asdf reshim
 ```
+
+**TODO**: go through the rest of this file. No content below this line has been modified.
 
 ## Plugin Configuration
 
