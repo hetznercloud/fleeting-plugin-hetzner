@@ -11,7 +11,7 @@ To generate the binary, ensure `$GOPATH/bin` is on your PATH, then use `go insta
 
 ```shell
 cd cmd/fleeting-plugin-aws/
-go install 
+go build 
 ```
 
 If you are managing go versions with asdf, run this after generating the binary:
