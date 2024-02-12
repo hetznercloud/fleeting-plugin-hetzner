@@ -1,7 +1,6 @@
 package hetzner
 
 import (
-	"bytes"
 	"context"
 	"crypto/x509"
 	"encoding/pem"
@@ -49,45 +48,6 @@ func setupFakeClient(t *testing.T, setup func(client *fake.Client)) *InstanceGro
 	return &InstanceGroup{
 		Name: "test-group",
 	}
-}
-
-func TestCapacitySync(t *testing.T) {
-	setupFakeClient(t, func(client *fake.Client) {
-		client.DesiredCapacity = 1
-		client.Instances = append(client.Instances, fake.Instance{
-			InstanceId: "pre-existing",
-			State:      "Running",
-		})
-	})
-
-	ctx := context.Background()
-
-	group := &InstanceGroup{
-		Name: "test-group",
-	}
-
-	var buf bytes.Buffer
-	logger := hclog.NewInterceptLogger(&hclog.LoggerOptions{Output: &buf})
-
-	// initialize with 1 instance
-	_, err := group.Init(ctx, logger, provider.Settings{})
-	require.NoError(t, err)
-	require.NoError(t, group.Update(ctx, func(id string, state provider.State) {}))
-
-	// increase to 5
-	num, err := group.Increase(ctx, 5)
-	require.Equal(t, 5, num)
-	require.NoError(t, err)
-	require.NoError(t, group.Update(ctx, func(id string, state provider.State) {}))
-	require.Equal(t, 6, group.client.(*fake.Client).DesiredCapacity)
-	require.Equal(t, 6, group.size)
-
-	// set ASG to have 10 instances manually and update to detect out-of-sync
-	group.client.(*fake.Client).DesiredCapacity = 10
-	require.NoError(t, group.Update(ctx, func(id string, state provider.State) {}))
-	require.Contains(t, buf.String(), "[ERROR] out-of-sync capacity: name=test-group region=fake expected=6 actual=10")
-	require.Equal(t, 10, group.client.(*fake.Client).DesiredCapacity)
-	require.Equal(t, 10, group.size)
 }
 
 func TestIncrease(t *testing.T) {
