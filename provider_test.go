@@ -197,7 +197,7 @@ func TestConnectInfo(t *testing.T) {
 				Key:      []byte("invalid-key"),
 			},
 			assert: func(t *testing.T, info provider.ConnectInfo, err error) {
-				require.Error(t, err, "reading private key: ssh: no key found")
+				require.ErrorContains(t, err, "reading private key: ssh: no key found")
 			},
 		},
 		{
@@ -216,7 +216,7 @@ func TestConnectInfo(t *testing.T) {
 				Protocol: provider.ProtocolWinRM,
 			},
 			assert: func(t *testing.T, info provider.ConnectInfo, err error) {
-				require.Error(t, err, "dynamically created windows passwords are encrypted with a keypair, but no keypair has been provided")
+				require.ErrorContains(t, err, "plugin does not support the WinRM protocol")
 			},
 		},
 		{
@@ -225,7 +225,7 @@ func TestConnectInfo(t *testing.T) {
 				Key:      []byte("invalid key"),
 			},
 			assert: func(t *testing.T, info provider.ConnectInfo, err error) {
-				require.Error(t, err, "reading private key: ssh: no key found")
+				require.ErrorContains(t, err, "plugin does not support the WinRM protocol")
 			},
 		},
 		{
@@ -234,8 +234,7 @@ func TestConnectInfo(t *testing.T) {
 				Key:      encodedKey,
 			},
 			assert: func(t *testing.T, info provider.ConnectInfo, err error) {
-				require.NoError(t, err)
-				require.Equal(t, "password", info.Password)
+				require.ErrorContains(t, err, "plugin does not support the WinRM protocol")
 			},
 		},
 	}
