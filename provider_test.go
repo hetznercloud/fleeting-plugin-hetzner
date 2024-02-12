@@ -1,4 +1,4 @@
-package aws
+package hetzner
 
 import (
 	"bytes"
@@ -12,9 +12,9 @@ import (
 	asgtypes "github.com/aws/aws-sdk-go-v2/service/autoscaling/types"
 	"github.com/hashicorp/go-hclog"
 	"github.com/stretchr/testify/require"
-	"gitlab.com/gitlab-org/fleeting/fleeting-plugin-aws/internal/awsclient"
-	"gitlab.com/gitlab-org/fleeting/fleeting-plugin-aws/internal/awsclient/fake"
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
+	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/awsclient"
+	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/awsclient/fake"
 )
 
 func setupFakeClient(t *testing.T, setup func(client *fake.Client)) *InstanceGroup {

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	aws "gitlab.com/gitlab-org/fleeting/fleeting-plugin-aws"
 	"gitlab.com/gitlab-org/fleeting/fleeting/plugin"
+	hetzner "gitlab.com/hiboxsystems/fleeting-plugin-hetzner"
 )
 
 var (
@@ -16,9 +16,9 @@ var (
 func main() {
 	flag.Parse()
 	if *showVersion {
-		fmt.Println(aws.Version.Full())
+		fmt.Println(hetzner.Version.Full())
 		os.Exit(0)
 	}
 
-	plugin.Serve(&aws.InstanceGroup{})
+	plugin.Serve(&hetzner.InstanceGroup{})
 }

@@ -1,4 +1,4 @@
-module gitlab.com/gitlab-org/fleeting/fleeting-plugin-aws
+module gitlab.com/hiboxsystems/fleeting-plugin-hetzner
 
 go 1.19
 

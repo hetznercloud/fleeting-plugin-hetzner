@@ -1,4 +1,4 @@
-package aws
+package hetzner
 
 import (
 	"context"
@@ -14,8 +14,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/hashicorp/go-hclog"
 
-	"gitlab.com/gitlab-org/fleeting/fleeting-plugin-aws/internal/awsclient"
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
+	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/awsclient"
 )
 
 var _ provider.InstanceGroup = (*InstanceGroup)(nil)
