@@ -226,7 +226,7 @@ func (g *InstanceGroup) ConnectInfo(ctx context.Context, id string) (provider.Co
 		err = g.ssh(ctx, &info, instance)
 
 	case provider.ProtocolWinRM:
-		err = g.winrm(ctx, &info, instance)
+		err = fmt.Errorf("plugin does not support the WinRM protocol")
 	}
 
 	return info, err

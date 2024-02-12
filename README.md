@@ -5,6 +5,11 @@ This is a [fleeting](https://gitlab.com/gitlab-org/fleeting/fleeting) plugin for
 [![Pipeline Status](https://gitlab.com/hiboxsystems/fleeting-plugin-hetzner/badges/main/pipeline.svg)](https://gitlab.com/hiboxsystems/fleeting-plugin-hetzner/commits/main)
 [![Go Report Card](https://goreportcard.com/badge/gitlab.com/hiboxsystems/fleeting-plugin-hetzner)](https://goreportcard.com/report/gitlab.com/hiboxsystems/fleeting-plugin-hetzner)
 
+The project started out as a fork of the existing
+[fleeting-plugin-aws](https://gitlab.com/gitlab-org/fleeting/fleeting-plugin-aws) plugin, gradually
+replacing the AWS calls with calls to the [Hetzner Cloud
+API](https://github.com/hetznercloud/hcloud-go).
+
 ## Building the plugin
 
 To generate the binary, ensure `$GOPATH/bin` is on your PATH, then use `go build`:
@@ -113,21 +118,6 @@ The IAM policy for `ec2-instance-connect:SendSSHPublicKey` is only necessary if 
 is set to `false` (default).
 
 The IAM policy for `ec2:GetPasswordData` is only necessary if the EC2 instances runs on Windows.
-
-## WinRM
-
-The fleeting connector can use Basic authentication via WinRM-HTTP (TCP/5985) to connect to the EC2 instance.
-The Windows AMIs provided by AWS don't allow WinRM access by default.
-
-The following startup script can enable a WinRM connection:
-
-```powershell
-netsh advfirewall firewall add rule name="WinRM-HTTP" dir=in localport=5985 protocol=TCP action=allow
-winrm set winrm/config/service/auth '@{Basic="true"}'
-winrm set winrm/config/service '@{AllowUnencrypted="true"}'
-```
-
-This adjusts the firewall, and allows Basic authentication via an unencrypted connection (WinRM-HTTP).
 
 ## Examples
 
