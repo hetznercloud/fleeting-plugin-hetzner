@@ -26,7 +26,11 @@ type InstanceGroup struct {
 	Profile         string `json:"profile"`
 	ConfigFile      string `json:"config_file"`
 	CredentialsFile string `json:"credentials_file"`
-	Name            string `json:"name"`
+
+	// Because of limitations in the Hetzner API, instance groups do not formally exist in the
+	// Hetzner API. The Name here is mapped to a label which is set on all machines created in this
+	// "instance group".
+	Name string `json:"name"`
 
 	log    hclog.Logger
 	client awsclient.Client
