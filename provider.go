@@ -3,24 +3,18 @@ package hetzner
 import (
 	"context"
 	"fmt"
-	"path"
-	"strings"
-
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/autoscaling"
-	asgtypes "github.com/aws/aws-sdk-go-v2/service/autoscaling/types"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/hashicorp/go-hclog"
+	"github.com/hetznercloud/hcloud-go/hcloud"
+	"path"
+	"strconv"
 
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
-	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/awsclient"
+	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/hetzner"
 )
 
 var _ provider.InstanceGroup = (*InstanceGroup)(nil)
 
-var newClient = awsclient.New
+var newClient = hetzner.New
 
 type InstanceGroup struct {
 	Profile         string `json:"profile"`
@@ -33,40 +27,28 @@ type InstanceGroup struct {
 	Name string `json:"name"`
 
 	log    hclog.Logger
-	client awsclient.Client
+	client hetzner.Client
 	size   int
 
 	settings provider.Settings
 }
 
 func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings provider.Settings) (provider.ProviderInfo, error) {
-	var opts []func(*config.LoadOptions) error
-
-	if g.Profile != "" {
-		opts = append(opts, config.WithSharedConfigProfile(g.Profile))
-	}
-	if g.ConfigFile != "" {
-		opts = append(opts, config.WithSharedConfigFiles([]string{g.ConfigFile}))
-	}
-	if g.CredentialsFile != "" {
-		opts = append(opts, config.WithSharedCredentialsFiles([]string{g.CredentialsFile}))
+	cfg := hetzner.Config{
+		// TODO: allow overriding this via env variable
+		Location: "hel1",
 	}
 
-	cfg, err := config.LoadDefaultConfig(ctx, opts...)
-	if err != nil {
-		return provider.ProviderInfo{}, fmt.Errorf("creating aws config: %w", err)
-	}
-
-	g.client = newClient(cfg)
-	g.log = log.With("region", cfg.Region, "name", g.Name)
+	g.client = newClient(cfg, Version.String())
+	g.log = log.With("location", cfg.Location, "name", g.Name)
 	g.settings = settings
 
-	if _, err := g.getInstances(ctx, true); err != nil {
+	if _, err := g.getServersInGroup(ctx); err != nil {
 		return provider.ProviderInfo{}, err
 	}
 
 	return provider.ProviderInfo{
-		ID:        path.Join("aws", cfg.Region, g.Name),
+		ID:        path.Join("hetzner", cfg.Location, g.Name),
 		MaxSize:   1000,
 		Version:   Version.String(),
 		BuildInfo: Version.BuildInfo(),
@@ -74,7 +56,7 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 }
 
 func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state provider.State)) error {
-	instances, err := g.getInstances(ctx, false)
+	instances, err := g.getServersInGroup(ctx)
 	if err != nil {
 		return err
 	}
@@ -82,28 +64,34 @@ func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state
 	for _, instance := range instances {
 		state := provider.StateCreating
 
-		switch instance.LifecycleState {
-		case asgtypes.LifecycleStateTerminated, asgtypes.LifecycleStateTerminating, asgtypes.LifecycleStateTerminatingProceed, asgtypes.LifecycleStateTerminatingWait:
+		switch instance.Status {
+		case hcloud.ServerStatusOff, hcloud.ServerStatusStopping, hcloud.ServerStatusDeleting:
 			state = provider.StateDeleting
 
-		case asgtypes.LifecycleStateInService:
+		case hcloud.ServerStatusInitializing, hcloud.ServerStatusRunning, hcloud.ServerStatusStarting:
 			state = provider.StateRunning
+
+		// TODO: how about these? What should we map them to in the Fleeting world view?
+		// hcloud.ServerStatusMigrating
+		// hcloud.ServerStatusRebuilding
+		// hcloud.ServerStatusUnknown
+		default:
+			return fmt.Errorf("unexpected instance status encountered: %v", instance.Status)
 		}
 
-		update(*instance.InstanceId, state)
+		update(strconv.Itoa(instance.ID), state)
 	}
 
 	return nil
 }
 
 func (g *InstanceGroup) Increase(ctx context.Context, delta int) (int, error) {
-	_, err := g.client.SetDesiredCapacity(ctx, &autoscaling.SetDesiredCapacityInput{
-		AutoScalingGroupName: aws.String(g.Name),
-		DesiredCapacity:      aws.Int32(int32(g.size + delta)),
-		HonorCooldown:        aws.Bool(false),
-	})
-	if err != nil {
-		return 0, fmt.Errorf("increase instances: %w", err)
+	for i := 0; i < delta; i++ {
+		_, err := g.client.CreateServer(ctx)
+
+		if err != nil {
+			return i + 1, fmt.Errorf("error creating server: %w", err)
+		}
 	}
 
 	g.size += delta
@@ -117,120 +105,91 @@ func (g *InstanceGroup) Decrease(ctx context.Context, instances []string) ([]str
 	}
 
 	var succeeded []string
+
 	for _, instance := range instances {
-		_, err := g.client.TerminateInstanceInAutoScalingGroup(ctx, &autoscaling.TerminateInstanceInAutoScalingGroupInput{
-			InstanceId:                     aws.String(instance),
-			ShouldDecrementDesiredCapacity: aws.Bool(true),
-		})
+		err := g.client.DeleteServer(ctx, instance)
+
 		if err != nil {
 			return succeeded, err
 		}
+
 		g.size--
+
 		succeeded = append(succeeded, instance)
 	}
 
 	return succeeded, nil
 }
 
-func (g *InstanceGroup) getInstances(ctx context.Context, initial bool) ([]asgtypes.Instance, error) {
-	desc, err := g.client.DescribeAutoScalingGroups(ctx, &autoscaling.DescribeAutoScalingGroupsInput{
-		AutoScalingGroupNames: []string{g.Name},
-	})
-	if err != nil {
-		return nil, fmt.Errorf("describing autoscaling groups: %w", err)
-	}
-	if len(desc.AutoScalingGroups) != 1 {
-		return nil, fmt.Errorf("unexpected number of autoscaling groups returned: %v", len(desc.AutoScalingGroups))
-	}
-
-	// detect out-of-sync capacity changes
-	group := desc.AutoScalingGroups[0]
-	capacity := group.DesiredCapacity
-	var size int
-	if capacity != nil {
-		size = int(*capacity)
-	}
-
-	if initial {
-		if !aws.ToBool(group.NewInstancesProtectedFromScaleIn) {
-			g.log.Error("new instances are not protected from scale in and should be")
-		}
-	}
-
-	if !initial && size != g.size {
-		g.log.Error("out-of-sync capacity", "expected", g.size, "actual", size)
-	}
-	g.size = size
-
-	return group.Instances, nil
-}
-
 func (g *InstanceGroup) ConnectInfo(ctx context.Context, id string) (provider.ConnectInfo, error) {
 	info := provider.ConnectInfo{ConnectorConfig: g.settings.ConnectorConfig}
 
-	output, err := g.client.DescribeInstances(ctx, &ec2.DescribeInstancesInput{
-		InstanceIds: []string{id},
-	})
+	if info.Protocol == provider.ProtocolWinRM {
+		return info, fmt.Errorf("plugin does not support the WinRM protocol")
+	}
+
+	if info.Key != nil {
+		// TODO: This is probably something we would *want* to support, but we currently don't.
+		return info, fmt.Errorf("plugin does not support providing an SSH key in advance")
+	}
+
+	server, err := g.client.GetServer(ctx, id)
+
 	if err != nil {
-		return info, fmt.Errorf("fetching instance: %w", err)
+		return info, fmt.Errorf("error getting server: %w", err)
 	}
 
-	if len(output.Reservations) == 0 || len(output.Reservations[0].Instances) == 0 {
-		return info, fmt.Errorf("fetching instance: not found")
+	if server == nil {
+		return info, fmt.Errorf("fetching instance %v: not found", id)
 	}
 
-	instance := output.Reservations[0].Instances[0]
+	info.OS = server.Image.OSFlavor
 
-	if info.OS == "" {
-		switch {
-		case instance.Architecture == types.ArchitectureValuesX8664Mac ||
-			instance.Architecture == types.ArchitectureValuesArm64Mac:
-			info.OS = "darwin"
-		case strings.EqualFold(string(instance.Platform), string(types.PlatformValuesWindows)):
-			info.OS = "windows"
-		default:
-			info.OS = "linux"
-		}
-	}
+	// TODO: get this from server-type API. Here we can continue tomorrow.
+	// info.Arch - Hetzner provides a "server type" API (https://docs.hetzner.cloud/#server-types), but regretfully the architecture field contains "
 
-	if info.Arch == "" {
-		switch instance.Architecture {
-		case types.ArchitectureValuesI386:
-			info.Arch = "386"
-		case types.ArchitectureValuesX8664, types.ArchitectureValuesX8664Mac:
-			info.Arch = "amd64"
-		case types.ArchitectureValuesArm64, types.ArchitectureValuesArm64Mac:
-			info.Arch = "arm64"
-		}
-	}
-
-	if info.Username == "" {
-		info.Username = "ec2-user"
-		if info.OS == "windows" {
-			info.Username = "Administrator"
-		}
-	}
-
-	info.InternalAddr = aws.ToString(instance.PrivateIpAddress)
-	info.ExternalAddr = aws.ToString(instance.PublicIpAddress)
-
-	if info.UseStaticCredentials {
-		return info, nil
-	}
+	//instance := output.Reservations[0].Instances[0]
+	//
+	//if info.OS == "" {
+	//	switch {
+	//	case instance.Architecture == types.ArchitectureValuesX8664Mac ||
+	//		instance.Architecture == types.ArchitectureValuesArm64Mac:
+	//		info.OS = "darwin"
+	//	case strings.EqualFold(string(instance.Platform), string(types.PlatformValuesWindows)):
+	//		info.OS = "windows"
+	//	default:
+	//		info.OS = "linux"
+	//	}
+	//}
+	//
+	//if info.Arch == "" {
+	//	switch instance.Architecture {
+	//	case types.ArchitectureValuesI386:
+	//		info.Arch = "386"
+	//	case types.ArchitectureValuesX8664, types.ArchitectureValuesX8664Mac:
+	//		info.Arch = "amd64"
+	//	case types.ArchitectureValuesArm64, types.ArchitectureValuesArm64Mac:
+	//		info.Arch = "arm64"
+	//	}
+	//}
+	//
+	//if info.Username == "" {
+	//	info.Username = "ec2-user"
+	//	if info.OS == "windows" {
+	//		info.Username = "Administrator"
+	//	}
+	//}
+	//
+	//info.InternalAddr = aws.ToString(instance.PrivateIpAddress)
+	//info.ExternalAddr = aws.ToString(instance.PublicIpAddress)
+	//
+	//if info.UseStaticCredentials {
+	//	return info, nil
+	//}
+	//
 
 	if info.Protocol == "" {
 		info.Protocol = provider.ProtocolSSH
-		if info.OS == "windows" {
-			info.Protocol = provider.ProtocolWinRM
-		}
-	}
-
-	switch info.Protocol {
-	case provider.ProtocolSSH:
-		err = g.ssh(ctx, &info, instance)
-
-	case provider.ProtocolWinRM:
-		err = fmt.Errorf("plugin does not support the WinRM protocol")
 	}
 
 	return info, err
@@ -238,4 +197,51 @@ func (g *InstanceGroup) ConnectInfo(ctx context.Context, id string) (provider.Co
 
 func (g *InstanceGroup) Shutdown(ctx context.Context) error {
 	return nil
+}
+
+func (g *InstanceGroup) getServersInGroup(ctx context.Context) ([]*hcloud.Server, error) {
+	servers, err := g.client.GetServersInGroup(ctx, g.Name)
+
+	if err != nil {
+		return nil, fmt.Errorf("GetServersInGroup: %w", err)
+	}
+
+	// Workaround for tests which may have added/removed servers without calling our Increase() or
+	// Decrease() methods.
+	g.size = len(servers)
+
+	return servers, nil
+
+	// TODO: Remove when we are done
+
+	//desc, err := g.client.DescribeAutoScalingGroups(ctx, &autoscaling.DescribeAutoScalingGroupsInput{
+	//	AutoScalingGroupNames: []string{g.Name},
+	//})
+	//if err != nil {
+	//	return nil, fmt.Errorf("describing autoscaling groups: %w", err)
+	//}
+	//if len(desc.AutoScalingGroups) != 1 {
+	//	return nil, fmt.Errorf("unexpected number of autoscaling groups returned: %v", len(desc.AutoScalingGroups))
+	//}
+	//
+	//// detect out-of-sync capacity changes
+	//group := desc.AutoScalingGroups[0]
+	//capacity := group.DesiredCapacity
+	//var size int
+	//if capacity != nil {
+	//	size = int(*capacity)
+	//}
+	//
+	//if initial {
+	//	if !aws.ToBool(group.NewInstancesProtectedFromScaleIn) {
+	//		g.log.Error("new instances are not protected from scale in and should be")
+	//	}
+	//}
+	//
+	//if !initial && size != g.size {
+	//	g.log.Error("out-of-sync capacity", "expected", g.size, "actual", size)
+	//}
+	//g.size = size
+	//
+	//return group.Instances, nil
 }
