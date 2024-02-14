@@ -4,16 +4,15 @@ import (
 	"context"
 	"crypto/x509"
 	"encoding/pem"
+	"github.com/hetznercloud/hcloud-go/hcloud"
+	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/hetzner"
 	"os"
 	"testing"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	asgtypes "github.com/aws/aws-sdk-go-v2/service/autoscaling/types"
 	"github.com/hashicorp/go-hclog"
 	"github.com/stretchr/testify/require"
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
-	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/awsclient"
-	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/awsclient/fake"
+	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/hetzner/fake"
 )
 
 func setupFakeClient(t *testing.T, setup func(client *fake.Client)) *InstanceGroup {
@@ -35,9 +34,9 @@ func setupFakeClient(t *testing.T, setup func(client *fake.Client)) *InstanceGro
 	}
 	os.Setenv("AWS_REGION", "fake")
 
-	newClient = func(cfg aws.Config) awsclient.Client {
+	newClient = func(cfg hetzner.Config, version string) hetzner.Client {
 		client := fake.New(cfg)
-		client.Name = "test-group"
+
 		if setup != nil {
 			setup(client)
 		}
@@ -72,23 +71,23 @@ func TestIncrease(t *testing.T) {
 		require.Equal(t, provider.StateRunning, state)
 		count++
 	}))
-	require.Equal(t, 2, group.client.(*fake.Client).DesiredCapacity)
 	require.Equal(t, 2, group.size)
 	require.Equal(t, 2, count)
 }
 
 func TestDecrease(t *testing.T) {
 	group := setupFakeClient(t, func(client *fake.Client) {
-		client.DesiredCapacity = 2
-		client.Instances = append(
-			client.Instances,
-			fake.Instance{
-				InstanceId: "pre-existing-1",
-				State:      asgtypes.LifecycleStateInService,
+		client.Servers = append(
+			client.Servers,
+			&hcloud.Server{
+				ID:     646457,
+				Name:   "pre-existing-1",
+				Status: hcloud.ServerStatusRunning,
 			},
-			fake.Instance{
-				InstanceId: "pre-existing-2",
-				State:      asgtypes.LifecycleStateInService,
+			&hcloud.Server{
+				ID:     382443,
+				Name:   "pre-existing-2",
+				Status: hcloud.ServerStatusRunning,
 			})
 	})
 
@@ -104,24 +103,30 @@ func TestDecrease(t *testing.T) {
 	require.Equal(t, 2, group.size)
 	require.Equal(t, 2, count)
 
-	removed, err := group.Decrease(ctx, []string{"pre-existing-1"})
-	require.Contains(t, removed, "pre-existing-1")
+	removed, err := group.Decrease(ctx, []string{"646457"})
+	require.Contains(t, removed, "646457")
 	require.NoError(t, err)
 	count = 0
 	require.NoError(t, group.Update(ctx, func(id string, state provider.State) {
 		count++
 	}))
-	require.Equal(t, 1, group.client.(*fake.Client).DesiredCapacity)
 	require.Equal(t, 1, group.size)
 }
 
 func TestConnectInfo(t *testing.T) {
 	group := setupFakeClient(t, func(client *fake.Client) {
-		client.DesiredCapacity = 1
-		client.Instances = append(client.Instances, fake.Instance{
-			InstanceId: "pre-existing-1",
-			State:      asgtypes.LifecycleStateInService,
-		})
+		client.Servers = append(
+			client.Servers,
+			&hcloud.Server{
+				ID:   218452,
+				Name: "pre-existing-1",
+
+				Image: &hcloud.Image{
+					OSFlavor: "ubuntu",
+				},
+
+				Status: hcloud.ServerStatusRunning,
+			})
 	})
 
 	ctx := context.Background()
@@ -148,16 +153,12 @@ func TestConnectInfo(t *testing.T) {
 			assert: func(t *testing.T, info provider.ConnectInfo, err error) {
 				require.NoError(t, err)
 				require.Equal(t, info.Protocol, provider.ProtocolSSH)
-				require.NotEmpty(t, info.Key)
-			},
-		},
-		{
-			config: provider.ConnectorConfig{
-				Protocol: provider.ProtocolSSH,
-				Key:      []byte("invalid-key"),
-			},
-			assert: func(t *testing.T, info provider.ConnectInfo, err error) {
-				require.ErrorContains(t, err, "reading private key: ssh: no key found")
+
+				// TODO: should info.Key be non-empty here? If we create a new SSH key for each
+				// TODO: machine, we also need a cleanup mechanism for it (because Hetzner doesn't
+				// TODO: let you create a server-specific key that is automatically cleaned up when the
+				// TODO: machine is destroyed)
+				//require.NotEmpty(t, info.Key)
 			},
 		},
 		{
@@ -166,9 +167,7 @@ func TestConnectInfo(t *testing.T) {
 				Key:      encodedKey,
 			},
 			assert: func(t *testing.T, info provider.ConnectInfo, err error) {
-				require.NoError(t, err)
-				require.Equal(t, info.Protocol, provider.ProtocolSSH)
-				require.NotEmpty(t, info.Key)
+				require.ErrorContains(t, err, "plugin does not support providing an SSH key in advance")
 			},
 		},
 		{
@@ -203,7 +202,7 @@ func TestConnectInfo(t *testing.T) {
 		t.Run("", func(t *testing.T) {
 			group.settings.ConnectorConfig = tc.config
 
-			info, err := group.ConnectInfo(ctx, "pre-existing-1")
+			info, err := group.ConnectInfo(ctx, "218452")
 			tc.assert(t, info, err)
 		})
 	}
