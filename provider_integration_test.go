@@ -17,47 +17,20 @@ func TestProvisioning(t *testing.T) {
 		t.Skip("mandatory environment variable FLEETING_PLUGIN_HETZNER_TOKEN not set")
 	}
 
-	// Give these env variables reasonable defaults, so the integration test can run with only the
-	// token set in the environment.
-	if region, ok := os.LookupEnv("FLEETING_PLUGIN_HETZNER_LOCATION"); ok {
-		t.Cleanup(func() {
-			os.Setenv("FLEETING_PLUGIN_HETZNER_LOCATION", region)
-		})
-	} else {
-		t.Cleanup(func() {
-			os.Unsetenv("FLEETING_PLUGIN_HETZNER_LOCATION")
-		})
-	}
-	os.Setenv("FLEETING_PLUGIN_HETZNER_LOCATION", "hel1")
-
-	if region, ok := os.LookupEnv("FLEETING_PLUGIN_HETZNER_SERVER_TYPE"); ok {
-		t.Cleanup(func() {
-			os.Setenv("FLEETING_PLUGIN_HETZNER_SERVER_TYPE", region)
-		})
-	} else {
-		t.Cleanup(func() {
-			os.Unsetenv("FLEETING_PLUGIN_HETZNER_SERVER_TYPE")
-		})
-	}
-	os.Setenv("FLEETING_PLUGIN_HETZNER_SERVER_TYPE", "cx11")
-
-	if region, ok := os.LookupEnv("FLEETING_PLUGIN_HETZNER_IMAGE"); ok {
-		t.Cleanup(func() {
-			os.Setenv("FLEETING_PLUGIN_HETZNER_IMAGE", region)
-		})
-	} else {
-		t.Cleanup(func() {
-			os.Unsetenv("FLEETING_PLUGIN_HETZNER_IMAGE")
-		})
-	}
-	os.Setenv("FLEETING_PLUGIN_HETZNER_IMAGE", "ubuntu-22.04")
-
 	name := uniqueASGName()
 
 	integration.TestProvisioning(t,
 		integration.BuildPluginBinary(t, "cmd/fleeting-plugin-hetzner", "fleeting-plugin-hetzner"),
 		integration.Config{
 			PluginConfig: InstanceGroup{
+				AccessToken: os.Getenv("FLEETING_PLUGIN_HETZNER_TOKEN"),
+
+				// Give these plugin config settings reasonable defaults, so the integration test
+				// can run with only the token set in the environment.
+				Location:   "hel1",
+				ServerType: "cx11",
+				Image:      "ubuntu-22.04",
+
 				Name: name,
 			},
 			ConnectorConfig: provider.ConnectorConfig{

@@ -25,102 +25,58 @@ If you are managing go versions with asdf, run this after generating the binary:
 asdf reshim
 ```
 
-**TODO**: go through the rest of this file. No content below this line has been modified.
-
 ## Plugin Configuration
 
 The following parameters are supported:
 
-| Parameter             | Type   | Description |
-|-----------------------|--------|-------------|
-| `name`                | string | Name of the Auto Scaling Group |
-| `profile` | string | Optional. AWS profile-name ([Named profiles for the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html)). |
-| `config_file`    | string | Optional. Path to the AWS config file ([AWS Configuration and credential file settings](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)). |
-| `credentials_file`    | string | Optional. Path to the AWS credential file ([AWS Configuration and credential file settings](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)). |
+| Parameter      | Type   | Description                                                                                                                                             |
+|----------------|--------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `access_token` | string | The Hetzner Cloud API token to use. Generate this in the Hetzner Cloud Console, for the project in which you want the cloud CI instances to be created. |
+| `location`     | string | The Hetzner location to use, from https://docs.hetzner.com/cloud/general/locations/                                                                     |
+| `server_type`  | string | The server type to create, from https://docs.hetzner.com/cloud/servers/overview/                                                                        |
+| `image`        | string | The operating system image to use. If you have the hcloud CLI installed, you can list available images using `hcloud image list --type system`.         |
 
-The credentials don't need to be set if the plugin is running on an instance inside AWS
-with the IAM permission assigned. See [Recommended IAM Policy](#recommended-iam-policy)
+### Connector config
 
-### Default connector config
+The connector config is currently hardwired as follows:
 
-| Parameter                | Default  |
-|--------------------------|----------|
-| `os`                     | `linux`  |
-| `protocol`               | `ssh` or `winrm` if Windows OS is detected |
-| `username`               | `ec2-user` or `Administrator` if Windows OS is detected |
-| `use_static_credentials` | `false`  |
-| `key_path`               | None. This is the path for the private key file used to connect to the runner **manager** machine. Required for Windows OS. |
-
-For Windows instances, if `use_static_credentials` is false, the password field is populated with a password that AWS provisions.
-
-For other instances, if `use_static_credentials` is false, credentials will be set using [SendSSHPublicKey](https://docs.aws.amazon.com/ec2-instance-connect/latest/APIReference/API_SendSSHPublicKey.html), either using the specified key or dynamically creating one.
-
-## Autoscaling Group Setup
-
-- Group size desired and minimal capacity should be zero.
-- Maximum capacity should be equal or more than the configured fleeting Max Size option.
-- Scaling policy should be set to `None`.
-- Process `AZRebalance` should be suspended.
-- Instance scale-in protection should be enabled.
-
-## Setting an IAM policy
-
-### Our recommendations
-
-- Grant least privilege
-- Create an IAM group with a policy like the example below and assign each AWS user to the group
-- Use policy conditions for extra security. This will depend on your setup.
-- Do not share AWS access keys to separate deployments.
-
-Create an `AWS Credential Type` of `Access key - Programmatic access`, enabling the plugin to
-access your ASG via the AWS SDK.
-
-#### Recommended IAM Policy
-
-```json
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "autoscaling:SetDesiredCapacity",
-                "autoscaling:TerminateInstanceInAutoScalingGroup"
-            ],
-            "Resource": "YOUR_AUTOSCALING_GROUP_ARN"
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "autoscaling:DescribeAutoScalingGroups",
-                "ec2:DescribeInstances"
-            ],
-            "Resource": "*"
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ec2:GetPasswordData",
-                "ec2-instance-connect:SendSSHPublicKey"
-            ],
-            "Resource": "arn:aws:ec2:YOUR_AWS_REGION:YOUR_AWS_ACCOUNT_ID:instance/*",
-            "Condition": {
-                "StringEquals": {
-                    "ec2:ResourceTag/aws:autoscaling:groupName": "YOUR_AUTOSCALING_GROUP_NAME"
-                }
-            }
-        }
-    ]
-}
-```
-
-The IAM policy for `ec2-instance-connect:SendSSHPublicKey` is only necessary if the configuration `use_static_credentials`
-is set to `false` (default).
-
-The IAM policy for `ec2:GetPasswordData` is only necessary if the EC2 instances runs on Windows.
+| Parameter                | Value                                                                             |
+|--------------------------|-----------------------------------------------------------------------------------|
+| `os`                     | Only `linux` is supported.                                                        |
+| `protocol`               | `ssh` (`winrm` is not supported)                                                  |
+| `username`               | `root`; the Hetzner Cloud API does not seem to allow overriding this.             |
+| `use_static_credentials` | `false`; a unique SSH private/public key will be created for each server created. |
+| `key_path`               | None.                                                                             |
 
 ## Examples
 
 ### GitLab Runner
 
-GitLab Runner has examples on using this plugin for the [Instance executor](https://docs.gitlab.com/runner/executors/instance.html#examples) and [Docker Autoscaler executor](https://docs.gitlab.com/runner/executors/docker_autoscaler.html#examples).
+GitLab Runner has examples on using the other plugins for the [Instance
+executor](https://docs.gitlab.com/runner/executors/instance.html#examples) and [Docker Autoscaler
+executor](https://docs.gitlab.com/runner/executors/docker_autoscaler.html#examples). Here is an
+incomplete example of how to use this plugin with the `docker-autoscaler` executor, starting from
+the `runners.autoscaler` node:
+
+```toml
+# ...
+[runners.autoscaler]
+  plugin = "/home/plundberg/git/fleeting-plugin-hetzner/cmd/fleeting-plugin-hetzner/fleeting-plugin-hetzner"
+
+  capacity_per_instance = 1
+  max_use_count = 1
+  max_instances = 10
+
+  [runners.autoscaler.plugin_config] # plugin specific configuration (see plugin documentation)
+    access_token      = "<insert-token-here>"
+    location          = "hel1"
+    server_type       = "cx11"
+    image             = "ubuntu-22.04"
+
+    # All instances created by this plugin will have their server name prefixed with this name
+    name              = "my-docker-autoscaler-group"
+
+  [[runners.autoscaler.policy]]
+    idle_count = 1
+    idle_time = "20m0s"
+```

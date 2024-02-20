@@ -5,7 +5,6 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/go-hclog"
@@ -24,51 +23,6 @@ func setupFakeClient(t *testing.T, setup func(client *fake.Client)) *InstanceGro
 		newClient = oldClient
 	})
 
-	// Set a bunch of environment variables here which are required by hetzner.Init()
-	if region, ok := os.LookupEnv("FLEETING_PLUGIN_HETZNER_TOKEN"); ok {
-		t.Cleanup(func() {
-			os.Setenv("FLEETING_PLUGIN_HETZNER_TOKEN", region)
-		})
-	} else {
-		t.Cleanup(func() {
-			os.Unsetenv("FLEETING_PLUGIN_HETZNER_TOKEN")
-		})
-	}
-	os.Setenv("FLEETING_PLUGIN_HETZNER_TOKEN", "fake")
-
-	if region, ok := os.LookupEnv("FLEETING_PLUGIN_HETZNER_LOCATION"); ok {
-		t.Cleanup(func() {
-			os.Setenv("FLEETING_PLUGIN_HETZNER_LOCATION", region)
-		})
-	} else {
-		t.Cleanup(func() {
-			os.Unsetenv("FLEETING_PLUGIN_HETZNER_LOCATION")
-		})
-	}
-	os.Setenv("FLEETING_PLUGIN_HETZNER_LOCATION", "dummy-location")
-
-	if region, ok := os.LookupEnv("FLEETING_PLUGIN_HETZNER_SERVER_TYPE"); ok {
-		t.Cleanup(func() {
-			os.Setenv("FLEETING_PLUGIN_HETZNER_SERVER_TYPE", region)
-		})
-	} else {
-		t.Cleanup(func() {
-			os.Unsetenv("FLEETING_PLUGIN_HETZNER_SERVER_TYPE")
-		})
-	}
-	os.Setenv("FLEETING_PLUGIN_HETZNER_SERVER_TYPE", "cx11")
-
-	if region, ok := os.LookupEnv("FLEETING_PLUGIN_HETZNER_IMAGE"); ok {
-		t.Cleanup(func() {
-			os.Setenv("FLEETING_PLUGIN_HETZNER_IMAGE", region)
-		})
-	} else {
-		t.Cleanup(func() {
-			os.Unsetenv("FLEETING_PLUGIN_HETZNER_IMAGE")
-		})
-	}
-	os.Setenv("FLEETING_PLUGIN_HETZNER_IMAGE", "ubuntu-22.04")
-
 	// Create a fake client which overrides all the Hetzner API calls and returns dummy data
 	newClient = func(_ hetzner.Config, _ string, _ string) (hetzner.Client, error) {
 		client, err := fake.New()
@@ -85,7 +39,11 @@ func setupFakeClient(t *testing.T, setup func(client *fake.Client)) *InstanceGro
 	}
 
 	return &InstanceGroup{
-		Name: "test-group",
+		AccessToken: "dummy-token",
+		Location:    "dummy-location",
+		ServerType:  "cx11",
+		Image:       "ubuntu-22.04",
+		Name:        "test-group",
 	}
 }
 
