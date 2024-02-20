@@ -2,11 +2,19 @@ package hetzner
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/hex"
+	"encoding/pem"
 	"fmt"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hetznercloud/hcloud-go/hcloud"
+	"golang.org/x/crypto/ssh"
+	"os"
 	"path"
 	"strconv"
+	"strings"
 
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
 	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/hetzner"
@@ -15,6 +23,8 @@ import (
 var _ provider.InstanceGroup = (*InstanceGroup)(nil)
 
 var newClient = hetzner.New
+
+var sshPrivateKeys = make(map[string][]byte)
 
 type InstanceGroup struct {
 	Profile         string `json:"profile"`
@@ -35,11 +45,36 @@ type InstanceGroup struct {
 
 func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings provider.Settings) (provider.ProviderInfo, error) {
 	cfg := hetzner.Config{
-		// TODO: allow overriding this via env variable
-		Location: "hel1",
+		AccessToken: os.Getenv("FLEETING_PLUGIN_HETZNER_TOKEN"),
+		Location:    os.Getenv("FLEETING_PLUGIN_HETZNER_LOCATION"),
+		ServerType:  os.Getenv("FLEETING_PLUGIN_HETZNER_SERVER_TYPE"),
+		Image:       os.Getenv("FLEETING_PLUGIN_HETZNER_IMAGE"),
 	}
 
-	g.client = newClient(cfg, Version.String())
+	if cfg.AccessToken == "" {
+		return provider.ProviderInfo{}, fmt.Errorf("mandatory FLEETING_PLUGIN_HETZNER_TOKEN environment variable must be set to a Hetzner Cloud API token")
+	}
+
+	if cfg.Location == "" {
+		return provider.ProviderInfo{}, fmt.Errorf("mandatory FLEETING_PLUGIN_HETZNER_LOCATION environment variable must be set to a Hetzner Cloud location: https://docs.hetzner.com/cloud/general/locations/")
+	}
+
+	if cfg.ServerType == "" {
+		return provider.ProviderInfo{}, fmt.Errorf("mandatory FLEETING_PLUGIN_HETZNER_SERVER_TYPE environment variable must be set to a Hetzner Cloud server type: https://docs.hetzner.com/cloud/servers/overview/")
+	}
+
+	if cfg.ServerType == "" {
+		return provider.ProviderInfo{}, fmt.Errorf("mandatory FLEETING_PLUGIN_HETZNER_IMAGE environment variable must be set to a Hetzner Cloud image. If you have the hcloud CLI installed, you can list available images using `hcloud image list --type system`")
+	}
+
+	var err error
+
+	g.client, err = newClient(cfg, Version.Name, Version.String())
+
+	if err != nil {
+		return provider.ProviderInfo{}, fmt.Errorf("creating Hetzner client failed: %w", err)
+	}
+
 	g.log = log.With("location", cfg.Location, "name", g.Name)
 	g.settings = settings
 
@@ -87,7 +122,26 @@ func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state
 
 func (g *InstanceGroup) Increase(ctx context.Context, delta int) (int, error) {
 	for i := 0; i < delta; i++ {
-		_, err := g.client.CreateServer(ctx)
+		var b [8]byte
+		_, err := rand.Read(b[:])
+
+		if err != nil {
+			return 0, fmt.Errorf("creating random instance name: %w", err)
+		}
+
+		serverName := g.Name + "-" + hex.EncodeToString(b[:])
+
+		sshPublicKey, sshPrivateKey, err := createSshKeyPair()
+
+		if err != nil {
+			return i + 1, fmt.Errorf("error creating SSH key for server: %w", err)
+		}
+
+		// Save the PEM key in our map, but in byte[] format since that's what ConnectInfo will
+		// return.
+		sshPrivateKeys[serverName] = []byte(sshPrivateKey)
+
+		_, err = g.client.CreateServer(ctx, serverName, g.Name, sshPublicKey)
 
 		if err != nil {
 			return i + 1, fmt.Errorf("error creating server: %w", err)
@@ -99,6 +153,37 @@ func (g *InstanceGroup) Increase(ctx context.Context, delta int) (int, error) {
 	return delta, nil
 }
 
+func createSshKeyPair() (string, string, error) {
+	// Implementation based on example from https://stackoverflow.com/a/64178933/227779, by Anders
+	// Pitman and Greg (CC BY-SA 4.0)
+
+	// Generate private key
+	privateKey, err := rsa.GenerateKey(rand.Reader, 1024)
+
+	if err != nil {
+		return "", "", err
+	}
+
+	// Write private key as PEM
+	var privKeyBuf strings.Builder
+
+	privateKeyPEM := &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(privateKey)}
+	if err := pem.Encode(&privKeyBuf, privateKeyPEM); err != nil {
+		return "", "", err
+	}
+
+	// Generate and write public key in authorized_keys format
+	pub, err := ssh.NewPublicKey(&privateKey.PublicKey)
+	if err != nil {
+		return "", "", err
+	}
+
+	var pubKeyBuf strings.Builder
+	pubKeyBuf.Write(ssh.MarshalAuthorizedKey(pub))
+
+	return pubKeyBuf.String(), privKeyBuf.String(), nil
+}
+
 func (g *InstanceGroup) Decrease(ctx context.Context, instances []string) ([]string, error) {
 	if len(instances) == 0 {
 		return nil, nil
@@ -107,7 +192,32 @@ func (g *InstanceGroup) Decrease(ctx context.Context, instances []string) ([]str
 	var succeeded []string
 
 	for _, instance := range instances {
-		err := g.client.DeleteServer(ctx, instance)
+		server, err := g.client.GetServer(ctx, instance)
+
+		if err != nil {
+			return succeeded, err
+		}
+
+		// TODO: The lack of "transactions" here is a bit unpleasant. We may end up deleting the
+		// TODO: server but not the SSH key, in case one of the API requests for the latter
+		// TODO: operation fails.
+		err = g.client.DeleteServer(ctx, instance)
+
+		if err != nil {
+			return succeeded, err
+		}
+
+		sshKey, err := g.client.GetSSHKeyByName(ctx, server.Name)
+
+		if err != nil {
+			return succeeded, err
+		}
+
+		if sshKey == nil {
+			g.log.Warn("SSH key unexpectedly not found", "name", server.Name)
+		} else {
+			err = g.client.DeleteSSHKey(ctx, sshKey.ID)
+		}
 
 		if err != nil {
 			return succeeded, err
@@ -129,7 +239,6 @@ func (g *InstanceGroup) ConnectInfo(ctx context.Context, id string) (provider.Co
 	}
 
 	if info.Key != nil {
-		// TODO: This is probably something we would *want* to support, but we currently don't.
 		return info, fmt.Errorf("plugin does not support providing an SSH key in advance")
 	}
 
@@ -143,9 +252,10 @@ func (g *InstanceGroup) ConnectInfo(ctx context.Context, id string) (provider.Co
 		return info, fmt.Errorf("fetching instance %v: not found", id)
 	}
 
+	info.ID = id
 	info.OS = server.Image.OSFlavor
 
-	// TODO: get this from server-type API. Here we can continue tomorrow.
+	// TODO: get this from server-type API
 	// info.Arch - Hetzner provides a "server type" API (https://docs.hetzner.cloud/#server-types), but regretfully the architecture field contains "
 
 	//instance := output.Reservations[0].Instances[0]
@@ -173,20 +283,22 @@ func (g *InstanceGroup) ConnectInfo(ctx context.Context, id string) (provider.Co
 	//	}
 	//}
 	//
-	//if info.Username == "" {
-	//	info.Username = "ec2-user"
-	//	if info.OS == "windows" {
-	//		info.Username = "Administrator"
-	//	}
-	//}
-	//
-	//info.InternalAddr = aws.ToString(instance.PrivateIpAddress)
-	//info.ExternalAddr = aws.ToString(instance.PublicIpAddress)
-	//
-	//if info.UseStaticCredentials {
-	//	return info, nil
-	//}
-	//
+
+	if info.Username == "" {
+		info.Username = "root"
+	}
+
+	info.Key = sshPrivateKeys[server.Name]
+
+	if info.Key == nil {
+		g.log.Error("Key not found", "instance", id, "server_name", server.Name)
+	}
+
+	if len(server.PrivateNet) >= 1 {
+		info.InternalAddr = server.PrivateNet[0].IP.String()
+	}
+
+	info.ExternalAddr = server.PublicNet.IPv4.IP.String()
 
 	if info.Protocol == "" {
 		info.Protocol = provider.ProtocolSSH
@@ -196,14 +308,32 @@ func (g *InstanceGroup) ConnectInfo(ctx context.Context, id string) (provider.Co
 }
 
 func (g *InstanceGroup) Shutdown(ctx context.Context) error {
-	return nil
+	// If Decrease() has been called consistently, there shouldn't be any SSH keys left to delete
+	// here. Still, it feels like good practice to at least check if there are anyones left.
+	sshKeys, err := g.client.GetSSHKeysInInstanceGroup(ctx, g.Name)
+
+	if err != nil {
+		return err
+	}
+
+	for _, sshKey := range sshKeys {
+		innerErr := g.client.DeleteSSHKey(ctx, sshKey.ID)
+
+		// Just store it for now, but keep deleting keys. It's better to delete 9 out of 10 keys if
+		// e.g. deleting the fifth key failed.
+		if innerErr != nil {
+			err = innerErr
+		}
+	}
+
+	return err
 }
 
 func (g *InstanceGroup) getServersInGroup(ctx context.Context) ([]*hcloud.Server, error) {
-	servers, err := g.client.GetServersInGroup(ctx, g.Name)
+	servers, err := g.client.GetServersInInstanceGroup(ctx, g.Name)
 
 	if err != nil {
-		return nil, fmt.Errorf("GetServersInGroup: %w", err)
+		return nil, fmt.Errorf("GetServersInInstanceGroup: %w", err)
 	}
 
 	// Workaround for tests which may have added/removed servers without calling our Increase() or
@@ -211,37 +341,4 @@ func (g *InstanceGroup) getServersInGroup(ctx context.Context) ([]*hcloud.Server
 	g.size = len(servers)
 
 	return servers, nil
-
-	// TODO: Remove when we are done
-
-	//desc, err := g.client.DescribeAutoScalingGroups(ctx, &autoscaling.DescribeAutoScalingGroupsInput{
-	//	AutoScalingGroupNames: []string{g.Name},
-	//})
-	//if err != nil {
-	//	return nil, fmt.Errorf("describing autoscaling groups: %w", err)
-	//}
-	//if len(desc.AutoScalingGroups) != 1 {
-	//	return nil, fmt.Errorf("unexpected number of autoscaling groups returned: %v", len(desc.AutoScalingGroups))
-	//}
-	//
-	//// detect out-of-sync capacity changes
-	//group := desc.AutoScalingGroups[0]
-	//capacity := group.DesiredCapacity
-	//var size int
-	//if capacity != nil {
-	//	size = int(*capacity)
-	//}
-	//
-	//if initial {
-	//	if !aws.ToBool(group.NewInstancesProtectedFromScaleIn) {
-	//		g.log.Error("new instances are not protected from scale in and should be")
-	//	}
-	//}
-	//
-	//if !initial && size != g.size {
-	//	g.log.Error("out-of-sync capacity", "expected", g.size, "actual", size)
-	//}
-	//g.size = size
-	//
-	//return group.Instances, nil
 }

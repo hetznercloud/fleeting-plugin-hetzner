@@ -1,7 +1,6 @@
 package hetzner
 
 import (
-	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"io"
@@ -9,58 +8,60 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/autoscaling"
-	"github.com/aws/aws-sdk-go-v2/service/autoscaling/types"
-	"github.com/stretchr/testify/require"
-
 	"gitlab.com/gitlab-org/fleeting/fleeting/integration"
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
 )
 
 func TestProvisioning(t *testing.T) {
-	integrationTestTemplateID := os.Getenv("AWS_LAUNCH_TEMPLATE_ID")
-	if integrationTestTemplateID == "" {
-		t.Skip("no integration test launch template id defined")
+	if os.Getenv("FLEETING_PLUGIN_HETZNER_TOKEN") == "" {
+		t.Skip("mandatory environment variable FLEETING_PLUGIN_HETZNER_TOKEN not set")
 	}
 
-	ctx := context.Background()
-	cfg, err := config.LoadDefaultConfig(ctx)
-	require.NoError(t, err)
+	// Give these env variables reasonable defaults, so the integration test can run with only the
+	// token set in the environment.
+	if region, ok := os.LookupEnv("FLEETING_PLUGIN_HETZNER_LOCATION"); ok {
+		t.Cleanup(func() {
+			os.Setenv("FLEETING_PLUGIN_HETZNER_LOCATION", region)
+		})
+	} else {
+		t.Cleanup(func() {
+			os.Unsetenv("FLEETING_PLUGIN_HETZNER_LOCATION")
+		})
+	}
+	os.Setenv("FLEETING_PLUGIN_HETZNER_LOCATION", "hel1")
 
-	client := autoscaling.NewFromConfig(cfg)
+	if region, ok := os.LookupEnv("FLEETING_PLUGIN_HETZNER_SERVER_TYPE"); ok {
+		t.Cleanup(func() {
+			os.Setenv("FLEETING_PLUGIN_HETZNER_SERVER_TYPE", region)
+		})
+	} else {
+		t.Cleanup(func() {
+			os.Unsetenv("FLEETING_PLUGIN_HETZNER_SERVER_TYPE")
+		})
+	}
+	os.Setenv("FLEETING_PLUGIN_HETZNER_SERVER_TYPE", "cx11")
+
+	if region, ok := os.LookupEnv("FLEETING_PLUGIN_HETZNER_IMAGE"); ok {
+		t.Cleanup(func() {
+			os.Setenv("FLEETING_PLUGIN_HETZNER_IMAGE", region)
+		})
+	} else {
+		t.Cleanup(func() {
+			os.Unsetenv("FLEETING_PLUGIN_HETZNER_IMAGE")
+		})
+	}
+	os.Setenv("FLEETING_PLUGIN_HETZNER_IMAGE", "ubuntu-22.04")
+
 	name := uniqueASGName()
 
-	_, err = client.CreateAutoScalingGroup(ctx, &autoscaling.CreateAutoScalingGroupInput{
-		AutoScalingGroupName:             aws.String(name),
-		MinSize:                          aws.Int32(0),
-		MaxSize:                          aws.Int32(3),
-		DesiredCapacity:                  aws.Int32(0),
-		NewInstancesProtectedFromScaleIn: aws.Bool(true),
-		LaunchTemplate: &types.LaunchTemplateSpecification{
-			LaunchTemplateId: aws.String(integrationTestTemplateID),
-		},
-	})
-	require.NoError(t, err)
-
-	defer func() {
-		_, err := client.DeleteAutoScalingGroup(ctx, &autoscaling.DeleteAutoScalingGroupInput{
-			AutoScalingGroupName: aws.String(name),
-			ForceDelete:          aws.Bool(true),
-		})
-		require.NoError(t, err)
-	}()
-
 	integration.TestProvisioning(t,
-		integration.BuildPluginBinary(t, "cmd/fleeting-plugin-aws", "fleeting-plugin-aws"),
+		integration.BuildPluginBinary(t, "cmd/fleeting-plugin-hetzner", "fleeting-plugin-hetzner"),
 		integration.Config{
 			PluginConfig: InstanceGroup{
 				Name: name,
 			},
 			ConnectorConfig: provider.ConnectorConfig{
-				Username: os.Getenv("AWS_FLEETING_SSH_USERNAME"),
-				Timeout:  10 * time.Minute,
+				Timeout: 10 * time.Minute,
 			},
 			MaxInstances:    3,
 			UseExternalAddr: true,
@@ -72,5 +73,5 @@ func uniqueASGName() string {
 	var buf [8]byte
 	io.ReadFull(rand.Reader, buf[:])
 
-	return "asg-fleeting-integration-" + hex.EncodeToString(buf[:])
+	return "fleeting-integration-" + hex.EncodeToString(buf[:])
 }

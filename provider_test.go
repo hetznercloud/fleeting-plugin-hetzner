@@ -4,14 +4,15 @@ import (
 	"context"
 	"crypto/x509"
 	"encoding/pem"
-	"github.com/hetznercloud/hcloud-go/hcloud"
-	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/hetzner"
+	"fmt"
 	"os"
 	"testing"
 
 	"github.com/hashicorp/go-hclog"
+	"github.com/hetznercloud/hcloud-go/hcloud"
 	"github.com/stretchr/testify/require"
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
+	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/hetzner"
 	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/hetzner/fake"
 )
 
@@ -23,25 +24,64 @@ func setupFakeClient(t *testing.T, setup func(client *fake.Client)) *InstanceGro
 		newClient = oldClient
 	})
 
-	if region, ok := os.LookupEnv("AWS_REGION"); ok {
+	// Set a bunch of environment variables here which are required by hetzner.Init()
+	if region, ok := os.LookupEnv("FLEETING_PLUGIN_HETZNER_TOKEN"); ok {
 		t.Cleanup(func() {
-			os.Setenv("AWS_REGION", region)
+			os.Setenv("FLEETING_PLUGIN_HETZNER_TOKEN", region)
 		})
 	} else {
 		t.Cleanup(func() {
-			os.Unsetenv("AWS_REGION")
+			os.Unsetenv("FLEETING_PLUGIN_HETZNER_TOKEN")
 		})
 	}
-	os.Setenv("AWS_REGION", "fake")
+	os.Setenv("FLEETING_PLUGIN_HETZNER_TOKEN", "fake")
 
-	newClient = func(cfg hetzner.Config, version string) hetzner.Client {
-		client := fake.New(cfg)
+	if region, ok := os.LookupEnv("FLEETING_PLUGIN_HETZNER_LOCATION"); ok {
+		t.Cleanup(func() {
+			os.Setenv("FLEETING_PLUGIN_HETZNER_LOCATION", region)
+		})
+	} else {
+		t.Cleanup(func() {
+			os.Unsetenv("FLEETING_PLUGIN_HETZNER_LOCATION")
+		})
+	}
+	os.Setenv("FLEETING_PLUGIN_HETZNER_LOCATION", "dummy-location")
+
+	if region, ok := os.LookupEnv("FLEETING_PLUGIN_HETZNER_SERVER_TYPE"); ok {
+		t.Cleanup(func() {
+			os.Setenv("FLEETING_PLUGIN_HETZNER_SERVER_TYPE", region)
+		})
+	} else {
+		t.Cleanup(func() {
+			os.Unsetenv("FLEETING_PLUGIN_HETZNER_SERVER_TYPE")
+		})
+	}
+	os.Setenv("FLEETING_PLUGIN_HETZNER_SERVER_TYPE", "cx11")
+
+	if region, ok := os.LookupEnv("FLEETING_PLUGIN_HETZNER_IMAGE"); ok {
+		t.Cleanup(func() {
+			os.Setenv("FLEETING_PLUGIN_HETZNER_IMAGE", region)
+		})
+	} else {
+		t.Cleanup(func() {
+			os.Unsetenv("FLEETING_PLUGIN_HETZNER_IMAGE")
+		})
+	}
+	os.Setenv("FLEETING_PLUGIN_HETZNER_IMAGE", "ubuntu-22.04")
+
+	// Create a fake client which overrides all the Hetzner API calls and returns dummy data
+	newClient = func(_ hetzner.Config, _ string, _ string) (hetzner.Client, error) {
+		client, err := fake.New()
+
+		if err != nil {
+			panic(fmt.Errorf("creating fake Hetzner client failed: %w", err))
+		}
 
 		if setup != nil {
 			setup(client)
 		}
 
-		return client
+		return client, nil
 	}
 
 	return &InstanceGroup{
@@ -127,6 +167,10 @@ func TestConnectInfo(t *testing.T) {
 
 				Status: hcloud.ServerStatusRunning,
 			})
+
+		// Add private keys for the servers above, so that ConnectInfo will be able to retrieve
+		// them.
+		sshPrivateKeys["pre-existing-1"] = []byte("dummy-private-key-1")
 	})
 
 	ctx := context.Background()
@@ -154,11 +198,7 @@ func TestConnectInfo(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, info.Protocol, provider.ProtocolSSH)
 
-				// TODO: should info.Key be non-empty here? If we create a new SSH key for each
-				// TODO: machine, we also need a cleanup mechanism for it (because Hetzner doesn't
-				// TODO: let you create a server-specific key that is automatically cleaned up when the
-				// TODO: machine is destroyed)
-				//require.NotEmpty(t, info.Key)
+				require.Equal(t, info.Key, []byte("dummy-private-key-1"))
 			},
 		},
 		{
