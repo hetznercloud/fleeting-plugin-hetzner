@@ -159,6 +159,10 @@ func (c *client) GetServer(ctx context.Context, id string) (*hcloud.Server, erro
 }
 
 func (c *client) GetServersInInstanceGroup(ctx context.Context, name string) ([]*hcloud.Server, error) {
+	if name == "" {
+		return nil, fmt.Errorf("instance group name was unexpectedly empty")
+	}
+
 	serverListOpts := hcloud.ServerListOpts{
 		ListOpts: hcloud.ListOpts{LabelSelector: "instance-group=" + name},
 	}

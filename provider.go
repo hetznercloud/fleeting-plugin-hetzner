@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/go-hclog"
 	"github.com/hetznercloud/hcloud-go/hcloud"
 	"golang.org/x/crypto/ssh"
-	"os"
 	"path"
 	"strconv"
 	"strings"
@@ -27,9 +26,10 @@ var newClient = hetzner.New
 var sshPrivateKeys = make(map[string][]byte)
 
 type InstanceGroup struct {
-	Profile         string `json:"profile"`
-	ConfigFile      string `json:"config_file"`
-	CredentialsFile string `json:"credentials_file"`
+	AccessToken string `json:"access_token"`
+	Location    string `json:"location"`
+	ServerType  string `json:"server_type"`
+	Image       string `json:"image"`
 
 	// Because of limitations in the Hetzner API, instance groups do not formally exist in the
 	// Hetzner API. The Name here is mapped to a label which is set on all machines created in this
@@ -45,26 +45,30 @@ type InstanceGroup struct {
 
 func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings provider.Settings) (provider.ProviderInfo, error) {
 	cfg := hetzner.Config{
-		AccessToken: os.Getenv("FLEETING_PLUGIN_HETZNER_TOKEN"),
-		Location:    os.Getenv("FLEETING_PLUGIN_HETZNER_LOCATION"),
-		ServerType:  os.Getenv("FLEETING_PLUGIN_HETZNER_SERVER_TYPE"),
-		Image:       os.Getenv("FLEETING_PLUGIN_HETZNER_IMAGE"),
+		AccessToken: g.AccessToken,
+		Location:    g.Location,
+		ServerType:  g.ServerType,
+		Image:       g.Image,
 	}
 
 	if cfg.AccessToken == "" {
-		return provider.ProviderInfo{}, fmt.Errorf("mandatory FLEETING_PLUGIN_HETZNER_TOKEN environment variable must be set to a Hetzner Cloud API token")
+		return provider.ProviderInfo{}, fmt.Errorf("the plugin_config must contain an access_token setting, containing a valid Hetzner Cloud API token")
 	}
 
 	if cfg.Location == "" {
-		return provider.ProviderInfo{}, fmt.Errorf("mandatory FLEETING_PLUGIN_HETZNER_LOCATION environment variable must be set to a Hetzner Cloud location: https://docs.hetzner.com/cloud/general/locations/")
+		return provider.ProviderInfo{}, fmt.Errorf("the plugin_config must contain a location setting, which is set to a Hetzner Cloud location: https://docs.hetzner.com/cloud/general/locations/")
 	}
 
 	if cfg.ServerType == "" {
-		return provider.ProviderInfo{}, fmt.Errorf("mandatory FLEETING_PLUGIN_HETZNER_SERVER_TYPE environment variable must be set to a Hetzner Cloud server type: https://docs.hetzner.com/cloud/servers/overview/")
+		return provider.ProviderInfo{}, fmt.Errorf("the plugin_config must contain a server_type setting, which is set to a Hetzner Cloud server type: https://docs.hetzner.com/cloud/servers/overview/")
 	}
 
-	if cfg.ServerType == "" {
-		return provider.ProviderInfo{}, fmt.Errorf("mandatory FLEETING_PLUGIN_HETZNER_IMAGE environment variable must be set to a Hetzner Cloud image. If you have the hcloud CLI installed, you can list available images using `hcloud image list --type system`")
+	if cfg.Image == "" {
+		return provider.ProviderInfo{}, fmt.Errorf("the plugin_config must contain a image setting, which is set to a Hetzner Cloud image. If you have the hcloud CLI installed, you can list available images using `hcloud image list --type system`")
+	}
+
+	if g.Name == "" {
+		return provider.ProviderInfo{}, fmt.Errorf("the plugin_config must contain a name setting, which is the desired \"instance group\" for the runner. This is used as a prefix for the server names, among other things")
 	}
 
 	var err error
@@ -103,7 +107,10 @@ func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state
 		case hcloud.ServerStatusOff, hcloud.ServerStatusStopping, hcloud.ServerStatusDeleting:
 			state = provider.StateDeleting
 
-		case hcloud.ServerStatusInitializing, hcloud.ServerStatusRunning, hcloud.ServerStatusStarting:
+		case hcloud.ServerStatusInitializing, hcloud.ServerStatusStarting:
+			state = provider.StateCreating
+
+		case hcloud.ServerStatusRunning:
 			state = provider.StateRunning
 
 		// TODO: how about these? What should we map them to in the Fleeting world view?

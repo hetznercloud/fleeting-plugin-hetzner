@@ -20,5 +20,7 @@ func main() {
 		os.Exit(0)
 	}
 
+	// Calling plugin.Serve() initializes the provided InstanceGroup with JSON data coming from the
+	// Fleeting architecture in GitLab
 	plugin.Serve(&hetzner.InstanceGroup{})
 }
