@@ -211,6 +211,7 @@ func (g *InstanceGroup) Decrease(ctx context.Context, instances []string) ([]str
 		err = g.client.DeleteServer(ctx, instance)
 
 		if err != nil {
+			g.log.Warn("Deleting server failed", "instance", instance, "err", err)
 			return succeeded, err
 		}
 
@@ -316,7 +317,7 @@ func (g *InstanceGroup) ConnectInfo(ctx context.Context, id string) (provider.Co
 
 func (g *InstanceGroup) Shutdown(ctx context.Context) error {
 	// If Decrease() has been called consistently, there shouldn't be any SSH keys left to delete
-	// here. Still, it feels like good practice to at least check if there are anyones left.
+	// here. Still, it feels like good practice to at least check if there are anyone left.
 	sshKeys, err := g.client.GetSSHKeysInInstanceGroup(ctx, g.Name)
 
 	if err != nil {
@@ -329,8 +330,30 @@ func (g *InstanceGroup) Shutdown(ctx context.Context) error {
 		// Just store it for now, but keep deleting keys. It's better to delete 9 out of 10 keys if
 		// e.g. deleting the fifth key failed.
 		if innerErr != nil {
+			g.log.Warn("Error deleting SSH key", "err", innerErr)
 			err = innerErr
 		}
+	}
+
+	// Likewise with server instances; check that we don't leave any stray ones hanging around,
+	// which would waste €€€ since they would essentially never be terminated. (Well, this is
+	// technically not true since the fleeting mechanism seems to detect "no data on pre-existing
+	// instance so removing for safety". But it's still a good idea to remove these servers here
+	// since we have no guarantee as to when the plugin will run the next time)
+	servers, laterErr := g.client.GetServersInInstanceGroup(ctx, g.Name)
+
+	if laterErr == nil {
+		for _, server := range servers {
+			innerErr := g.client.DeleteServer(ctx, strconv.Itoa(server.ID))
+
+			// As with SSH keys, save it for now and keep deleting servers.
+			if innerErr != nil {
+				g.log.Warn("Error deleting server", "err", innerErr)
+				err = innerErr
+			}
+		}
+	} else {
+		err = laterErr
 	}
 
 	return err
