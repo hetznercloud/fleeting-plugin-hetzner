@@ -104,8 +104,14 @@ func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state
 		state := provider.StateCreating
 
 		switch instance.Status {
-		case hcloud.ServerStatusOff, hcloud.ServerStatusStopping, hcloud.ServerStatusDeleting:
+		case hcloud.ServerStatusStopping, hcloud.ServerStatusDeleting:
 			state = provider.StateDeleting
+
+		// Workaround for potential bug in the Hetzner API:
+		// https://gitlab.com/fleeting-plugin-hetzner/fleeting-plugin-hetzner/-/issues/1#note_1781403906
+		// Hetzner support ticket #2024022103016195
+		case hcloud.ServerStatusOff:
+			state = provider.StateCreating
 
 		case hcloud.ServerStatusInitializing, hcloud.ServerStatusStarting:
 			state = provider.StateCreating
