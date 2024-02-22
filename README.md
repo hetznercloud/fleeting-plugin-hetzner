@@ -62,29 +62,29 @@ autoscaler will otherwise complaining about `"missing docker configuration"`.
 
 ```toml
 # ...
-[runners.docker]
-  tls_verify = false
-  image = "busybox"
+  [runners.docker]
+    tls_verify = false
+    image = "busybox"
 
-[runners.autoscaler]
-  plugin = "/path/to/fleeting-plugin-hetzner"
+  [runners.autoscaler]
+    plugin = "/path/to/fleeting-plugin-hetzner"
 
-  capacity_per_instance = 1
-  max_use_count = 1
-  max_instances = 10
+    capacity_per_instance = 1
+    max_use_count = 1
+    max_instances = 10
 
-  [runners.autoscaler.plugin_config] # plugin specific configuration (see plugin documentation)
-    access_token      = "<insert-token-here>"
-    location          = "hel1"
-    server_type       = "cx11"
-    image             = "ubuntu-22.04"
+    [runners.autoscaler.plugin_config] # plugin specific configuration (see plugin documentation)
+      access_token      = "<insert-token-here>"
+      location          = "hel1"
+      server_type       = "cx11"
+      image             = "ubuntu-22.04"
 
-    # All instances created by this plugin will have their server name prefixed with this name
-    name              = "my-docker-autoscaler-group"
+      # All instances created by this plugin will have their server name prefixed with this name
+      name              = "my-docker-autoscaler-group"
 
-  [[runners.autoscaler.policy]]
-    idle_count = 1
-    idle_time = "20m0s"
+    [[runners.autoscaler.policy]]
+      idle_count        = 1
+      idle_time         = "20m0s"
 ```
 
 ## Testing the plugin locally
