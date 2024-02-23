@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/go-hclog"
-	"github.com/hetznercloud/hcloud-go/hcloud"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"github.com/stretchr/testify/require"
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
 	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/hetzner"

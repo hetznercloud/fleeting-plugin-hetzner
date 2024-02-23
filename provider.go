@@ -9,7 +9,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"github.com/hashicorp/go-hclog"
-	"github.com/hetznercloud/hcloud-go/hcloud"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
 	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/hetzner"
 	"golang.org/x/crypto/ssh"
@@ -44,7 +44,7 @@ type InstanceGroup struct {
 	size              int
 	enablePublicIPv4  bool
 	enablePublicIPv6  bool
-	privateNetworkIDs []int
+	privateNetworkIDs []int64
 
 	settings provider.Settings
 }
@@ -179,7 +179,7 @@ func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state
 			return fmt.Errorf("unexpected instance status encountered: %v", instance.Status)
 		}
 
-		update(strconv.Itoa(instance.ID), state)
+		update(strconv.FormatInt(instance.ID, 10), state)
 	}
 
 	return nil
@@ -396,7 +396,7 @@ func (g *InstanceGroup) Shutdown(ctx context.Context) error {
 
 	if laterErr == nil {
 		for _, server := range servers {
-			innerErr := g.client.DeleteServer(ctx, strconv.Itoa(server.ID))
+			innerErr := g.client.DeleteServer(ctx, strconv.FormatInt(server.ID, 10))
 
 			// As with SSH keys, save it for now and keep deleting servers.
 			if innerErr != nil {
