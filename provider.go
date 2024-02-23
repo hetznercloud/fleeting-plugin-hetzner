@@ -10,13 +10,11 @@ import (
 	"fmt"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hetznercloud/hcloud-go/hcloud"
+	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
+	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/hetzner"
 	"golang.org/x/crypto/ssh"
 	"path"
 	"strconv"
-	"strings"
-
-	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
-	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/hetzner"
 )
 
 var _ provider.InstanceGroup = (*InstanceGroup)(nil)
@@ -107,9 +105,9 @@ func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state
 		case hcloud.ServerStatusStopping, hcloud.ServerStatusDeleting:
 			state = provider.StateDeleting
 
-		// Workaround for potential bug in the Hetzner API:
-		// https://gitlab.com/fleeting-plugin-hetzner/fleeting-plugin-hetzner/-/issues/1#note_1781403906
-		// Hetzner support ticket #2024022103016195
+		// Servers always go through `initializing` and `off` when they are created. Since this plugin never
+                // "shuts servers down" to power them on later, we are quite safe to assume that "off" here means
+                // that the server is still in the initialization phase.
 		case hcloud.ServerStatusOff:
 			state = provider.StateCreating
 
@@ -119,7 +117,8 @@ func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state
 		case hcloud.ServerStatusRunning:
 			state = provider.StateRunning
 
-		// TODO: how about these? What should we map them to in the Fleeting world view?
+		// TODO: The following are currently not handled. Should be safe, since our plugin should
+		// TODO: never cause any of the servers created using it to have any of these states.
 		// hcloud.ServerStatusMigrating
 		// hcloud.ServerStatusRebuilding
 		// hcloud.ServerStatusUnknown
@@ -150,9 +149,7 @@ func (g *InstanceGroup) Increase(ctx context.Context, delta int) (int, error) {
 			return i + 1, fmt.Errorf("error creating SSH key for server: %w", err)
 		}
 
-		// Save the PEM key in our map, but in byte[] format since that's what ConnectInfo will
-		// return.
-		sshPrivateKeys[serverName] = []byte(sshPrivateKey)
+		sshPrivateKeys[serverName] = sshPrivateKey
 
 		_, err = g.client.CreateServer(ctx, serverName, g.Name, sshPublicKey)
 
@@ -166,35 +163,31 @@ func (g *InstanceGroup) Increase(ctx context.Context, delta int) (int, error) {
 	return delta, nil
 }
 
-func createSshKeyPair() (string, string, error) {
-	// Implementation based on example from https://stackoverflow.com/a/64178933/227779, by Anders
-	// Pitman and Greg (CC BY-SA 4.0)
-
-	// Generate private key
-	privateKey, err := rsa.GenerateKey(rand.Reader, 1024)
+func createSshKeyPair() (string, []byte, error) {
+	// Generate a new private/public keypair
+	privateKey, err := rsa.GenerateKey(rand.Reader, 4096)
 
 	if err != nil {
-		return "", "", err
+		return "", nil, fmt.Errorf("generating private key: %w", err)
 	}
 
-	// Write private key as PEM
-	var privKeyBuf strings.Builder
+	privateKeyPEM := pem.EncodeToMemory(
+		&pem.Block{
+			Type:  "RSA PRIVATE KEY",
+			Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
+		},
+	)
 
-	privateKeyPEM := &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(privateKey)}
-	if err := pem.Encode(&privKeyBuf, privateKeyPEM); err != nil {
-		return "", "", err
-	}
+	// Convert the public key to ssh authorized_keys format
+	pub, err := ssh.NewPublicKey(privateKey.Public())
 
-	// Generate and write public key in authorized_keys format
-	pub, err := ssh.NewPublicKey(&privateKey.PublicKey)
 	if err != nil {
-		return "", "", err
+		return "", nil, err
 	}
 
-	var pubKeyBuf strings.Builder
-	pubKeyBuf.Write(ssh.MarshalAuthorizedKey(pub))
+	var publicKey = string(ssh.MarshalAuthorizedKey(pub))
 
-	return pubKeyBuf.String(), privKeyBuf.String(), nil
+	return publicKey, privateKeyPEM, nil
 }
 
 func (g *InstanceGroup) Decrease(ctx context.Context, instances []string) ([]string, error) {
