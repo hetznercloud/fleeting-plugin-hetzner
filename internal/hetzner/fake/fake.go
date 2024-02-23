@@ -34,7 +34,7 @@ func New() (*Client, error) {
 	return &Client{}, nil
 }
 
-func (c *Client) CreateServer(_ context.Context, name string, _ string, _ string) (hcloud.ServerCreateResult, error) {
+func (c *Client) CreateServer(_ context.Context, name string, _ string, _ string, _ bool, _ bool, _ []int) (hcloud.ServerCreateResult, error) {
 	c.Servers = append(c.Servers, &hcloud.Server{
 		Status: hcloud.ServerStatusRunning,
 		Name:   name,
@@ -61,6 +61,11 @@ func (c *Client) DeleteSSHKey(context.Context, int) error {
 	return nil
 }
 
+func (c *Client) GetNetwork(ctx context.Context, networkName string) (*hcloud.Network, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (c *Client) GetServer(_ context.Context, id string) (*hcloud.Server, error) {
 	for _, server := range c.Servers {
 		if strconv.Itoa(server.ID) == id {
@@ -83,7 +88,7 @@ func (c *Client) GetSSHKeyByName(_ context.Context, name string) (*hcloud.SSHKey
 	}, nil
 }
 
-func (c *Client) GetSSHKeysInInstanceGroup(ctx context.Context, name string) ([]*hcloud.SSHKey, error) {
+func (c *Client) GetSSHKeysInInstanceGroup(context.Context, string) ([]*hcloud.SSHKey, error) {
 	//TODO implement me
 	panic("implement me")
 }

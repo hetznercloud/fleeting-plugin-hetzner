@@ -13,9 +13,13 @@ import (
 
 type Client interface {
 	GetServersInInstanceGroup(ctx context.Context, name string) ([]*hcloud.Server, error)
-	CreateServer(ctx context.Context, name string, instanceGroupName string, sshPublicKey string) (hcloud.ServerCreateResult, error)
+
+	CreateServer(ctx context.Context, name string, instanceGroupName string, sshPublicKey string,
+		enablePublicIPv4 bool, enablePublicIPv6 bool, networks []int) (hcloud.ServerCreateResult, error)
+
 	DeleteServer(ctx context.Context, id string) error
 	DeleteSSHKey(ctx context.Context, id int) error
+	GetNetwork(ctx context.Context, networkName string) (*hcloud.Network, error)
 	GetServer(ctx context.Context, id string) (*hcloud.Server, error)
 	GetSSHKeysInInstanceGroup(ctx context.Context, name string) ([]*hcloud.SSHKey, error)
 	GetSSHKeyByName(ctx context.Context, name string) (*hcloud.SSHKey, error)
@@ -74,7 +78,9 @@ func New(cfg Config, name string, version string) (Client, error) {
 	}, nil
 }
 
-func (c *client) CreateServer(ctx context.Context, name string, instanceGroupName string, sshPublicKey string) (hcloud.ServerCreateResult, error) {
+func (c *client) CreateServer(ctx context.Context, name string, instanceGroupName string, sshPublicKey string,
+	enablePublicIPv4 bool, enablePublicIPv6 bool, networks []int) (hcloud.ServerCreateResult, error) {
+
 	hetznerClient := c.getHetznerClient()
 
 	sshKeyCreateOpts := hcloud.SSHKeyCreateOpts{
@@ -103,18 +109,35 @@ func (c *client) CreateServer(ctx context.Context, name string, instanceGroupNam
 		return hcloud.ServerCreateResult{}, fmt.Errorf("error creating SSH key for server %v: %w", name, err)
 	}
 
+	var hetznerNetworks []*hcloud.Network
+
+	for _, network := range networks {
+		hetznerNetworks = append(hetznerNetworks, &hcloud.Network{ID: network})
+	}
+
 	serverCreateOpts := hcloud.ServerCreateOpts{
 		Name: name,
+
 		ServerType: &hcloud.ServerType{
 			Name: c.Config.ServerType,
 		},
+
 		Image: &hcloud.Image{
 			Name: c.Config.Image,
 		},
+
 		Labels: map[string]string{
 			"instance-group": instanceGroupName,
 			"created-by":     c.Name,
 		},
+
+		Networks: hetznerNetworks,
+
+		PublicNet: &hcloud.ServerCreatePublicNet{
+			EnableIPv4: enablePublicIPv4,
+			EnableIPv6: enablePublicIPv6,
+		},
+
 		SSHKeys: []*hcloud.SSHKey{sshKey},
 	}
 
@@ -150,6 +173,12 @@ func (c *client) DeleteSSHKey(ctx context.Context, id int) error {
 	_, err := c.getHetznerClient().SSHKey.Delete(ctx, &sshKey)
 
 	return err
+}
+
+func (c *client) GetNetwork(ctx context.Context, networkName string) (*hcloud.Network, error) {
+	network, _, err := c.getHetznerClient().Network.GetByName(ctx, networkName)
+
+	return network, err
 }
 
 func (c *client) GetServer(ctx context.Context, id string) (*hcloud.Server, error) {
