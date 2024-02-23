@@ -13,6 +13,7 @@ import (
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
 	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/hetzner"
 	"golang.org/x/crypto/ssh"
+	"os"
 	"path"
 	"strconv"
 )
@@ -30,6 +31,8 @@ type InstanceGroup struct {
 	Image                 string   `json:"image"`
 	DisablePublicNetworks []string `json:"disable_public_networks"`
 	PrivateNetworks       []string `json:"private_networks"`
+	CloudInitUserData     string   `json:"cloud_init_user_data"`
+	CloudInitUserDataFile string   `json:"cloud_init_user_data_file"`
 
 	// Because of limitations in the Hetzner API, instance groups do not formally exist in the
 	// Hetzner API. The Name here is mapped to a label which is set on all machines created in this
@@ -88,6 +91,20 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 		}
 	}
 
+	if g.CloudInitUserData != "" && g.CloudInitUserDataFile != "" {
+		return provider.ProviderInfo{}, fmt.Errorf("the 'cloud_init_user_data' and 'cloud_init_user_data_file' settings are mutually exclusive")
+	}
+
+	if g.CloudInitUserDataFile != "" {
+		userData, err := os.ReadFile(g.CloudInitUserDataFile)
+
+		if err != nil {
+			return provider.ProviderInfo{}, fmt.Errorf("reading cloud-init user data file failed: %w", err)
+		}
+
+		g.CloudInitUserData = string(userData)
+	}
+
 	var err error
 
 	g.client, err = newClient(cfg, Version.Name, Version.String())
@@ -142,8 +159,8 @@ func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state
 			state = provider.StateDeleting
 
 		// Servers always go through `initializing` and `off` when they are created. Since this plugin never
-                // "shuts servers down" to power them on later, we are quite safe to assume that "off" here means
-                // that the server is still in the initialization phase.
+		// "shuts servers down" to power them on later, we are quite safe to assume that "off" here means
+		// that the server is still in the initialization phase.
 		case hcloud.ServerStatusOff:
 			state = provider.StateCreating
 
@@ -187,7 +204,7 @@ func (g *InstanceGroup) Increase(ctx context.Context, delta int) (int, error) {
 
 		sshPrivateKeys[serverName] = sshPrivateKey
 
-		_, err = g.client.CreateServer(ctx, serverName, g.Name, sshPublicKey, g.enablePublicIPv4, g.enablePublicIPv6, g.privateNetworkIDs)
+		_, err = g.client.CreateServer(ctx, serverName, g.Name, sshPublicKey, g.enablePublicIPv4, g.enablePublicIPv6, g.privateNetworkIDs, g.CloudInitUserData)
 
 		if err != nil {
 			return i + 1, fmt.Errorf("error creating server: %w", err)
