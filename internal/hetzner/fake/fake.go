@@ -5,7 +5,7 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"fmt"
-	"github.com/hetznercloud/hcloud-go/hcloud"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"strconv"
 	"sync"
 )
@@ -34,7 +34,7 @@ func New() (*Client, error) {
 	return &Client{}, nil
 }
 
-func (c *Client) CreateServer(_ context.Context, name string, _ string, _ string, _ bool, _ bool, _ []int, _ string) (hcloud.ServerCreateResult, error) {
+func (c *Client) CreateServer(_ context.Context, name string, _ string, _ string, _ bool, _ bool, _ []int64, _ string) (hcloud.ServerCreateResult, error) {
 	c.Servers = append(c.Servers, &hcloud.Server{
 		Status: hcloud.ServerStatusRunning,
 		Name:   name,
@@ -47,7 +47,7 @@ func (c *Client) DeleteServer(_ context.Context, id string) error {
 	// We currently don't have any error handling here. If no matching server could be found, the
 	// c.Servers field is simply left intact as-is.
 	for i, server := range c.Servers {
-		if strconv.Itoa(server.ID) == id {
+		if strconv.FormatInt(server.ID, 10) == id {
 			c.Servers = append(c.Servers[:i], c.Servers[i+1:]...)
 		}
 	}
@@ -56,7 +56,7 @@ func (c *Client) DeleteServer(_ context.Context, id string) error {
 	return nil
 }
 
-func (c *Client) DeleteSSHKey(context.Context, int) error {
+func (c *Client) DeleteSSHKey(context.Context, int64) error {
 	// no-op
 	return nil
 }
@@ -68,7 +68,7 @@ func (c *Client) GetNetwork(context.Context, string) (*hcloud.Network, error) {
 
 func (c *Client) GetServer(_ context.Context, id string) (*hcloud.Server, error) {
 	for _, server := range c.Servers {
-		if strconv.Itoa(server.ID) == id {
+		if strconv.FormatInt(server.ID, 10) == id {
 			return server, nil
 		}
 	}

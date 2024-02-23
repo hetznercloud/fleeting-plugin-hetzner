@@ -3,7 +3,7 @@ package hetzner
 import (
 	"context"
 	"fmt"
-	"github.com/hetznercloud/hcloud-go/hcloud"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"strconv"
 )
 
@@ -14,10 +14,10 @@ import (
 type Client interface {
 	GetServersInInstanceGroup(ctx context.Context, name string) ([]*hcloud.Server, error)
 
-	CreateServer(ctx context.Context, name string, instanceGroupName string, sshPublicKey string, enablePublicIPv4 bool, enablePublicIPv6 bool, networks []int, cloudInitUserData string) (hcloud.ServerCreateResult, error)
+	CreateServer(ctx context.Context, name string, instanceGroupName string, sshPublicKey string, enablePublicIPv4 bool, enablePublicIPv6 bool, networks []int64, cloudInitUserData string) (hcloud.ServerCreateResult, error)
 
 	DeleteServer(ctx context.Context, id string) error
-	DeleteSSHKey(ctx context.Context, id int) error
+	DeleteSSHKey(ctx context.Context, id int64) error
 	GetNetwork(ctx context.Context, networkName string) (*hcloud.Network, error)
 	GetServer(ctx context.Context, id string) (*hcloud.Server, error)
 	GetSSHKeysInInstanceGroup(ctx context.Context, name string) ([]*hcloud.SSHKey, error)
@@ -77,7 +77,7 @@ func New(cfg Config, name string, version string) (Client, error) {
 	}, nil
 }
 
-func (c *client) CreateServer(ctx context.Context, name string, instanceGroupName string, sshPublicKey string, enablePublicIPv4 bool, enablePublicIPv6 bool, networks []int, cloudInitUserData string) (hcloud.ServerCreateResult, error) {
+func (c *client) CreateServer(ctx context.Context, name string, instanceGroupName string, sshPublicKey string, enablePublicIPv4 bool, enablePublicIPv6 bool, networks []int64, cloudInitUserData string) (hcloud.ServerCreateResult, error) {
 
 	hetznerClient := c.getHetznerClient()
 
@@ -147,7 +147,7 @@ func (c *client) CreateServer(ctx context.Context, name string, instanceGroupNam
 }
 
 func (c *client) DeleteServer(ctx context.Context, id string) error {
-	serverId, err := strconv.Atoi(id)
+	serverId, err := strconv.ParseInt(id, 10, 64)
 
 	if err != nil {
 		// Should never happen, since we use int IDs internally, but... The `fleeting` interface
@@ -165,7 +165,7 @@ func (c *client) DeleteServer(ctx context.Context, id string) error {
 	return err
 }
 
-func (c *client) DeleteSSHKey(ctx context.Context, id int) error {
+func (c *client) DeleteSSHKey(ctx context.Context, id int64) error {
 	sshKey := hcloud.SSHKey{
 		ID: id,
 	}
