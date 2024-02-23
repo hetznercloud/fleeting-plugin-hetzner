@@ -129,3 +129,12 @@ Use an approach like this:
 
 1. Make a CI job run using this runner, perhaps using special `tags:` or similar (to avoid breaking
    things for other CI jobs on the same GitLab installation).
+
+## Creating a new release
+
+1. Make sure the `VERSION` file is up-to-date
+2. Commit the changes to that file, using a commit message in line with this: `git commit VERSION -m
+   "Bump version to v0.2.0"`
+3. Run `make do-release`. This creates a tag, which in turns triggers some CI logic in
+   [`.gitlab/ci/release.gitlab-ci.yml`](.gitlab/ci/release.gitlab-ci.yml) which creates a GitLab
+   release.
