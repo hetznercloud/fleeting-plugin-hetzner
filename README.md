@@ -73,6 +73,12 @@ autoscaler will otherwise complaining about `"missing docker configuration"`.
     max_use_count = 1
     max_instances = 10
 
+    # Must currently be set because the plugin does not create any private networks and GitLab
+    # doesn't fallback to use the external address even if no internal address is available:
+    # https://gitlab.com/gitlab-org/fleeting/fleeting/-/issues/22
+    [runners.autoscaler.connector_config]
+      use_external_addr = true
+
     [runners.autoscaler.plugin_config] # plugin specific configuration (see plugin documentation)
       access_token      = "<insert-token-here>"
       location          = "hel1"
