@@ -24,19 +24,24 @@ var newClient = hetzner.New
 var sshPrivateKeys = make(map[string][]byte)
 
 type InstanceGroup struct {
-	AccessToken string `json:"access_token"`
-	Location    string `json:"location"`
-	ServerType  string `json:"server_type"`
-	Image       string `json:"image"`
+	AccessToken           string   `json:"access_token"`
+	Location              string   `json:"location"`
+	ServerType            string   `json:"server_type"`
+	Image                 string   `json:"image"`
+	DisablePublicNetworks []string `json:"disable_public_networks"`
+	PrivateNetworks       []string `json:"private_networks"`
 
 	// Because of limitations in the Hetzner API, instance groups do not formally exist in the
 	// Hetzner API. The Name here is mapped to a label which is set on all machines created in this
 	// "instance group".
 	Name string `json:"name"`
 
-	log    hclog.Logger
-	client hetzner.Client
-	size   int
+	log               hclog.Logger
+	client            hetzner.Client
+	size              int
+	enablePublicIPv4  bool
+	enablePublicIPv6  bool
+	privateNetworkIDs []int
 
 	settings provider.Settings
 }
@@ -69,6 +74,20 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 		return provider.ProviderInfo{}, fmt.Errorf("the plugin_config must contain a name setting, which is the desired \"instance group\" for the runner. This is used as a prefix for the server names, among other things")
 	}
 
+	// Enable both of these by default, unless otherwise specified in the config file
+	g.enablePublicIPv4 = true
+	g.enablePublicIPv6 = true
+
+	for _, str := range g.DisablePublicNetworks {
+		if str == "ipv4" {
+			g.enablePublicIPv4 = false
+		} else if str == "ipv6" {
+			g.enablePublicIPv6 = false
+		} else {
+			return provider.ProviderInfo{}, fmt.Errorf("unexpected value found in disable_public_networks setting: '%v'. Only 'ipv4' and 'ipv6' are supported", str)
+		}
+	}
+
 	var err error
 
 	g.client, err = newClient(cfg, Version.Name, Version.String())
@@ -82,6 +101,23 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 
 	if _, err := g.getServersInGroup(ctx); err != nil {
 		return provider.ProviderInfo{}, err
+	}
+
+	// Resolve network names to IDs once, at startup. Note: this means that adding/removing networks
+	// while the plugin is running will not work. In our experience, networks are not recreated that
+	// frequently, but if this causes problems for you, feel free to raise an issue about it.
+	for _, networkName := range g.PrivateNetworks {
+		network, err := g.client.GetNetwork(ctx, networkName)
+
+		if err != nil {
+			return provider.ProviderInfo{}, fmt.Errorf("retrieving network failed: %w", err)
+		}
+
+		if network == nil {
+			return provider.ProviderInfo{}, fmt.Errorf("network '%v' not found", networkName)
+		}
+
+		g.privateNetworkIDs = append(g.privateNetworkIDs, network.ID)
 	}
 
 	return provider.ProviderInfo{
@@ -151,7 +187,7 @@ func (g *InstanceGroup) Increase(ctx context.Context, delta int) (int, error) {
 
 		sshPrivateKeys[serverName] = sshPrivateKey
 
-		_, err = g.client.CreateServer(ctx, serverName, g.Name, sshPublicKey)
+		_, err = g.client.CreateServer(ctx, serverName, g.Name, sshPublicKey, g.enablePublicIPv4, g.enablePublicIPv6, g.privateNetworkIDs)
 
 		if err != nil {
 			return i + 1, fmt.Errorf("error creating server: %w", err)

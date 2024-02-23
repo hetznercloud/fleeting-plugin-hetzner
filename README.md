@@ -73,8 +73,8 @@ autoscaler will otherwise complaining about `"missing docker configuration"`.
     max_use_count = 1
     max_instances = 10
 
-    # Must currently be set because the plugin does not create any private networks and GitLab
-    # doesn't fallback to use the external address even if no internal address is available:
+    # Must currently be set because the plugin does not create any private networks and GitLab does
+    # not fall back to use the external address even if no internal address is available:
     # https://gitlab.com/gitlab-org/fleeting/fleeting/-/issues/22
     [runners.autoscaler.connector_config]
       use_external_addr = true
@@ -83,10 +83,22 @@ autoscaler will otherwise complaining about `"missing docker configuration"`.
       access_token      = "<insert-token-here>"
       location          = "hel1"
       server_type       = "cx11"
-      image             = "ubuntu-22.04"
+
+      # docker-ce is an "app" image provided by Hetzner which is based on Ubuntu 22.04, but provides
+      # Docker CE preinstalled: https://docs.hetzner.com/cloud/apps/list/docker-ce/
+      #
+      # You could also use another image here, but it must have Docker installed.
+      image             = "docker-ce"
 
       # All instances created by this plugin will have their server name prefixed with this name
       name              = "my-docker-autoscaler-group"
+
+      # Public IPv4 and IPv6 are enabled on Hetzner by default. These can be disabled below, but you must
+      # add one or more private networks in that case; otherwise the Hetzner cloud API will return errors
+      # when we try to create instances. It is also possible to use public and private networks
+      # simultaneously.
+      disable_public_networks   = ["ipv4", "ipv6"]
+      private_networks          = ["hetzner-cloud-ci-network"]
 
     [[runners.autoscaler.policy]]
       idle_count        = 1
