@@ -73,9 +73,8 @@ autoscaler will otherwise complaining about `"missing docker configuration"`.
     max_use_count = 1
     max_instances = 10
 
-    # Must currently be set because the plugin does not create any private networks and GitLab does
-    # not fall back to use the external address even if no internal address is available:
-    # https://gitlab.com/gitlab-org/fleeting/fleeting/-/issues/22
+    # Set this if you want to connect using a public address. If you use private_networks, you can leave
+    # this out (the default is 'false', i.e. connect using internal address only)
     [runners.autoscaler.connector_config]
       use_external_addr = true
 
@@ -99,6 +98,24 @@ autoscaler will otherwise complaining about `"missing docker configuration"`.
       # simultaneously.
       disable_public_networks   = ["ipv4", "ipv6"]
       private_networks          = ["hetzner-cloud-ci-network"]
+
+      # If you like to, you can specify a cloud-init configuration using one of the following forms (note,
+      # both cannot be used simultaneously). The first example below is taken from
+      # https://cloudinit.readthedocs.io/en/latest/reference/examples.html. Remember that the cloud-init
+      # user-data must begin with #cloud-config, otherwise the file will be silently ignored.
+      cloud_init_user_data = """
+#cloud-config
+users:
+- name: ansible
+  gecos: Ansible User
+  groups: users,admin,wheel
+  sudo: ALL=(ALL) NOPASSWD:ALL
+  shell: /bin/bash
+  lock_passwd: true
+  ssh_authorized_keys:
+    - "ssh-rsa AAAAB3NzaC1..."
+    """
+      cloud_init_user_data_file = "/path/to/cloud-init/user-data.yml"
 
     [[runners.autoscaler.policy]]
       idle_count        = 1

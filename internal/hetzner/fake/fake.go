@@ -34,7 +34,7 @@ func New() (*Client, error) {
 	return &Client{}, nil
 }
 
-func (c *Client) CreateServer(_ context.Context, name string, _ string, _ string, _ bool, _ bool, _ []int) (hcloud.ServerCreateResult, error) {
+func (c *Client) CreateServer(_ context.Context, name string, _ string, _ string, _ bool, _ bool, _ []int, _ string) (hcloud.ServerCreateResult, error) {
 	c.Servers = append(c.Servers, &hcloud.Server{
 		Status: hcloud.ServerStatusRunning,
 		Name:   name,
@@ -61,7 +61,7 @@ func (c *Client) DeleteSSHKey(context.Context, int) error {
 	return nil
 }
 
-func (c *Client) GetNetwork(ctx context.Context, networkName string) (*hcloud.Network, error) {
+func (c *Client) GetNetwork(context.Context, string) (*hcloud.Network, error) {
 	//TODO implement me
 	panic("implement me")
 }
