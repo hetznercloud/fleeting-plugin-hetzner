@@ -20,6 +20,7 @@ type Client interface {
 	DeleteSSHKey(ctx context.Context, id int64) error
 	GetNetwork(ctx context.Context, networkName string) (*hcloud.Network, error)
 	GetServer(ctx context.Context, id string) (*hcloud.Server, error)
+	GetServerTypes(ctx context.Context) ([]*hcloud.ServerType, error)
 	GetSSHKeysInInstanceGroup(ctx context.Context, name string) ([]*hcloud.SSHKey, error)
 	GetSSHKeyByName(ctx context.Context, name string) (*hcloud.SSHKey, error)
 }
@@ -199,6 +200,12 @@ func (c *client) GetServersInInstanceGroup(ctx context.Context, name string) ([]
 	servers, _, err := c.getHetznerClient().Server.List(ctx, serverListOpts)
 
 	return servers, err
+}
+
+func (c *client) GetServerTypes(ctx context.Context) ([]*hcloud.ServerType, error) {
+	serverTypes, _, err := c.getHetznerClient().ServerType.List(ctx, hcloud.ServerTypeListOpts{})
+
+	return serverTypes, err
 }
 
 func (c *client) GetSSHKeyByName(ctx context.Context, name string) (*hcloud.SSHKey, error) {

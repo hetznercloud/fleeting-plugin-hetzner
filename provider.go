@@ -123,18 +123,10 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 	// Resolve network names to IDs once, at startup. Note: this means that adding/removing networks
 	// while the plugin is running will not work. In our experience, networks are not recreated that
 	// frequently, but if this causes problems for you, feel free to raise an issue about it.
-	for _, networkName := range g.PrivateNetworks {
-		network, err := g.client.GetNetwork(ctx, networkName)
+	err = g.getPrivateNetworkIDs(ctx)
 
-		if err != nil {
-			return provider.ProviderInfo{}, fmt.Errorf("retrieving network failed: %w", err)
-		}
-
-		if network == nil {
-			return provider.ProviderInfo{}, fmt.Errorf("network '%v' not found", networkName)
-		}
-
-		g.privateNetworkIDs = append(g.privateNetworkIDs, network.ID)
+	if err != nil {
+		return provider.ProviderInfo{}, err
 	}
 
 	return provider.ProviderInfo{
@@ -143,6 +135,23 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 		Version:   Version.String(),
 		BuildInfo: Version.BuildInfo(),
 	}, nil
+}
+
+func (g *InstanceGroup) getPrivateNetworkIDs(ctx context.Context) error {
+	for _, networkName := range g.PrivateNetworks {
+		network, err := g.client.GetNetwork(ctx, networkName)
+
+		if err != nil {
+			return fmt.Errorf("retrieving network failed: %w", err)
+		}
+
+		if network == nil {
+			return fmt.Errorf("network '%v' not found", networkName)
+		}
+
+		g.privateNetworkIDs = append(g.privateNetworkIDs, network.ID)
+	}
+	return nil
 }
 
 func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state provider.State)) error {
@@ -315,34 +324,19 @@ func (g *InstanceGroup) ConnectInfo(ctx context.Context, id string) (provider.Co
 	info.ID = id
 	info.OS = server.Image.OSFlavor
 
-	// TODO: get this from server-type API
-	// info.Arch - Hetzner provides a "server type" API (https://docs.hetzner.cloud/#server-types), but regretfully the architecture field contains "
-
-	//instance := output.Reservations[0].Instances[0]
-	//
-	//if info.OS == "" {
-	//	switch {
-	//	case instance.Architecture == types.ArchitectureValuesX8664Mac ||
-	//		instance.Architecture == types.ArchitectureValuesArm64Mac:
-	//		info.OS = "darwin"
-	//	case strings.EqualFold(string(instance.Platform), string(types.PlatformValuesWindows)):
-	//		info.OS = "windows"
-	//	default:
-	//		info.OS = "linux"
-	//	}
-	//}
-	//
-	//if info.Arch == "" {
-	//	switch instance.Architecture {
-	//	case types.ArchitectureValuesI386:
-	//		info.Arch = "386"
-	//	case types.ArchitectureValuesX8664, types.ArchitectureValuesX8664Mac:
-	//		info.Arch = "amd64"
-	//	case types.ArchitectureValuesArm64, types.ArchitectureValuesArm64Mac:
-	//		info.Arch = "arm64"
-	//	}
-	//}
-	//
+	switch server.ServerType.Architecture {
+	case hcloud.ArchitectureX86:
+		// We presume that Hetzner doesn't use any 32-bit only machines in their data centers.
+		// Regardless, there isn't any way with their API to distinguish between x86 and amd64
+		// server types.
+		info.Arch = "amd64"
+	case hcloud.ArchitectureARM:
+		info.Arch = "arm64"
+	case "":
+		g.log.Warn("Architecture unexpectedly missing for server type", "server_type", server.ServerType.Name)
+	default:
+		g.log.Warn("Unsupported architecture encountered", "arch", string(server.ServerType.Architecture))
+	}
 
 	if info.Username == "" {
 		info.Username = "root"
@@ -358,7 +352,9 @@ func (g *InstanceGroup) ConnectInfo(ctx context.Context, id string) (provider.Co
 		info.InternalAddr = server.PrivateNet[0].IP.String()
 	}
 
-	info.ExternalAddr = server.PublicNet.IPv4.IP.String()
+	if !server.PublicNet.IPv4.IsUnspecified() {
+		info.ExternalAddr = server.PublicNet.IPv4.IP.String()
+	}
 
 	if info.Protocol == "" {
 		info.Protocol = provider.ProtocolSSH

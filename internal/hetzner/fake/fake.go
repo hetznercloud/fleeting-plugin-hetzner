@@ -81,6 +81,10 @@ func (c *Client) GetServersInInstanceGroup(_ context.Context, _ string) ([]*hclo
 	return c.Servers, nil
 }
 
+func (c *Client) GetServerTypes(context.Context) ([]*hcloud.ServerType, error) {
+	return make([]*hcloud.ServerType, 0), nil
+}
+
 func (c *Client) GetSSHKeyByName(_ context.Context, name string) (*hcloud.SSHKey, error) {
 	return &hcloud.SSHKey{
 		Name:      name,
