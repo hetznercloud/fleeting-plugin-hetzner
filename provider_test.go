@@ -124,6 +124,10 @@ func TestConnectInfo(t *testing.T) {
 				},
 
 				Status: hcloud.ServerStatusRunning,
+
+				ServerType: &hcloud.ServerType{
+					Name: "cx11",
+				},
 			})
 
 		// Add private keys for the servers above, so that ConnectInfo will be able to retrieve
