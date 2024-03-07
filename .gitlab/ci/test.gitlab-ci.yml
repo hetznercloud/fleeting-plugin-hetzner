@@ -1,0 +1,19 @@
+test:
+  stage: test
+  image: golang:$GO_VERSION
+  extends:
+    - .rules:merge_request_or_release
+    - .go-cache
+  script:
+    - make test
+
+shell check:
+  image: koalaman/shellcheck-alpine:stable
+  stage: test
+  extends:
+    - .rules:merge_request_or_release
+  before_script:
+    - shellcheck --version
+    - apk add make
+  script:
+    - make shellcheck

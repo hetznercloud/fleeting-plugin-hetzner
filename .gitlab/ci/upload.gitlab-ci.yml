@@ -1,0 +1,15 @@
+upload-binaries:
+  stage: upload
+  image: alpine:latest
+  extends:
+    - .rules:upload
+  dependencies:
+    - binaries
+  script:
+    - apk add curl gnupg make
+    - make upload-release
+  environment:
+    name: upload
+  artifacts:
+    paths:
+      - manifest.txt

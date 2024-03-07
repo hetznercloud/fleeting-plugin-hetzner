@@ -1,0 +1,22 @@
+binaries:
+  stage: build
+  image: golang:$GO_VERSION
+  extends:
+    - .rules:merge_request_or_release
+    - .go-cache
+  script:
+    - make all
+  artifacts:
+    paths:
+      - ${OUT_PATH}/${CI_PROJECT_NAME}-*
+  parallel:
+    matrix:
+    - OS_ARCHS:
+      - darwin/amd64 darwin/arm64
+      - freebsd/amd64 freebsd/arm64
+      - freebsd/386 freebsd/arm
+      - linux/amd64 linux/arm64
+      - linux/arm linux/s390x
+      - linux/ppc64le linux/386
+      - windows/amd64.exe windows/386.exe
+  needs: []
