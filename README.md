@@ -180,3 +180,7 @@ when you are making changes to the public API.
    https://gitlab.com/fleeting-plugin-hetzner/fleeting-plugin-hetzner/-/releases/v0.1.0 as an example.
    The "Full changelog" content can be retrieved using `make release-notes PREVIOUS_VERSION=0.1.0`
    (replace the version number with the "real" version number of the previous release)
+
+### Project history
+
+This project is based on [gitlab-org/fleeting/fleeting-plugin-aws](https://gitlab.com/fleeting-plugin-hetzner/fleeting-plugin-hetzner/-/commit/5c71bcde58f5eb1272828bf34051b02510e7f0de). To all the people involved in this initial work, *thanks a lot*!
