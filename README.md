@@ -20,7 +20,7 @@ To generate the binary, ensure `$GOPATH/bin` is on your PATH, then use `go build
 
 ```shell
 cd cmd/fleeting-plugin-hetzner/
-go build 
+go build
 ```
 
 If you are managing go versions with asdf, run this after generating the binary:
@@ -33,12 +33,13 @@ asdf reshim
 
 The following parameters are supported:
 
-| Parameter      | Type   | Description                                                                                                                                             |
-|----------------|--------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `access_token` | string | The Hetzner Cloud API token to use. Generate this in the Hetzner Cloud Console, for the project in which you want the cloud CI instances to be created. |
-| `location`     | string | The Hetzner location to use, from https://docs.hetzner.com/cloud/general/locations/                                                                     |
-| `server_type`  | string | The server type to create, from https://docs.hetzner.com/cloud/servers/overview/                                                                        |
-| `image`        | string | The operating system image to use. If you have the hcloud CLI installed, you can list available images using `hcloud image list --type system`.         |
+| Parameter      | Type   | Description                                                                                                                                                                   |
+|----------------|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `access_token` | string | The Hetzner Cloud API token to use. Generate this in the Hetzner Cloud Console, for the project in which you want the cloud CI instances to be created.                       |
+| `location`     | string | The Hetzner location to use, from https://docs.hetzner.com/cloud/general/locations/                                                                                           |
+| `server_type`  | string | The server type to create, from https://docs.hetzner.com/cloud/servers/overview/                                                                                              |
+| `image`        | string | The operating system image to use. If you have the hcloud CLI installed, you can list available images using `hcloud image list --type system`.                               |
+| `name`         | string | All instances created by this plugin will have their server name prefixed with this name. They will also have a special label `instance-group` with the value specified here. |
 
 ### Connector config
 
