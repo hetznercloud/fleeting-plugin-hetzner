@@ -130,6 +130,10 @@ func (c *client) CreateServer(ctx context.Context, name string, instanceGroupNam
 			"created-by":     c.Name,
 		},
 
+		Location: &hcloud.Location{
+			Name: c.Config.Location,
+		},
+
 		Networks: hetznerNetworks,
 
 		PublicNet: &hcloud.ServerCreatePublicNet{
