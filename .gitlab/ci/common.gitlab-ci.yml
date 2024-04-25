@@ -12,9 +12,8 @@ variables:
   variables:
     GOCACHE: $CI_PROJECT_DIR/.gocache
   before_script:
-  - mkdir -p "${GOCACHE}"
+    - mkdir -p "${GOCACHE}"
   cache:
     paths:
-    - $CI_PROJECT_DIR/.gocache/
+      - $CI_PROJECT_DIR/.gocache/
     key: "${CI_JOB_NAME_SLUG}"
-

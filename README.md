@@ -34,7 +34,7 @@ asdf reshim
 The following parameters are supported:
 
 | Parameter      | Type   | Description                                                                                                                                                                   |
-|----------------|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `access_token` | string | The Hetzner Cloud API token to use. Generate this in the Hetzner Cloud Console, for the project in which you want the cloud CI instances to be created.                       |
 | `location`     | string | The Hetzner location to use, from https://docs.hetzner.com/cloud/general/locations/                                                                                           |
 | `server_type`  | string | The server type to create, from https://docs.hetzner.com/cloud/servers/overview/                                                                                              |
@@ -46,7 +46,7 @@ The following parameters are supported:
 The connector config is currently hardwired as follows:
 
 | Parameter                | Value                                                                             |
-|--------------------------|-----------------------------------------------------------------------------------|
+| ------------------------ | --------------------------------------------------------------------------------- |
 | `os`                     | Only `linux` is supported.                                                        |
 | `protocol`               | `ssh` (`winrm` is not supported)                                                  |
 | `username`               | `root`; the Hetzner Cloud API does not seem to allow overriding this.             |
@@ -170,8 +170,7 @@ when you are making changes to the public API.
 
 1. Make sure the `VERSION` file is up-to-date. This file is typically edited at the beginning of the
    new release cycle (in other words "work towrads version x.y.z" rather than "release version x.y.z")
-2. If not, commit the changes to that file, using a commit message in line with this: `git commit
-   VERSION -m "Bump version to v0.2.0"`. Make sure to `git push` the commit as well.
+2. If not, commit the changes to that file, using a commit message in line with this: `git commit VERSION -m "Bump version to v0.2.0"`. Make sure to `git push` the commit as well.
 3. Run `make do-release`. This creates a tag, which in turns triggers some CI logic in
    [`.gitlab/ci/release.gitlab-ci.yml`](.gitlab/ci/release.gitlab-ci.yml) which creates a GitLab
    release.
@@ -183,4 +182,4 @@ when you are making changes to the public API.
 
 ### Project history
 
-This project is based on [gitlab-org/fleeting/fleeting-plugin-aws](https://gitlab.com/fleeting-plugin-hetzner/fleeting-plugin-hetzner/-/commit/5c71bcde58f5eb1272828bf34051b02510e7f0de). To all the people involved in this initial work, *thanks a lot*!
+This project is based on [gitlab-org/fleeting/fleeting-plugin-aws](https://gitlab.com/fleeting-plugin-hetzner/fleeting-plugin-hetzner/-/commit/5c71bcde58f5eb1272828bf34051b02510e7f0de). To all the people involved in this initial work, _thanks a lot_!

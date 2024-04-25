@@ -42,14 +42,14 @@
 
 .rules:default-branch-only:no_docs:
   rules:
-  - <<: *if-default-branch
-    changes: *code-backstage-patterns
+    - <<: *if-default-branch
+      changes: *code-backstage-patterns
 
 .rules:default-branch-only:no_docs:always:
   rules:
-  - <<: *if-default-branch
-    changes: *code-backstage-patterns
-    when: always
+    - <<: *if-default-branch
+      changes: *code-backstage-patterns
+      when: always
 
 #######################
 # Merge Request rules #
@@ -57,14 +57,14 @@
 
 .rules:merge_request_pipelines:
   rules:
-  - <<: *if-merge-request-pipeline
+    - <<: *if-merge-request-pipeline
 
 .rules:merge_request_or_release:
   rules:
-  - <<: *if-merge-request-pipeline
-  - <<: *if-default-branch
-  - <<: *if-stable-branch
-  - <<: *if-release-tag
+    - <<: *if-merge-request-pipeline
+    - <<: *if-default-branch
+    - <<: *if-stable-branch
+    - <<: *if-release-tag
 
 #################
 # Release rules #
@@ -72,12 +72,12 @@
 
 .rules:upload:
   rules:
-  - <<: *if-default-branch
-  - <<: *if-stable-branch
-  - <<: *if-release-candidate-tag
-  - <<: *if-stable-release-tag
+    - <<: *if-default-branch
+    - <<: *if-stable-branch
+    - <<: *if-release-candidate-tag
+    - <<: *if-stable-release-tag
 
 .rules:release:all:
   rules:
-  - <<: *if-release-candidate-tag
-  - <<: *if-stable-release-tag
+    - <<: *if-release-candidate-tag
+    - <<: *if-stable-release-tag

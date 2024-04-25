@@ -45,10 +45,6 @@ all:$(TARGETS)
 test: .mods
 	go test -v -timeout=30m ./...
 
-.PHONY: shellcheck
-shellcheck:
-	shellcheck $(shell find ci -name "*.sh")
-
 .PHONY: clean
 clean:
 	rm -fr $(OUT_PATH)

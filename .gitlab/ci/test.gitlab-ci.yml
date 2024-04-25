@@ -1,3 +1,22 @@
+pre-commit:
+  stage: test
+  image: python:3.12
+  extends:
+    - .rules:merge_request_or_release
+  variables:
+    PIP_CACHE_DIR: $CI_PROJECT_DIR/.cache/pip
+    PRE_COMMIT_HOME: $CI_PROJECT_DIR/.cache/pre-commit
+  cache:
+    - key: pre-commit-pip
+      paths: [$PIP_CACHE_DIR]
+    - key:
+        prefix: pre-commit-home
+        files: [.pre-commit-config.yaml]
+      paths: [$PRE_COMMIT_HOME]
+  script:
+    - pip install pre-commit
+    - pre-commit run --all --color=always --show-diff-on-failure
+
 test:
   stage: test
   image: golang:$GO_VERSION
@@ -6,14 +25,3 @@ test:
     - .go-cache
   script:
     - make test
-
-shell check:
-  image: koalaman/shellcheck-alpine:stable
-  stage: test
-  extends:
-    - .rules:merge_request_or_release
-  before_script:
-    - shellcheck --version
-    - apk add make
-  script:
-    - make shellcheck
