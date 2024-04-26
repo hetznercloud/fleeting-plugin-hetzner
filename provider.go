@@ -3,10 +3,7 @@ package hetzner
 import (
 	"context"
 	"crypto/rand"
-	"crypto/rsa"
-	"crypto/x509"
 	"encoding/hex"
-	"encoding/pem"
 	"fmt"
 	"os"
 	"path"
@@ -15,7 +12,7 @@ import (
 	"github.com/hashicorp/go-hclog"
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
 	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/hetzner"
-	"golang.org/x/crypto/ssh"
+	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/utils"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
@@ -208,15 +205,14 @@ func (g *InstanceGroup) Increase(ctx context.Context, delta int) (int, error) {
 
 		serverName := g.Name + "-" + hex.EncodeToString(b[:])
 
-		sshPublicKey, sshPrivateKey, err := createSSHKeyPair()
-
+		sshPublicKey, sshPrivateKey, err := utils.GenerateSSHKeyPair()
 		if err != nil {
 			return i + 1, fmt.Errorf("error creating SSH key for server: %w", err)
 		}
 
 		sshPrivateKeys[serverName] = sshPrivateKey
 
-		_, err = g.client.CreateServer(ctx, serverName, g.Name, sshPublicKey, g.enablePublicIPv4, g.enablePublicIPv6, g.privateNetworkIDs, g.CloudInitUserData)
+		_, err = g.client.CreateServer(ctx, serverName, g.Name, string(sshPublicKey), g.enablePublicIPv4, g.enablePublicIPv6, g.privateNetworkIDs, g.CloudInitUserData)
 
 		if err != nil {
 			return i + 1, fmt.Errorf("error creating server: %w", err)
@@ -226,33 +222,6 @@ func (g *InstanceGroup) Increase(ctx context.Context, delta int) (int, error) {
 	g.size += delta
 
 	return delta, nil
-}
-
-func createSSHKeyPair() (string, []byte, error) {
-	// Generate a new private/public keypair
-	privateKey, err := rsa.GenerateKey(rand.Reader, 4096)
-
-	if err != nil {
-		return "", nil, fmt.Errorf("generating private key: %w", err)
-	}
-
-	privateKeyPEM := pem.EncodeToMemory(
-		&pem.Block{
-			Type:  "RSA PRIVATE KEY",
-			Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
-		},
-	)
-
-	// Convert the public key to ssh authorized_keys format
-	pub, err := ssh.NewPublicKey(privateKey.Public())
-
-	if err != nil {
-		return "", nil, err
-	}
-
-	var publicKey = string(ssh.MarshalAuthorizedKey(pub))
-
-	return publicKey, privateKeyPEM, nil
 }
 
 func (g *InstanceGroup) Decrease(ctx context.Context, instances []string) ([]string, error) {
