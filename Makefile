@@ -66,6 +66,9 @@ generate-checksums-file:
 release:
 	ci/release.sh
 
+release-oci-artifacts:
+	ci/release-oci-artifacts.sh
+
 .PHONY: do-release
 do-release:
 	git tag -s $(VERSION) -m "Version $(VERSION)"

@@ -8,3 +8,14 @@ release:
   script:
     - apk add make bash curl
     - make release
+
+release-oci:
+  stage: release
+  image: golang:$GO_VERSION-alpine
+  dependencies:
+    - binaries
+  extends:
+    - .rules:release:all
+  script:
+    - apk add --update make git bash
+    - make release-oci-artifacts
