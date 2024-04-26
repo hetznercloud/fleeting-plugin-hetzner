@@ -107,7 +107,7 @@ autoscaler will otherwise complaining about `"missing docker configuration"`.
       # both cannot be used simultaneously). The first example below is taken from
       # https://cloudinit.readthedocs.io/en/latest/reference/examples.html. Remember that the cloud-init
       # user-data must begin with #cloud-config, otherwise the file will be silently ignored.
-      cloud_init_user_data = """
+      user_data = """
 #cloud-config
 users:
 - name: ansible
@@ -119,7 +119,7 @@ users:
   ssh_authorized_keys:
     - "ssh-rsa AAAAB3NzaC1..."
     """
-      cloud_init_user_data_file = "/path/to/cloud-init/user-data.yml"
+      user_data_file = "/path/to/cloud-init/user-data.yml"
 
     [[runners.autoscaler.policy]]
       idle_count        = 1

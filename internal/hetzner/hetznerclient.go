@@ -15,7 +15,7 @@ import (
 type Client interface {
 	GetServersInInstanceGroup(ctx context.Context, name string) ([]*hcloud.Server, error)
 
-	CreateServer(ctx context.Context, name string, instanceGroupName string, sshPublicKey string, enablePublicIPv4 bool, enablePublicIPv6 bool, networks []int64, cloudInitUserData string) (hcloud.ServerCreateResult, error)
+	CreateServer(ctx context.Context, name string, instanceGroupName string, sshPublicKey string, enablePublicIPv4 bool, enablePublicIPv6 bool, networks []int64, userData string) (hcloud.ServerCreateResult, error)
 
 	DeleteServer(ctx context.Context, id string) error
 	DeleteSSHKey(ctx context.Context, id int64) error
@@ -79,7 +79,7 @@ func New(cfg Config, name string, version string) (Client, error) {
 	}, nil
 }
 
-func (c *client) CreateServer(ctx context.Context, name string, instanceGroupName string, sshPublicKey string, enablePublicIPv4 bool, enablePublicIPv6 bool, networks []int64, cloudInitUserData string) (hcloud.ServerCreateResult, error) {
+func (c *client) CreateServer(ctx context.Context, name string, instanceGroupName string, sshPublicKey string, enablePublicIPv4 bool, enablePublicIPv6 bool, networks []int64, userData string) (hcloud.ServerCreateResult, error) {
 	hetznerClient := c.getHetznerClient()
 
 	sshKeyCreateOpts := hcloud.SSHKeyCreateOpts{
@@ -142,7 +142,7 @@ func (c *client) CreateServer(ctx context.Context, name string, instanceGroupNam
 
 		SSHKeys: []*hcloud.SSHKey{sshKey},
 
-		UserData: cloudInitUserData,
+		UserData: userData,
 	}
 
 	serverCreateResult, _, err := hetznerClient.Server.Create(ctx, serverCreateOpts)

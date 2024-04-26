@@ -30,8 +30,8 @@ type InstanceGroup struct {
 	Image                 string   `json:"image"`
 	DisablePublicNetworks []string `json:"disable_public_networks"`
 	PrivateNetworks       []string `json:"private_networks"`
-	CloudInitUserData     string   `json:"cloud_init_user_data"`
-	CloudInitUserDataFile string   `json:"cloud_init_user_data_file"`
+	UserData              string   `json:"user_data"`
+	UserDataFile          string   `json:"user_data_file"`
 
 	// Because of limitations in the Hetzner API, instance groups do not formally exist in the
 	// Hetzner API. The Name here is mapped to a label which is set on all machines created in this
@@ -91,18 +91,18 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 		}
 	}
 
-	if g.CloudInitUserData != "" && g.CloudInitUserDataFile != "" {
-		return provider.ProviderInfo{}, fmt.Errorf("the 'cloud_init_user_data' and 'cloud_init_user_data_file' settings are mutually exclusive")
+	if g.UserData != "" && g.UserDataFile != "" {
+		return provider.ProviderInfo{}, fmt.Errorf("the 'user_data' and 'user_data_file' settings are mutually exclusive")
 	}
 
-	if g.CloudInitUserDataFile != "" {
-		userData, err := os.ReadFile(g.CloudInitUserDataFile)
+	if g.UserDataFile != "" {
+		userData, err := os.ReadFile(g.UserDataFile)
 
 		if err != nil {
-			return provider.ProviderInfo{}, fmt.Errorf("reading cloud-init user data file failed: %w", err)
+			return provider.ProviderInfo{}, fmt.Errorf("reading user data file failed: %w", err)
 		}
 
-		g.CloudInitUserData = string(userData)
+		g.UserData = string(userData)
 	}
 
 	var err error
@@ -212,7 +212,7 @@ func (g *InstanceGroup) Increase(ctx context.Context, delta int) (int, error) {
 
 		sshPrivateKeys[serverName] = sshPrivateKey
 
-		_, err = g.client.CreateServer(ctx, serverName, g.Name, string(sshPublicKey), g.enablePublicIPv4, g.enablePublicIPv6, g.privateNetworkIDs, g.CloudInitUserData)
+		_, err = g.client.CreateServer(ctx, serverName, g.Name, string(sshPublicKey), g.enablePublicIPv4, g.enablePublicIPv6, g.privateNetworkIDs, g.UserData)
 
 		if err != nil {
 			return i + 1, fmt.Errorf("error creating server: %w", err)
