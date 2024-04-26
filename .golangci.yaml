@@ -1,0 +1,55 @@
+---
+linters-settings:
+  exhaustive:
+    default-signifies-exhaustive: true
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(github.com/hetznercloud)
+  forbidigo:
+    forbid:
+      - ^print.*$
+      - ^fmt\.Print.*$
+  misspell:
+    locale: "US"
+
+linters:
+  disable-all: true
+  enable:
+    - bodyclose
+    - dupl
+    - errcheck
+    - errname
+    - exhaustive
+    - exportloopref
+    - forbidigo
+    - gci
+    - gocritic
+    - godot
+    - goimports
+    - gomodguard
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - misspell
+    - prealloc
+    - revive
+    - rowserrcheck
+    - staticcheck
+    - typecheck
+    - unparam
+    - unused
+    - whitespace
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - gosec
+        - errcheck
+    - path: _test\.go
+      linters:
+        - revive
+      text: unused-parameter

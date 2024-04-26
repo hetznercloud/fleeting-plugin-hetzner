@@ -3,8 +3,9 @@ package hetzner
 import (
 	"context"
 	"fmt"
-	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"strconv"
+
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
 
 // Inspired by
@@ -79,7 +80,6 @@ func New(cfg Config, name string, version string) (Client, error) {
 }
 
 func (c *client) CreateServer(ctx context.Context, name string, instanceGroupName string, sshPublicKey string, enablePublicIPv4 bool, enablePublicIPv6 bool, networks []int64, cloudInitUserData string) (hcloud.ServerCreateResult, error) {
-
 	hetznerClient := c.getHetznerClient()
 
 	sshKeyCreateOpts := hcloud.SSHKeyCreateOpts{
@@ -108,8 +108,7 @@ func (c *client) CreateServer(ctx context.Context, name string, instanceGroupNam
 		return hcloud.ServerCreateResult{}, fmt.Errorf("error creating SSH key for server %v: %w", name, err)
 	}
 
-	var hetznerNetworks []*hcloud.Network
-
+	hetznerNetworks := make([]*hcloud.Network, 0, len(networks))
 	for _, network := range networks {
 		hetznerNetworks = append(hetznerNetworks, &hcloud.Network{ID: network})
 	}
@@ -152,7 +151,7 @@ func (c *client) CreateServer(ctx context.Context, name string, instanceGroupNam
 }
 
 func (c *client) DeleteServer(ctx context.Context, id string) error {
-	serverId, err := strconv.ParseInt(id, 10, 64)
+	serverID, err := strconv.ParseInt(id, 10, 64)
 
 	if err != nil {
 		// Should never happen, since we use int IDs internally, but... The `fleeting` interface
@@ -162,7 +161,7 @@ func (c *client) DeleteServer(ctx context.Context, id string) error {
 	}
 
 	server := hcloud.Server{
-		ID: serverId,
+		ID: serverID,
 	}
 
 	_, _, err = c.getHetznerClient().Server.DeleteWithResult(ctx, &server)

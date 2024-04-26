@@ -5,9 +5,10 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"fmt"
-	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"strconv"
 	"sync"
+
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
 
 type Client struct {
@@ -62,7 +63,7 @@ func (c *Client) DeleteSSHKey(context.Context, int64) error {
 }
 
 func (c *Client) GetNetwork(context.Context, string) (*hcloud.Network, error) {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
@@ -93,6 +94,6 @@ func (c *Client) GetSSHKeyByName(_ context.Context, name string) (*hcloud.SSHKey
 }
 
 func (c *Client) GetSSHKeysInInstanceGroup(context.Context, string) ([]*hcloud.SSHKey, error) {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }

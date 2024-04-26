@@ -8,14 +8,16 @@ import (
 	"encoding/hex"
 	"encoding/pem"
 	"fmt"
-	"github.com/hashicorp/go-hclog"
-	"github.com/hetznercloud/hcloud-go/v2/hcloud"
-	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
-	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/hetzner"
-	"golang.org/x/crypto/ssh"
 	"os"
 	"path"
 	"strconv"
+
+	"github.com/hashicorp/go-hclog"
+	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
+	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/hetzner"
+	"golang.org/x/crypto/ssh"
+
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
 
 var _ provider.InstanceGroup = (*InstanceGroup)(nil)
@@ -82,11 +84,12 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 	g.enablePublicIPv6 = true
 
 	for _, str := range g.DisablePublicNetworks {
-		if str == "ipv4" {
+		switch str {
+		case "ipv4":
 			g.enablePublicIPv4 = false
-		} else if str == "ipv6" {
+		case "ipv6":
 			g.enablePublicIPv6 = false
-		} else {
+		default:
 			return provider.ProviderInfo{}, fmt.Errorf("unexpected value found in disable_public_networks setting: '%v'. Only 'ipv4' and 'ipv6' are supported", str)
 		}
 	}
@@ -161,7 +164,7 @@ func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state
 	}
 
 	for _, instance := range instances {
-		state := provider.StateCreating
+		var state provider.State
 
 		switch instance.Status {
 		case hcloud.ServerStatusStopping, hcloud.ServerStatusDeleting:
@@ -205,7 +208,7 @@ func (g *InstanceGroup) Increase(ctx context.Context, delta int) (int, error) {
 
 		serverName := g.Name + "-" + hex.EncodeToString(b[:])
 
-		sshPublicKey, sshPrivateKey, err := createSshKeyPair()
+		sshPublicKey, sshPrivateKey, err := createSSHKeyPair()
 
 		if err != nil {
 			return i + 1, fmt.Errorf("error creating SSH key for server: %w", err)
@@ -225,7 +228,7 @@ func (g *InstanceGroup) Increase(ctx context.Context, delta int) (int, error) {
 	return delta, nil
 }
 
-func createSshKeyPair() (string, []byte, error) {
+func createSSHKeyPair() (string, []byte, error) {
 	// Generate a new private/public keypair
 	privateKey, err := rsa.GenerateKey(rand.Reader, 4096)
 
@@ -257,7 +260,7 @@ func (g *InstanceGroup) Decrease(ctx context.Context, instances []string) ([]str
 		return nil, nil
 	}
 
-	var succeeded []string
+	succeeded := make([]string, 0, len(instances))
 
 	for _, instance := range instances {
 		server, err := g.client.GetServer(ctx, instance)
