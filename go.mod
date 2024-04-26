@@ -3,7 +3,7 @@ module gitlab.com/hetznercloud/fleeting-plugin-hetzner
 go 1.21
 
 require (
-	github.com/hashicorp/go-hclog v1.1.0
+	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hetznercloud/hcloud-go/v2 v2.6.0
 	github.com/stretchr/testify v1.8.4
 	gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20240408221008-c218ebb86b92
