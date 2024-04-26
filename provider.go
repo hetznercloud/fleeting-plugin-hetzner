@@ -11,10 +11,11 @@ import (
 
 	"github.com/hashicorp/go-hclog"
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
-	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/hetzner"
-	"gitlab.com/hiboxsystems/fleeting-plugin-hetzner/internal/utils"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
+
+	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/hetzner"
+	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/utils"
 )
 
 var _ provider.InstanceGroup = (*InstanceGroup)(nil)

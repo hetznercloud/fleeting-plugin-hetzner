@@ -7,6 +7,7 @@ linters-settings:
       - standard
       - default
       - prefix(github.com/hetznercloud)
+      - prefix(gitlab.com/hetznercloud)
   forbidigo:
     forbid:
       - ^print.*$

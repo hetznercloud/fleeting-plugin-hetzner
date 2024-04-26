@@ -1,4 +1,4 @@
-module gitlab.com/hiboxsystems/fleeting-plugin-hetzner
+module gitlab.com/hetznercloud/fleeting-plugin-hetzner
 
 go 1.21
 

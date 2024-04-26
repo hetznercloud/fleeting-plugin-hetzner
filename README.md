@@ -6,8 +6,8 @@ Cloud](https://www.hetzner.com/cloud/).
 > This plugin is experimental, breaking changes may occur without notice. You can expect
 > the plugin to be experimental until we reach version 1.0.0.
 
-[![Pipeline Status](https://gitlab.com/hiboxsystems/fleeting-plugin-hetzner/badges/main/pipeline.svg)](https://gitlab.com/hiboxsystems/fleeting-plugin-hetzner/commits/main)
-[![Go Report Card](https://goreportcard.com/badge/gitlab.com/hiboxsystems/fleeting-plugin-hetzner)](https://goreportcard.com/report/gitlab.com/hiboxsystems/fleeting-plugin-hetzner)
+[![Pipeline Status](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/badges/main/pipeline.svg)](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/commits/main)
+[![Go Report Card](https://goreportcard.com/badge/gitlab.com/hetznercloud/fleeting-plugin-hetzner)](https://goreportcard.com/report/gitlab.com/hetznercloud/fleeting-plugin-hetzner)
 
 The project started out as a fork of the existing
 [fleeting-plugin-aws](https://gitlab.com/gitlab-org/fleeting/fleeting-plugin-aws) plugin, gradually

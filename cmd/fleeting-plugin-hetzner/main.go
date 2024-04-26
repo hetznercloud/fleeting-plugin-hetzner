@@ -2,7 +2,8 @@ package main
 
 import (
 	"gitlab.com/gitlab-org/fleeting/fleeting/plugin"
-	hetzner "gitlab.com/hiboxsystems/fleeting-plugin-hetzner"
+
+	hetzner "gitlab.com/hetznercloud/fleeting-plugin-hetzner"
 )
 
 func main() {
