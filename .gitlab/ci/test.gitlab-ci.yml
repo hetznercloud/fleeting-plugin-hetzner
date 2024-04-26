@@ -6,6 +6,7 @@ pre-commit:
   variables:
     PIP_CACHE_DIR: $CI_PROJECT_DIR/.cache/pip
     PRE_COMMIT_HOME: $CI_PROJECT_DIR/.cache/pre-commit
+    GOLANGCI_LINT_CACHE: $CI_PROJECT_DIR/.cache/golangci-lint
   cache:
     - key: pre-commit-pip
       paths: [$PIP_CACHE_DIR]
@@ -13,6 +14,8 @@ pre-commit:
         prefix: pre-commit-home
         files: [.pre-commit-config.yaml]
       paths: [$PRE_COMMIT_HOME]
+    - key: golangci-lint
+      paths: [$GOLANGCI_LINT_CACHE]
   script:
     - pip install pre-commit
     - pre-commit run --all --color=always --show-diff-on-failure

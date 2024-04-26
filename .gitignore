@@ -5,6 +5,9 @@
 .idea/
 .tool-versions
 
+# Misc
+.cache
+
 # build artifacts
 out/*
 cmd/fleeting-plugin-hetzner/fleeting-plugin-hetzner
