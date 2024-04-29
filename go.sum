@@ -166,6 +166,8 @@ github.com/tidwall/transform v0.0.0-20201103190739-32f242e2dbde/go.mod h1:MvrEmd
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20240408221008-c218ebb86b92 h1:L47EldwOZorw794BnOsHgSYohueRqBcCwu8XJfzkV9g=
 gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20240408221008-c218ebb86b92/go.mod h1:CnQ2hEjGVBwogAnSrbhzzHeMlVaQ7SkkZkHT+Fev8hw=
+gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20240429092009-80a1949a176e h1:2SqcDv7cpFScEabsgQRhtwz+aZq9lZV0lrRUoz09mPQ=
+gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20240429092009-80a1949a176e/go.mod h1:CnQ2hEjGVBwogAnSrbhzzHeMlVaQ7SkkZkHT+Fev8hw=
 go.opentelemetry.io/proto/otlp v0.7.0/go.mod h1:PqfVotwruBrMGOCsRd/89rSnXhoiJIqeYNgFYFoEGnI=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
