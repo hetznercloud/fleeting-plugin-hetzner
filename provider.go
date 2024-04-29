@@ -2,8 +2,6 @@ package hetzner
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/hex"
 	"fmt"
 	"os"
 	"path"
@@ -197,14 +195,7 @@ func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state
 
 func (g *InstanceGroup) Increase(ctx context.Context, delta int) (int, error) {
 	for i := 0; i < delta; i++ {
-		var b [8]byte
-		_, err := rand.Read(b[:])
-
-		if err != nil {
-			return 0, fmt.Errorf("creating random instance name: %w", err)
-		}
-
-		serverName := g.Name + "-" + hex.EncodeToString(b[:])
+		serverName := g.Name + "-" + utils.GenerateRandomID()
 
 		sshPublicKey, sshPrivateKey, err := utils.GenerateSSHKeyPair()
 		if err != nil {

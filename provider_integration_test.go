@@ -1,15 +1,14 @@
 package hetzner
 
 import (
-	"crypto/rand"
-	"encoding/hex"
-	"io"
 	"os"
 	"testing"
 	"time"
 
 	"gitlab.com/gitlab-org/fleeting/fleeting/integration"
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
+
+	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/utils"
 )
 
 func TestProvisioning(t *testing.T) {
@@ -17,7 +16,7 @@ func TestProvisioning(t *testing.T) {
 		t.Skip("mandatory environment variable FLEETING_PLUGIN_HETZNER_TOKEN not set")
 	}
 
-	name := uniqueASGName()
+	name := "fleeting-integration-" + utils.GenerateRandomID()
 
 	integration.TestProvisioning(t,
 		integration.BuildPluginBinary(t, "cmd/fleeting-plugin-hetzner", "fleeting-plugin-hetzner"),
@@ -40,11 +39,4 @@ func TestProvisioning(t *testing.T) {
 			UseExternalAddr: true,
 		},
 	)
-}
-
-func uniqueASGName() string {
-	var buf [8]byte
-	io.ReadFull(rand.Reader, buf[:])
-
-	return "fleeting-integration-" + hex.EncodeToString(buf[:])
 }
