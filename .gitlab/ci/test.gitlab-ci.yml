@@ -26,5 +26,10 @@ test:
   extends:
     - .rules:merge_request_or_release
     - .go-cache
+  before_script:
+    - >
+      if $CI_COMMIT_REF_PROTECTED; then
+        export HCLOUD_TOKEN="$(hack/get-tmp-hcloud-token.sh)";
+      fi
   script:
     - make test
