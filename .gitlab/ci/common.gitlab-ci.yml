@@ -1,6 +1,6 @@
 default:
   tags:
-    - gitlab-org
+    - hetzner-docker
 
 variables:
   GO_VERSION: 1.21
