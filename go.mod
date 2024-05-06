@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/hashicorp/go-hclog v1.6.3
-	github.com/hetznercloud/hcloud-go/v2 v2.7.2
+	github.com/hetznercloud/hcloud-go/v2 v2.8.0
 	github.com/stretchr/testify v1.9.0
 	gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20240429092009-80a1949a176e
 	golang.org/x/crypto v0.22.0
