@@ -3,6 +3,7 @@ module gitlab.com/hetznercloud/fleeting-plugin-hetzner
 go 1.21
 
 require (
+	github.com/boumenot/gocover-cobertura v1.2.0
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hetznercloud/hcloud-go/v2 v2.8.0
 	github.com/stretchr/testify v1.9.0
@@ -49,6 +50,7 @@ require (
 	golang.org/x/net v0.24.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
+	golang.org/x/tools v0.17.0 // indirect
 	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
 	google.golang.org/grpc v1.44.0 // indirect
 	google.golang.org/protobuf v1.32.0 // indirect
