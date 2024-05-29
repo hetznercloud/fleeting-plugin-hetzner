@@ -23,14 +23,15 @@ var newClient = hetzner.New
 var sshPrivateKeys = make(map[string][]byte)
 
 type InstanceGroup struct {
-	AccessToken           string   `json:"access_token"`
-	Location              string   `json:"location"`
-	ServerType            string   `json:"server_type"`
-	Image                 string   `json:"image"`
-	DisablePublicNetworks []string `json:"disable_public_networks"`
-	PrivateNetworks       []string `json:"private_networks"`
-	UserData              string   `json:"user_data"`
-	UserDataFile          string   `json:"user_data_file"`
+	AccessToken        string   `json:"access_token"`
+	Location           string   `json:"location"`
+	ServerType         string   `json:"server_type"`
+	Image              string   `json:"image"`
+	PublicIPv4Disabled bool     `json:"public_ipv4_disabled"`
+	PublicIPv6Disabled bool     `json:"public_ipv6_disabled"`
+	PrivateNetworks    []string `json:"private_networks"`
+	UserData           string   `json:"user_data"`
+	UserDataFile       string   `json:"user_data_file"`
 
 	// Because of limitations in the Hetzner API, instance groups do not formally exist in the
 	// Hetzner API. The Name here is mapped to a label which is set on all machines created in this
@@ -40,8 +41,6 @@ type InstanceGroup struct {
 	log               hclog.Logger
 	client            hetzner.Client
 	size              int
-	enablePublicIPv4  bool
-	enablePublicIPv6  bool
 	privateNetworkIDs []int64
 
 	settings provider.Settings
@@ -73,21 +72,6 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 
 	if g.Name == "" {
 		return provider.ProviderInfo{}, fmt.Errorf("the plugin_config must contain a name setting, which is the desired \"instance group\" for the runner. This is used as a prefix for the server names, among other things")
-	}
-
-	// Enable both of these by default, unless otherwise specified in the config file
-	g.enablePublicIPv4 = true
-	g.enablePublicIPv6 = true
-
-	for _, str := range g.DisablePublicNetworks {
-		switch str {
-		case "ipv4":
-			g.enablePublicIPv4 = false
-		case "ipv6":
-			g.enablePublicIPv6 = false
-		default:
-			return provider.ProviderInfo{}, fmt.Errorf("unexpected value found in disable_public_networks setting: '%v'. Only 'ipv4' and 'ipv6' are supported", str)
-		}
 	}
 
 	if g.UserData != "" && g.UserDataFile != "" {
@@ -204,7 +188,7 @@ func (g *InstanceGroup) Increase(ctx context.Context, delta int) (int, error) {
 
 		sshPrivateKeys[serverName] = sshPrivateKey
 
-		_, err = g.client.CreateServer(ctx, serverName, g.Name, string(sshPublicKey), g.enablePublicIPv4, g.enablePublicIPv6, g.privateNetworkIDs, g.UserData)
+		_, err = g.client.CreateServer(ctx, serverName, g.Name, string(sshPublicKey), !g.PublicIPv4Disabled, !g.PublicIPv6Disabled, g.privateNetworkIDs, g.UserData)
 
 		if err != nil {
 			return i + 1, fmt.Errorf("error creating server: %w", err)

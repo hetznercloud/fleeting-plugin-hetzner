@@ -100,8 +100,9 @@ autoscaler will otherwise complaining about `"missing docker configuration"`.
       # add one or more private networks in that case; otherwise the Hetzner cloud API will return errors
       # when we try to create instances. It is also possible to use public and private networks
       # simultaneously.
-      disable_public_networks   = ["ipv4", "ipv6"]
-      private_networks          = ["hetzner-cloud-ci-network"]
+      public_ipv4_disabled  = true
+      public_ipv6_disabled  = true
+      private_networks      = ["hetzner-cloud-ci-network"]
 
       # If you like to, you can specify a cloud-init configuration using one of the following forms (note,
       # both cannot be used simultaneously). The first example below is taken from
