@@ -127,6 +127,13 @@ users:
       idle_time         = "20m0s"
 ```
 
+When using the `user_data` or `user_data_file` config, we need to make sure not to schedule CI jobs before the initialization framework finished. We can wait for the initialization framework using the `instance_ready_command` config. For example using `cloud-init`, you need to add the following:
+
+```toml
+[runners.autoscaler]
+instance_ready_command = "cloud-init status --wait || test $? -eq 2"
+```
+
 ## Testing the plugin locally
 
 Running the unit tests is easy, and this is also done for each MR/commit to `main` on GitLab:
