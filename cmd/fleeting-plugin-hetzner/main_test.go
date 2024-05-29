@@ -31,7 +31,7 @@ func buildBinary(t *testing.T) string {
 	return binaryName
 }
 
-func TestPluginServe(t *testing.T) {
+func TestPluginMain(t *testing.T) {
 	runner, err := fleeting.RunPlugin(buildBinary(t), nil)
 	require.NoError(t, err)
 	runner.Kill()
