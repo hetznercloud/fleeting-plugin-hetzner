@@ -23,7 +23,7 @@ var newClient = hetzner.New
 var sshPrivateKeys = make(map[string][]byte)
 
 type InstanceGroup struct {
-	AccessToken        string   `json:"access_token"`
+	Token              string   `json:"token"`
 	Location           string   `json:"location"`
 	ServerType         string   `json:"server_type"`
 	Image              string   `json:"image"`
@@ -48,14 +48,14 @@ type InstanceGroup struct {
 
 func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings provider.Settings) (provider.ProviderInfo, error) {
 	cfg := hetzner.Config{
-		AccessToken: g.AccessToken,
-		Location:    g.Location,
-		ServerType:  g.ServerType,
-		Image:       g.Image,
+		Token:      g.Token,
+		Location:   g.Location,
+		ServerType: g.ServerType,
+		Image:      g.Image,
 	}
 
-	if cfg.AccessToken == "" {
-		return provider.ProviderInfo{}, fmt.Errorf("the plugin_config must contain an access_token setting, containing a valid Hetzner Cloud API token")
+	if cfg.Token == "" {
+		return provider.ProviderInfo{}, fmt.Errorf("the plugin_config must contain a token setting, containing a valid Hetzner Cloud API token")
 	}
 
 	if cfg.Location == "" {

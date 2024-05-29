@@ -36,7 +36,7 @@ type client struct {
 
 type Config struct {
 	// The Hetzner Cloud API token to use when connecting to the Hetzner Cloud API.
-	AccessToken string
+	Token string
 
 	// The Hetzner Cloud "Location" to use. See https://docs.hetzner.com/cloud/general/locations/
 	// for a list of the locations.
@@ -56,8 +56,8 @@ func New(cfg Config, name string, version string) (Client, error) {
 	// validate all the fields anyway just for the sake of it. The error messages here deliberately
 	// do not include the environment variables, in case they ever get changed in the calling side
 	// etc. This is just a "Java programmer writing Go". ;)
-	if cfg.AccessToken == "" {
-		return nil, fmt.Errorf("cfg.AccessToken must be set")
+	if cfg.Token == "" {
+		return nil, fmt.Errorf("cfg.Token must be set")
 	}
 
 	if cfg.Location == "" {
@@ -228,5 +228,5 @@ func (c *client) GetSSHKeysInInstanceGroup(ctx context.Context, name string) ([]
 }
 
 func (c *client) getHetznerClient() *hcloud.Client {
-	return hcloud.NewClient(hcloud.WithToken(c.Config.AccessToken), hcloud.WithApplication("fleeting-plugin-hetzner", c.Version))
+	return hcloud.NewClient(hcloud.WithToken(c.Config.Token), hcloud.WithApplication("fleeting-plugin-hetzner", c.Version))
 }

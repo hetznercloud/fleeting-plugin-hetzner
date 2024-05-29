@@ -41,11 +41,11 @@ func setupFakeClient(t *testing.T, setup func(client *fake.Client)) *InstanceGro
 	}
 
 	return &InstanceGroup{
-		AccessToken: "dummy-token",
-		Location:    "dummy-location",
-		ServerType:  "cx11",
-		Image:       "ubuntu-22.04",
-		Name:        "test-group",
+		Token:      "dummy-token",
+		Location:   "dummy-location",
+		ServerType: "cx11",
+		Image:      "ubuntu-22.04",
+		Name:       "test-group",
 	}
 }
 

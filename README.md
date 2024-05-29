@@ -33,13 +33,13 @@ asdf reshim
 
 The following parameters are supported:
 
-| Parameter      | Type   | Description                                                                                                                                                                   |
-| -------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`         | string | All instances created by this plugin will have their server name prefixed with this name. They will also have a special label `instance-group` with the value specified here. |
-| `access_token` | string | The Hetzner Cloud API token to use. Generate this in the Hetzner Cloud Console, for the project in which you want the cloud CI instances to be created.                       |
-| `location`     | string | The Hetzner location to use, from https://docs.hetzner.com/cloud/general/locations/                                                                                           |
-| `server_type`  | string | The server type to create, from https://docs.hetzner.com/cloud/servers/overview/                                                                                              |
-| `image`        | string | The operating system image to use. If you have the hcloud CLI installed, you can list available images using `hcloud image list --type system`.                               |
+| Parameter     | Type   | Description                                                                                                                                                                   |
+| ------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`        | string | All instances created by this plugin will have their server name prefixed with this name. They will also have a special label `instance-group` with the value specified here. |
+| `token`       | string | The [Hetzner Cloud API token](https://docs.hetzner.com/cloud/api/getting-started/generating-api-token) of the project to use.                                                 |
+| `location`    | string | The Hetzner location to use, from https://docs.hetzner.com/cloud/general/locations/                                                                                           |
+| `server_type` | string | The server type to create, from https://docs.hetzner.com/cloud/servers/overview/                                                                                              |
+| `image`       | string | The operating system image to use. If you have the hcloud CLI installed, you can list available images using `hcloud image list --type system`.                               |
 
 ### Connector config
 
@@ -84,8 +84,8 @@ autoscaler will otherwise complaining about `"missing docker configuration"`.
 
     [runners.autoscaler.plugin_config] # plugin specific configuration (see plugin documentation)
       # All instances created by this plugin will have their server name prefixed with this name
-      name           = "my-docker-autoscaler-group"
-      access_token   = "<insert-token-here>"
+      name  = "my-docker-autoscaler-group"
+      token = "<insert-token-here>"
 
       location    = "hel1"
       server_type = "cx11"

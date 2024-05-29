@@ -22,7 +22,7 @@ func TestProvisioning(t *testing.T) {
 		integration.BuildPluginBinary(t, "cmd/fleeting-plugin-hetzner", "fleeting-plugin-hetzner"),
 		integration.Config{
 			PluginConfig: InstanceGroup{
-				AccessToken: os.Getenv("HCLOUD_TOKEN"),
+				Token: os.Getenv("HCLOUD_TOKEN"),
 
 				// Give these plugin config settings reasonable defaults, so the integration test
 				// can run with only the token set in the environment.
