@@ -35,11 +35,11 @@ The following parameters are supported:
 
 | Parameter      | Type   | Description                                                                                                                                                                   |
 | -------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`         | string | All instances created by this plugin will have their server name prefixed with this name. They will also have a special label `instance-group` with the value specified here. |
 | `access_token` | string | The Hetzner Cloud API token to use. Generate this in the Hetzner Cloud Console, for the project in which you want the cloud CI instances to be created.                       |
 | `location`     | string | The Hetzner location to use, from https://docs.hetzner.com/cloud/general/locations/                                                                                           |
 | `server_type`  | string | The server type to create, from https://docs.hetzner.com/cloud/servers/overview/                                                                                              |
 | `image`        | string | The operating system image to use. If you have the hcloud CLI installed, you can list available images using `hcloud image list --type system`.                               |
-| `name`         | string | All instances created by this plugin will have their server name prefixed with this name. They will also have a special label `instance-group` with the value specified here. |
 
 ### Connector config
 
@@ -83,18 +83,18 @@ autoscaler will otherwise complaining about `"missing docker configuration"`.
       use_external_addr = true
 
     [runners.autoscaler.plugin_config] # plugin specific configuration (see plugin documentation)
-      access_token      = "<insert-token-here>"
-      location          = "hel1"
-      server_type       = "cx11"
+      # All instances created by this plugin will have their server name prefixed with this name
+      name           = "my-docker-autoscaler-group"
+      access_token   = "<insert-token-here>"
+
+      location    = "hel1"
+      server_type = "cx11"
 
       # docker-ce is an "app" image provided by Hetzner which is based on Ubuntu 22.04, but provides
       # Docker CE preinstalled: https://docs.hetzner.com/cloud/apps/list/docker-ce/
       #
       # You could also use another image here, but it must have Docker installed.
-      image             = "docker-ce"
-
-      # All instances created by this plugin will have their server name prefixed with this name
-      name              = "my-docker-autoscaler-group"
+      image = "docker-ce"
 
       # Public IPv4 and IPv6 are enabled on Hetzner by default. These can be disabled below, but you must
       # add one or more private networks in that case; otherwise the Hetzner cloud API will return errors
