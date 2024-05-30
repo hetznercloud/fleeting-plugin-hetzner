@@ -62,7 +62,7 @@ func (g *InstanceGroup) populate() error {
 	}
 
 	g.labels = map[string]string{
-		"managed-by": g.Name,
+		"managed-by": Version.Name,
 	}
 
 	return nil
