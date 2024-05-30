@@ -16,21 +16,17 @@ func TestProvisioning(t *testing.T) {
 		t.Skip("mandatory environment variable HCLOUD_TOKEN not set")
 	}
 
-	name := "fleeting-integration-" + utils.GenerateRandomID()
-
 	integration.TestProvisioning(t,
 		integration.BuildPluginBinary(t, "cmd/fleeting-plugin-hetzner", "fleeting-plugin-hetzner"),
 		integration.Config{
 			PluginConfig: InstanceGroup{
+				Name: "fleeting-" + utils.GenerateRandomID(),
+
 				Token: os.Getenv("HCLOUD_TOKEN"),
 
-				// Give these plugin config settings reasonable defaults, so the integration test
-				// can run with only the token set in the environment.
 				Location:   "hel1",
-				ServerType: "cx11",
-				Image:      "ubuntu-22.04",
-
-				Name: name,
+				ServerType: "cpx11",
+				Image:      "ubuntu-24.04",
 			},
 			ConnectorConfig: provider.ConnectorConfig{
 				Timeout: 10 * time.Minute,

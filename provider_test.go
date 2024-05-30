@@ -2,212 +2,382 @@ package hetzner
 
 import (
 	"context"
-	"crypto/x509"
-	"encoding/pem"
 	"fmt"
+	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/stretchr/testify/require"
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
+	"go.uber.org/mock/gomock"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/schema"
 
-	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/hetzner"
-	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/hetzner/fake"
+	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/instancegroup"
+	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/mocked"
+	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/utils"
 )
 
-func setupFakeClient(t *testing.T, setup func(client *fake.Client)) *InstanceGroup {
+func sshKeyFixture(t *testing.T) ([]byte, schema.SSHKey) {
 	t.Helper()
 
-	oldClient := newClient
-	t.Cleanup(func() {
-		newClient = oldClient
-	})
-
-	// Create a fake client which overrides all the Hetzner API calls and returns dummy data
-	newClient = func(_ hetzner.Config, _ string, _ string) (hetzner.Client, error) {
-		client, err := fake.New()
-
-		if err != nil {
-			panic(fmt.Errorf("creating fake Hetzner client failed: %w", err))
-		}
-
-		if setup != nil {
-			setup(client)
-		}
-
-		return client, nil
+	publicKey, privateKey, err := utils.GenerateSSHKeyPair()
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	return &InstanceGroup{
-		Token:      "dummy-token",
-		Location:   "dummy-location",
-		ServerType: "cx11",
-		Image:      "ubuntu-22.04",
-		Name:       "test-group",
+	fingerprint, err := utils.GetSSHPublicKeyFingerprint(publicKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return privateKey, schema.SSHKey{ID: 1, Name: "fleeting", Fingerprint: fingerprint, PublicKey: string(publicKey)}
+}
+
+func TestInit(t *testing.T) {
+	sshPrivateKey, sshKey := sshKeyFixture(t)
+
+	testCases := []struct {
+		name     string
+		requests []mocked.Request
+		run      func(t *testing.T, group *InstanceGroup, ctx context.Context, log hclog.Logger, settings provider.Settings)
+	}{
+		{name: "generated ssh key upload",
+			requests: []mocked.Request{
+				{Method: "GET", PathRegexp: `\/ssh_keys\?fingerprint=.*`,
+					Status: 200,
+					JSON:   schema.SSHKeyListResponse{SSHKeys: []schema.SSHKey{}},
+				},
+				{Method: "GET", Path: "/ssh_keys?name=fleeting",
+					Status: 200,
+					JSON:   schema.SSHKeyListResponse{SSHKeys: []schema.SSHKey{}},
+				},
+				{Method: "POST", Path: "/ssh_keys",
+					Status: 201,
+					JSON:   schema.SSHKeyCreateResponse{SSHKey: sshKey},
+				},
+				mocked.GetLocationHel1Request,
+				mocked.GetServerTypeCPX11Request,
+				mocked.GetImageDebian12Request,
+				{Method: "GET", Path: "/ssh_keys?name=fleeting",
+					Status: 200,
+					JSON: schema.SSHKeyListResponse{
+						SSHKeys: []schema.SSHKey{sshKey},
+					},
+				},
+			},
+			run: func(t *testing.T, group *InstanceGroup, ctx context.Context, log hclog.Logger, settings provider.Settings) {
+				info, err := group.Init(ctx, log, settings)
+				require.NoError(t, err)
+				require.Equal(t, "hetzner/hel1/cpx11/fleeting", info.ID)
+			},
+		},
+		{name: "static ssh key upload",
+			requests: []mocked.Request{
+				{Method: "GET", Path: "/ssh_keys?fingerprint=" + url.QueryEscape(sshKey.Fingerprint),
+					Status: 200,
+					JSON: schema.SSHKeyListResponse{
+						SSHKeys: []schema.SSHKey{},
+					},
+				},
+				{Method: "GET", Path: "/ssh_keys?name=fleeting",
+					Status: 200,
+					JSON: schema.SSHKeyListResponse{
+						SSHKeys: []schema.SSHKey{},
+					},
+				},
+				{Method: "POST", Path: "/ssh_keys",
+					Status: 201,
+					JSON:   schema.SSHKeyCreateResponse{SSHKey: sshKey},
+				},
+				mocked.GetLocationHel1Request,
+				mocked.GetServerTypeCPX11Request,
+				mocked.GetImageDebian12Request,
+				{Method: "GET", Path: "/ssh_keys?name=fleeting",
+					Status: 200,
+					JSON: schema.SSHKeyListResponse{
+						SSHKeys: []schema.SSHKey{sshKey},
+					},
+				},
+			},
+			run: func(t *testing.T, group *InstanceGroup, ctx context.Context, log hclog.Logger, settings provider.Settings) {
+				settings.UseStaticCredentials = true
+				settings.Key = sshPrivateKey
+
+				info, err := group.Init(ctx, log, settings)
+				require.NoError(t, err)
+				require.Equal(t, "hetzner/hel1/cpx11/fleeting", info.ID)
+			},
+		},
+		{name: "static ssh key existing",
+			requests: []mocked.Request{
+				{Method: "GET", Path: "/ssh_keys?fingerprint=" + url.QueryEscape(sshKey.Fingerprint),
+					Status: 200,
+					JSON: schema.SSHKeyListResponse{
+						SSHKeys: []schema.SSHKey{sshKey},
+					},
+				},
+				mocked.GetLocationHel1Request,
+				mocked.GetServerTypeCPX11Request,
+				mocked.GetImageDebian12Request,
+				{Method: "GET", Path: "/ssh_keys?name=fleeting",
+					Status: 200,
+					JSON: schema.SSHKeyListResponse{
+						SSHKeys: []schema.SSHKey{sshKey},
+					},
+				},
+			},
+			run: func(t *testing.T, group *InstanceGroup, ctx context.Context, log hclog.Logger, settings provider.Settings) {
+				settings.UseStaticCredentials = true
+				settings.Key = sshPrivateKey
+
+				info, err := group.Init(ctx, log, settings)
+				require.NoError(t, err)
+				require.Equal(t, "hetzner/hel1/cpx11/fleeting", info.ID)
+			},
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			server := httptest.NewServer(mocked.Handler(t, testCase.requests))
+
+			group := &InstanceGroup{
+				Name:       "fleeting",
+				Token:      "dummy",
+				Endpoint:   server.URL,
+				Location:   "hel1",
+				ServerType: "cpx11",
+				Image:      "debian-12",
+
+				client: hcloud.NewClient(),
+			}
+			ctx := context.Background()
+			log := hclog.NewNullLogger()
+			settings := provider.Settings{}
+
+			testCase.run(t, group, ctx, log, settings)
+		})
 	}
 }
 
 func TestIncrease(t *testing.T) {
-	group := setupFakeClient(t, nil)
-
-	ctx := context.Background()
-
-	var count int
-	_, err := group.Init(ctx, hclog.NewNullLogger(), provider.Settings{})
-	require.NoError(t, err)
-	require.NoError(t, group.Update(ctx, func(id string, state provider.State) {
-		count++
-	}))
-	require.Equal(t, 0, group.size)
-	require.Equal(t, 0, count)
-
-	num, err := group.Increase(ctx, 2)
-	require.Equal(t, 2, num)
-	require.NoError(t, err)
-	count = 0
-	require.NoError(t, group.Update(ctx, func(id string, state provider.State) {
-		require.Equal(t, provider.StateRunning, state)
-		count++
-	}))
-	require.Equal(t, 2, group.size)
-	require.Equal(t, 2, count)
-}
-
-func TestDecrease(t *testing.T) {
-	group := setupFakeClient(t, func(client *fake.Client) {
-		client.Servers = append(
-			client.Servers,
-			&hcloud.Server{
-				ID:     646457,
-				Name:   "pre-existing-1",
-				Status: hcloud.ServerStatusRunning,
-			},
-			&hcloud.Server{
-				ID:     382443,
-				Name:   "pre-existing-2",
-				Status: hcloud.ServerStatusRunning,
-			})
-	})
-
-	ctx := context.Background()
-
-	var count int
-	_, err := group.Init(ctx, hclog.NewNullLogger(), provider.Settings{})
-	require.NoError(t, err)
-	require.NoError(t, group.Update(ctx, func(id string, state provider.State) {
-		require.Equal(t, provider.StateRunning, state)
-		count++
-	}))
-	require.Equal(t, 2, group.size)
-	require.Equal(t, 2, count)
-
-	removed, err := group.Decrease(ctx, []string{"646457"})
-	require.Contains(t, removed, "646457")
-	require.NoError(t, err)
-	count = 0
-	require.NoError(t, group.Update(ctx, func(id string, state provider.State) {
-		count++
-	}))
-	require.Equal(t, 1, group.size)
-}
-
-func TestConnectInfo(t *testing.T) {
-	group := setupFakeClient(t, func(client *fake.Client) {
-		client.Servers = append(
-			client.Servers,
-			&hcloud.Server{
-				ID:   218452,
-				Name: "pre-existing-1",
-
-				Image: &hcloud.Image{
-					OSFlavor: "ubuntu",
-				},
-
-				Status: hcloud.ServerStatusRunning,
-
-				ServerType: &hcloud.ServerType{
-					Name: "cx11",
-				},
-			})
-
-		// Add private keys for the servers above, so that ConnectInfo will be able to retrieve
-		// them.
-		sshPrivateKeys["pre-existing-1"] = []byte("dummy-private-key-1")
-	})
-
-	ctx := context.Background()
-
-	_, err := group.Init(ctx, hclog.NewNullLogger(), provider.Settings{})
-	require.NoError(t, err)
-	require.NoError(t, group.Update(ctx, func(id string, state provider.State) {}))
-
-	encodedKey := pem.EncodeToMemory(
-		&pem.Block{
-			Type:  "RSA PRIVATE KEY",
-			Bytes: x509.MarshalPKCS1PrivateKey(fake.Key()),
-		},
-	)
-
-	tests := []struct {
-		config provider.ConnectorConfig
-		assert func(t *testing.T, info provider.ConnectInfo, err error)
+	testCases := []struct {
+		name string
+		run  func(t *testing.T, mock *instancegroup.MockInstanceGroup, group *InstanceGroup, ctx context.Context)
 	}{
-		{
-			config: provider.ConnectorConfig{
-				OS: "linux",
-			},
-			assert: func(t *testing.T, info provider.ConnectInfo, err error) {
-				require.NoError(t, err)
-				require.Equal(t, info.Protocol, provider.ProtocolSSH)
+		{name: "success",
+			run: func(t *testing.T, mock *instancegroup.MockInstanceGroup, group *InstanceGroup, ctx context.Context) {
+				group.size = 3
 
-				require.Equal(t, info.Key, []byte("dummy-private-key-1"))
+				mock.EXPECT().Increase(ctx, 2).Return([]int64{1, 2}, nil)
+
+				count, err := group.Increase(ctx, 2)
+				require.NoError(t, err)
+				require.Equal(t, 2, count)
+				require.Equal(t, 5, group.size)
 			},
 		},
-		{
-			config: provider.ConnectorConfig{
-				Protocol: provider.ProtocolSSH,
-				Key:      encodedKey,
-			},
-			assert: func(t *testing.T, info provider.ConnectInfo, err error) {
-				require.ErrorContains(t, err, "plugin does not support providing an SSH key in advance")
-			},
-		},
-		{
-			config: provider.ConnectorConfig{
-				Protocol: provider.ProtocolWinRM,
-			},
-			assert: func(t *testing.T, info provider.ConnectInfo, err error) {
-				require.ErrorContains(t, err, "plugin does not support the WinRM protocol")
-			},
-		},
-		{
-			config: provider.ConnectorConfig{
-				Protocol: provider.ProtocolWinRM,
-				Key:      []byte("invalid key"),
-			},
-			assert: func(t *testing.T, info provider.ConnectInfo, err error) {
-				require.ErrorContains(t, err, "plugin does not support the WinRM protocol")
-			},
-		},
-		{
-			config: provider.ConnectorConfig{
-				Protocol: provider.ProtocolWinRM,
-				Key:      encodedKey,
-			},
-			assert: func(t *testing.T, info provider.ConnectInfo, err error) {
-				require.ErrorContains(t, err, "plugin does not support the WinRM protocol")
+		{name: "failure",
+			run: func(t *testing.T, mock *instancegroup.MockInstanceGroup, group *InstanceGroup, ctx context.Context) {
+				group.size = 3
+
+				mock.EXPECT().Increase(ctx, 2).Return([]int64{1}, fmt.Errorf("some error"))
+
+				count, err := group.Increase(ctx, 2)
+				require.Error(t, err)
+				require.Equal(t, 1, count)
+				require.Equal(t, 4, group.size)
 			},
 		},
 	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mock := instancegroup.NewMockInstanceGroup(ctrl)
+			group := &InstanceGroup{
+				log:      hclog.NewNullLogger(),
+				settings: provider.Settings{},
+				group:    mock,
+			}
 
-	for _, tc := range tests {
-		t.Run("", func(t *testing.T) {
-			group.settings.ConnectorConfig = tc.config
+			testCase.run(t, mock, group, context.Background())
+		})
+	}
+}
 
-			info, err := group.ConnectInfo(ctx, "218452")
-			tc.assert(t, info, err)
+func TestDecrease(t *testing.T) {
+	testCases := []struct {
+		name string
+		run  func(t *testing.T, mock *instancegroup.MockInstanceGroup, group *InstanceGroup, ctx context.Context)
+	}{
+		{name: "success",
+			run: func(t *testing.T, mock *instancegroup.MockInstanceGroup, group *InstanceGroup, ctx context.Context) {
+				group.size = 2
+
+				mock.EXPECT().Decrease(ctx, []int64{1, 2}).Return([]int64{1, 2}, nil)
+
+				result, err := group.Decrease(ctx, []string{"1", "2"})
+				require.NoError(t, err)
+				require.Equal(t, []string{"1", "2"}, result)
+
+				require.Equal(t, 0, group.size)
+			},
+		},
+		{name: "failure",
+			run: func(t *testing.T, mock *instancegroup.MockInstanceGroup, group *InstanceGroup, ctx context.Context) {
+				group.size = 2
+
+				mock.EXPECT().Decrease(ctx, []int64{1, 2}).Return([]int64{1}, fmt.Errorf("some error"))
+
+				result, err := group.Decrease(ctx, []string{"1", "2"})
+				require.Error(t, err)
+				require.Equal(t, []string{"1"}, result)
+
+				require.Equal(t, 1, group.size)
+			},
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mock := instancegroup.NewMockInstanceGroup(ctrl)
+			group := &InstanceGroup{
+				log:      hclog.NewNullLogger(),
+				settings: provider.Settings{},
+				group:    mock,
+			}
+
+			testCase.run(t, mock, group, context.Background())
+		})
+	}
+}
+
+func TestUpdate(t *testing.T) {
+	testCases := []struct {
+		name string
+		run  func(t *testing.T, mock *instancegroup.MockInstanceGroup, group *InstanceGroup, ctx context.Context)
+	}{
+		{name: "success",
+			run: func(t *testing.T, mock *instancegroup.MockInstanceGroup, group *InstanceGroup, ctx context.Context) {
+				mock.EXPECT().List(ctx).Return([]*hcloud.Server{{ID: 1, Status: hcloud.ServerStatusRunning}}, nil)
+
+				updateIDs := make([]string, 0)
+				err := group.Update(ctx, func(id string, state provider.State) {
+					updateIDs = append(updateIDs, id)
+				})
+				require.NoError(t, err)
+				require.Equal(t, []string{"1"}, updateIDs)
+				require.Equal(t, 1, group.size)
+			},
+		},
+		{name: "failure",
+			run: func(t *testing.T, mock *instancegroup.MockInstanceGroup, group *InstanceGroup, ctx context.Context) {
+				mock.EXPECT().List(ctx).Return(nil, fmt.Errorf("some error"))
+
+				err := group.Update(ctx, func(id string, state provider.State) {
+					require.Fail(t, "update should not have been called")
+				})
+				require.Error(t, err)
+			},
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mock := instancegroup.NewMockInstanceGroup(ctrl)
+			group := &InstanceGroup{
+				log:      hclog.NewNullLogger(),
+				settings: provider.Settings{},
+				group:    mock,
+			}
+
+			testCase.run(t, mock, group, context.Background())
+		})
+	}
+}
+
+func TestConnectInfo(t *testing.T) {
+	testCases := []struct {
+		name string
+		run  func(t *testing.T, mock *instancegroup.MockInstanceGroup, group *InstanceGroup, ctx context.Context)
+	}{
+		{name: "success",
+			run: func(t *testing.T, mock *instancegroup.MockInstanceGroup, group *InstanceGroup, ctx context.Context) {
+				group.settings.UseStaticCredentials = true
+				group.settings.Key = []byte("-----BEGIN OPENSSH PRIVATE KEY-----")
+
+				mock.EXPECT().Get(ctx, gomock.Any()).Return(hcloud.ServerFromSchema(
+					schema.Server{
+						ID:     1,
+						Name:   "existing-1",
+						Status: "running",
+						Image: &schema.Image{
+							OSFlavor:  "debian",
+							OSVersion: hcloud.Ptr("12"),
+						},
+						ServerType: schema.ServerType{
+							Name:         "cpx11",
+							Architecture: "x86",
+						},
+						PublicNet: schema.ServerPublicNet{
+							IPv4: schema.ServerPublicNetIPv4{
+								IP: "37.1.1.1",
+							},
+						},
+						PrivateNet: []schema.ServerPrivateNet{
+							{IP: "10.0.1.2"},
+						},
+					},
+				), nil)
+
+				result, err := group.ConnectInfo(ctx, "1")
+				require.NoError(t, err)
+				require.Equal(t, provider.ConnectInfo{
+					ConnectorConfig: provider.ConnectorConfig{
+						OS:                   "debian",
+						Arch:                 "amd64",
+						Protocol:             "ssh",
+						UseStaticCredentials: true,
+						Username:             "root",
+						Key:                  []byte("-----BEGIN OPENSSH PRIVATE KEY-----"),
+					},
+					ID:           "1",
+					ExternalAddr: "37.1.1.1",
+					InternalAddr: "10.0.1.2",
+				}, result)
+			},
+		},
+		{name: "failure",
+			run: func(t *testing.T, mock *instancegroup.MockInstanceGroup, group *InstanceGroup, ctx context.Context) {
+				mock.EXPECT().Get(ctx, gomock.Any()).Return(nil, fmt.Errorf("some error"))
+
+				result, err := group.ConnectInfo(ctx, "1")
+				require.Error(t, err)
+				require.Equal(t, provider.ConnectInfo{
+					ConnectorConfig: provider.ConnectorConfig{
+						Protocol: "ssh",
+						Username: "root",
+					},
+				}, result)
+			},
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mock := instancegroup.NewMockInstanceGroup(ctrl)
+			group := &InstanceGroup{
+				log:      hclog.NewNullLogger(),
+				settings: provider.Settings{},
+				group:    mock,
+			}
+
+			group.settings.Protocol = "ssh"
+			group.settings.Username = "root"
+
+			testCase.run(t, mock, group, context.Background())
 		})
 	}
 }

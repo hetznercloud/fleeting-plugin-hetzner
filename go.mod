@@ -8,6 +8,7 @@ require (
 	github.com/hetznercloud/hcloud-go/v2 v2.8.0
 	github.com/stretchr/testify v1.9.0
 	gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20240515132427-669ba1469989
+	go.uber.org/mock v0.4.0
 	golang.org/x/crypto v0.23.0
 )
 

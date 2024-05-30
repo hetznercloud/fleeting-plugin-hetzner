@@ -45,13 +45,10 @@ The following parameters are supported:
 
 The connector config is currently hardwired as follows:
 
-| Parameter                | Value                                                                             |
-| ------------------------ | --------------------------------------------------------------------------------- |
-| `os`                     | Only `linux` is supported.                                                        |
-| `protocol`               | `ssh` (`winrm` is not supported)                                                  |
-| `username`               | `root`; the Hetzner Cloud API does not seem to allow overriding this.             |
-| `use_static_credentials` | `false`; a unique SSH private/public key will be created for each server created. |
-| `key_path`               | None.                                                                             |
+| Parameter  | Value                            |
+| ---------- | -------------------------------- |
+| `os`       | Only `linux` is supported.       |
+| `protocol` | `ssh` (`winrm` is not supported) |
 
 ## Examples
 
@@ -88,7 +85,7 @@ autoscaler will otherwise complaining about `"missing docker configuration"`.
       token = "<insert-token-here>"
 
       location    = "hel1"
-      server_type = "cx11"
+      server_type = "cpx11"
 
       # docker-ce is an "app" image provided by Hetzner which is based on Ubuntu 22.04, but provides
       # Docker CE preinstalled: https://docs.hetzner.com/cloud/apps/list/docker-ce/
