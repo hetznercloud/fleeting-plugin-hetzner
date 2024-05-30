@@ -1,6 +1,6 @@
 default:
   tags:
-    - hetzner-docker
+    - hetzner-docker-autoscaler
 
 variables:
   GO_VERSION: 1.21
