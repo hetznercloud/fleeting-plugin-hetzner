@@ -7,7 +7,6 @@ import (
 	"math"
 	"net/http"
 	"path"
-	"strconv"
 	"time"
 
 	"github.com/hashicorp/go-hclog"
@@ -75,7 +74,7 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 
 	// Prepare credentials
 	if !g.settings.UseStaticCredentials {
-		g.log.Info("generating new ssh key")
+		g.log.Info("generating ssh key")
 		sshPrivateKey, sshPublicKey, err := utils.GenerateSSHKeyPair()
 		if err != nil {
 			return info, err
@@ -88,7 +87,7 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 			return info, err
 		}
 	} else if len(g.settings.Key) > 0 {
-		g.log.Info("using configured static ssh key")
+		g.log.Info("using static ssh key")
 		sshPublicKey, err := utils.GenerateSSHPublicKey(g.settings.Key)
 		if err != nil {
 			return info, err
@@ -157,13 +156,13 @@ func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state
 			state = provider.StateRunning
 
 		case hcloud.ServerStatusMigrating, hcloud.ServerStatusRebuilding, hcloud.ServerStatusUnknown:
-			g.log.Debug("unhandled instance status", "id", instance.ID, "status", instance.Status)
+			g.log.Debug("unhandled instance status", "id", utils.FormatID(instance.ID), "status", instance.Status)
 
 		default:
-			g.log.Error("unexpected instance status", "id", instance.ID, "status", instance.Status)
+			g.log.Error("unexpected instance status", "id", utils.FormatID(instance.ID), "status", instance.Status)
 		}
 
-		update(strconv.FormatInt(instance.ID, 10), state)
+		update(utils.FormatID(instance.ID), state)
 	}
 
 	return nil
@@ -242,7 +241,7 @@ func (g *InstanceGroup) Shutdown(ctx context.Context) error {
 	errs := make([]error, 0)
 
 	if g.sshKey != nil {
-		g.log.Debug("deleting ssh key", "id", g.sshKey.ID)
+		g.log.Debug("deleting ssh key", "id", utils.FormatID(g.sshKey.ID))
 		_, err := g.client.SSHKey.Delete(ctx, g.sshKey)
 		if err != nil {
 			errs = append(errs, err)
