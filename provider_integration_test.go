@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
 	"gitlab.com/gitlab-org/fleeting/fleeting/integration"
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
 
@@ -16,23 +17,60 @@ func TestProvisioning(t *testing.T) {
 		t.Skip("mandatory environment variable HCLOUD_TOKEN not set")
 	}
 
-	integration.TestProvisioning(t,
-		integration.BuildPluginBinary(t, "cmd/fleeting-plugin-hetzner", "fleeting-plugin-hetzner"),
-		integration.Config{
-			PluginConfig: InstanceGroup{
-				Name: "fleeting-" + utils.GenerateRandomID(),
+	pluginBinary := integration.BuildPluginBinary(t, "cmd/fleeting-plugin-hetzner", "fleeting-plugin-hetzner")
 
-				Token: os.Getenv("HCLOUD_TOKEN"),
+	t.Run("generated credentials", func(t *testing.T) {
+		t.Parallel()
 
-				Location:   "hel1",
-				ServerType: "cpx11",
-				Image:      "ubuntu-24.04",
+		integration.TestProvisioning(t,
+			pluginBinary,
+			integration.Config{
+				PluginConfig: InstanceGroup{
+					Name: "fleeting-" + utils.GenerateRandomID(),
+
+					Token: os.Getenv("HCLOUD_TOKEN"),
+
+					Location:   "hel1",
+					ServerType: "cpx11",
+					Image:      "ubuntu-24.04",
+				},
+				ConnectorConfig: provider.ConnectorConfig{
+					Timeout: 10 * time.Minute,
+				},
+				MaxInstances:    3,
+				UseExternalAddr: true,
 			},
-			ConnectorConfig: provider.ConnectorConfig{
-				Timeout: 10 * time.Minute,
+		)
+	})
+
+	t.Run("static credentials", func(t *testing.T) {
+		t.Parallel()
+
+		_, sshPrivateKey, err := utils.GenerateSSHKeyPair()
+		require.NoError(t, err)
+
+		integration.TestProvisioning(t,
+			pluginBinary,
+			integration.Config{
+				PluginConfig: InstanceGroup{
+					Name: "fleeting-" + utils.GenerateRandomID(),
+
+					Token: os.Getenv("HCLOUD_TOKEN"),
+
+					Location:   "hel1",
+					ServerType: "cpx11",
+					Image:      "ubuntu-24.04",
+				},
+				ConnectorConfig: provider.ConnectorConfig{
+					Timeout: 10 * time.Minute,
+
+					UseStaticCredentials: true,
+					Username:             "root",
+					Key:                  sshPrivateKey,
+				},
+				MaxInstances:    3,
+				UseExternalAddr: true,
 			},
-			MaxInstances:    3,
-			UseExternalAddr: true,
-		},
-	)
+		)
+	})
 }
