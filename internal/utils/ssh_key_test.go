@@ -9,11 +9,11 @@ import (
 )
 
 func TestGenerateSSHKeyPair(t *testing.T) {
-	pubBytes, privBytes, err := GenerateSSHKeyPair()
+	privBytes, pubBytes, err := GenerateSSHKeyPair()
 	assert.Nil(t, err)
 
-	pub := string(pubBytes)
 	priv := string(privBytes)
+	pub := string(pubBytes)
 
 	if !(strings.HasPrefix(priv, "-----BEGIN OPENSSH PRIVATE KEY-----\n") &&
 		strings.HasSuffix(priv, "-----END OPENSSH PRIVATE KEY-----\n")) {
@@ -26,7 +26,7 @@ func TestGenerateSSHKeyPair(t *testing.T) {
 }
 
 func TestGenerateSSHPublicKey(t *testing.T) {
-	pubBytesOrig, privBytes, err := GenerateSSHKeyPair()
+	privBytes, pubBytesOrig, err := GenerateSSHKeyPair()
 	require.NoError(t, err)
 
 	pubBytes, err := GenerateSSHPublicKey(privBytes)

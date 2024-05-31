@@ -138,7 +138,7 @@ func (g *instanceGroup) Increase(ctx context.Context, delta int) ([]int64, error
 			continue
 		}
 
-		results = append(results, newResourceActions(result.Server.ID, MergeNextActions(result.Action, result.NextActions)...))
+		results = append(results, newResourceActions(result.Server.ID, AppendNextActions(result.Action, result.NextActions)...))
 	}
 
 	for _, result := range results {

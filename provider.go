@@ -76,7 +76,7 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 	// Prepare credentials
 	if !g.settings.UseStaticCredentials {
 		g.log.Info("generating new ssh key")
-		sshPublicKey, sshPrivateKey, err := utils.GenerateSSHKeyPair()
+		sshPrivateKey, sshPublicKey, err := utils.GenerateSSHKeyPair()
 		if err != nil {
 			return info, err
 		}

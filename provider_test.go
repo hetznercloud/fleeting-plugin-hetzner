@@ -23,7 +23,7 @@ import (
 func sshKeyFixture(t *testing.T) ([]byte, schema.SSHKey) {
 	t.Helper()
 
-	publicKey, privateKey, err := utils.GenerateSSHKeyPair()
+	privateKey, publicKey, err := utils.GenerateSSHKeyPair()
 	if err != nil {
 		t.Fatal(err)
 	}
