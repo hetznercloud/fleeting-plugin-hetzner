@@ -46,7 +46,7 @@ func TestProvisioning(t *testing.T) {
 	t.Run("static credentials", func(t *testing.T) {
 		t.Parallel()
 
-		_, sshPrivateKey, err := utils.GenerateSSHKeyPair()
+		sshPrivateKey, _, err := utils.GenerateSSHKeyPair()
 		require.NoError(t, err)
 
 		integration.TestProvisioning(t,
