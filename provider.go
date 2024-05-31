@@ -13,6 +13,7 @@ import (
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/kit/sshutils"
 
 	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/instancegroup"
 	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/utils"
@@ -75,7 +76,7 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 	// Prepare credentials
 	if !g.settings.UseStaticCredentials {
 		g.log.Info("generating ssh key")
-		sshPrivateKey, sshPublicKey, err := utils.GenerateSSHKeyPair()
+		sshPrivateKey, sshPublicKey, err := sshutils.GenerateKeyPair()
 		if err != nil {
 			return info, err
 		}
@@ -88,7 +89,7 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 		}
 	} else if len(g.settings.Key) > 0 {
 		g.log.Info("using static ssh key")
-		sshPublicKey, err := utils.GenerateSSHPublicKey(g.settings.Key)
+		sshPublicKey, err := sshutils.GeneratePublicKey(g.settings.Key)
 		if err != nil {
 			return info, err
 		}

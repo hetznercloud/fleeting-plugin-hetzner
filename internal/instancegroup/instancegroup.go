@@ -7,6 +7,7 @@ import (
 	"maps"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/actionutils"
 
 	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/utils"
 )
@@ -138,7 +139,7 @@ func (g *instanceGroup) Increase(ctx context.Context, delta int) ([]int64, error
 			continue
 		}
 
-		results = append(results, newResourceActions(result.Server.ID, AppendNextActions(result.Action, result.NextActions)...))
+		results = append(results, newResourceActions(result.Server.ID, actionutils.AppendNextActions(result.Action, result.NextActions)...))
 	}
 
 	for _, result := range results {

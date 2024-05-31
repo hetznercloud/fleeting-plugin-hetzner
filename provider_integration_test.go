@@ -9,6 +9,8 @@ import (
 	"gitlab.com/gitlab-org/fleeting/fleeting/integration"
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
 
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/kit/sshutils"
+
 	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/utils"
 )
 
@@ -46,7 +48,7 @@ func TestProvisioning(t *testing.T) {
 	t.Run("static credentials", func(t *testing.T) {
 		t.Parallel()
 
-		sshPrivateKey, _, err := utils.GenerateSSHKeyPair()
+		sshPrivateKey, _, err := sshutils.GenerateKeyPair()
 		require.NoError(t, err)
 
 		integration.TestProvisioning(t,

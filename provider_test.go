@@ -13,22 +13,22 @@ import (
 	"go.uber.org/mock/gomock"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/kit/sshutils"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/schema"
 
 	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/instancegroup"
 	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/mocked"
-	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/utils"
 )
 
 func sshKeyFixture(t *testing.T) ([]byte, schema.SSHKey) {
 	t.Helper()
 
-	privateKey, publicKey, err := utils.GenerateSSHKeyPair()
+	privateKey, publicKey, err := sshutils.GenerateKeyPair()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	fingerprint, err := utils.GetSSHPublicKeyFingerprint(publicKey)
+	fingerprint, err := sshutils.GetPublicKeyFingerprint(publicKey)
 	if err != nil {
 		t.Fatal(err)
 	}

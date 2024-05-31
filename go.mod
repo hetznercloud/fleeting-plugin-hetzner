@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/boumenot/gocover-cobertura v1.2.0
 	github.com/hashicorp/go-hclog v1.6.3
-	github.com/hetznercloud/hcloud-go/v2 v2.8.0
+	github.com/hetznercloud/hcloud-go/v2 v2.9.0
 	github.com/stretchr/testify v1.9.0
 	gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20240531144118-752ebc78a2c0
 	go.uber.org/mock v0.4.0
@@ -41,7 +41,7 @@ require (
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/prometheus/client_golang v1.19.0 // indirect
+	github.com/prometheus/client_golang v1.19.1 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.48.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect

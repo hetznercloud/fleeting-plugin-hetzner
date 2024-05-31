@@ -5,12 +5,11 @@ import (
 	"fmt"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
-
-	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/utils"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/kit/sshutils"
 )
 
 func (g *InstanceGroup) UploadSSHPublicKey(ctx context.Context, pub []byte) (sshKey *hcloud.SSHKey, err error) {
-	fingerprint, err := utils.GetSSHPublicKeyFingerprint(pub)
+	fingerprint, err := sshutils.GetPublicKeyFingerprint(pub)
 	if err != nil {
 		return nil, fmt.Errorf("could not get ssh key fingerprint: %w", err)
 	}
