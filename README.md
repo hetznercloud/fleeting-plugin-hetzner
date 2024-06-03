@@ -34,7 +34,7 @@ check_interval = 0
 [[runners]]
 name = "runner-docker-autoscaler0"
 url = "https://gitlab.com"
-id = 36151752
+id = <your-gitlab-project-id>
 token = "<your-gitlab-runner-authentication-token>"
 
 executor = "docker-autoscaler"
@@ -98,6 +98,12 @@ idle_time = "20m0s"
 periods = ["* * * * *"]
 idle_count = 0
 idle_time = "0s"
+```
+
+Before starting `gitlab-runner` with the configuration above, you must [install the fleeting plugin](https://docs.gitlab.com/runner/fleet_scaling/fleeting.html#install-with-the-oci-registry-distribution), using the following command:
+
+```sh
+gitlab-runner fleeting install
 ```
 
 ## Testing the plugin locally
