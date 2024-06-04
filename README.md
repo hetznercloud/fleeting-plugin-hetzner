@@ -49,6 +49,8 @@ capacity_per_instance = 4
 max_instances = 5
 max_use_count = 0
 
+// cloud-init>=23.4 returns an exit code 2 when the setup succeeded but some recoverable errors occurred.
+// See https://cloudinit.readthedocs.io/en/latest/explanation/return_codes.html
 instance_ready_command = "cloud-init status --wait || test $? -eq 2"
 
 [runners.autoscaler.plugin_config]
