@@ -71,15 +71,9 @@ apt:
       source: deb https://download.docker.com/linux/ubuntu $RELEASE stable
       keyid: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
 
-    gitlab-runner.list:
-      source: deb https://packages.gitlab.com/runner/gitlab-runner/ubuntu/ $RELEASE main
-      keyid: F6403F6544A38863DAA0B6E03F01618A51312F3F
-
 packages:
   - ca-certificates
   - docker-ce
-  - git
-  - gitlab-runner
 
 swap:
   filename: /var/swap.bin
