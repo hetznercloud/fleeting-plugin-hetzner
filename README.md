@@ -34,7 +34,6 @@ check_interval = 0
 [[runners]]
 name = "runner-docker-autoscaler0"
 url = "https://gitlab.com"
-id = <your-gitlab-project-id>
 token = "<your-gitlab-runner-authentication-token>"
 
 executor = "docker-autoscaler"
@@ -62,7 +61,7 @@ server_type = "cpx41"
 image = "ubuntu-24.04"
 private_networks = []
 
-user_data_file = """#cloud-config
+user_data = """#cloud-config
 package_update: true
 package_upgrade: true
 
