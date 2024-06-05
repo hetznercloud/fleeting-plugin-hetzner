@@ -85,14 +85,17 @@ swap:
 use_external_addr = true
 
 [[runners.autoscaler.policy]]
-periods = ["* 7-19 * * mon-fri"]
-idle_count = 1
-idle_time = "20m0s"
-
-[[runners.autoscaler.policy]]
 periods = ["* * * * *"]
+timezone = "Europe/Berlin"
 idle_count = 0
 idle_time = "0s"
+
+[[runners.autoscaler.policy]]
+periods = ["* 7-19 * * 1-5"]
+timezone = "Europe/Berlin"
+# idle_count refers to the number of jobs, not the number of instances.
+idle_count = 8
+idle_time = "50m"
 ```
 
 Before starting `gitlab-runner` with the configuration above, you must [install the fleeting plugin](https://docs.gitlab.com/runner/fleet_scaling/fleeting.html#install-with-the-oci-registry-distribution), using the following command:
