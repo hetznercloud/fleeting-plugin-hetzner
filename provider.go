@@ -27,14 +27,16 @@ type InstanceGroup struct {
 	Token    string `json:"token"`
 	Endpoint string `json:"endpoint"`
 
-	Location           string   `json:"location"`
-	ServerType         string   `json:"server_type"`
-	Image              string   `json:"image"`
-	PublicIPv4Disabled bool     `json:"public_ipv4_disabled"`
-	PublicIPv6Disabled bool     `json:"public_ipv6_disabled"`
-	PrivateNetworks    []string `json:"private_networks"`
-	UserData           string   `json:"user_data"`
-	UserDataFile       string   `json:"user_data_file"`
+	Location     string `json:"location"`
+	ServerType   string `json:"server_type"`
+	Image        string `json:"image"`
+	UserData     string `json:"user_data"`
+	UserDataFile string `json:"user_data_file"`
+
+	PublicIPv4Disabled bool `json:"public_ipv4_disabled"`
+	PublicIPv6Disabled bool `json:"public_ipv6_disabled"`
+
+	PrivateNetworks []string `json:"private_networks"`
 
 	sshKey *hcloud.SSHKey
 	labels map[string]string
@@ -105,10 +107,10 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 		Location:           g.Location,
 		ServerType:         g.ServerType,
 		Image:              g.Image,
+		UserData:           g.UserData,
 		PublicIPv4Disabled: g.PublicIPv4Disabled,
 		PublicIPv6Disabled: g.PublicIPv6Disabled,
 		PrivateNetworks:    g.PrivateNetworks,
-		UserData:           g.UserData,
 		Labels:             g.labels,
 	}
 
