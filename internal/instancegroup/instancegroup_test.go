@@ -9,8 +9,9 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutils"
 
-	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/mocked"
+	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/testutils"
 )
 
 var (
@@ -23,11 +24,11 @@ var (
 )
 
 func TestInit(t *testing.T) {
-	server := httptest.NewServer(mocked.Handler(t,
-		[]mocked.Request{
-			mocked.GetLocationHel1Request,
-			mocked.GetServerTypeCPX11Request,
-			mocked.GetImageDebian12Request,
+	server := httptest.NewServer(mockutils.Handler(t,
+		[]mockutils.Request{
+			testutils.GetLocationHel1Request,
+			testutils.GetServerTypeCPX11Request,
+			testutils.GetImageDebian12Request,
 		},
 	))
 
@@ -43,15 +44,15 @@ func TestInit(t *testing.T) {
 }
 
 func TestIncrease(t *testing.T) {
-	server := httptest.NewServer(mocked.Handler(t,
-		[]mocked.Request{
-			mocked.GetLocationHel1Request,
-			mocked.GetServerTypeCPX11Request,
-			mocked.GetImageDebian12Request,
+	server := httptest.NewServer(mockutils.Handler(t,
+		[]mockutils.Request{
+			testutils.GetLocationHel1Request,
+			testutils.GetServerTypeCPX11Request,
+			testutils.GetImageDebian12Request,
 			{
 				Method: "POST", Path: "/servers",
 				Status: 201,
-				Body: `{
+				JSONRaw: `{
 					"server": { "id": 1 },
 					"action": { "id": 10, "status": "running" },
 					"next_actions": [
@@ -62,7 +63,7 @@ func TestIncrease(t *testing.T) {
 			{
 				Method: "POST", Path: "/servers",
 				Status: 201,
-				Body: `{
+				JSONRaw: `{
 					"server": { "id": 2 },
 					"action": { "id": 30, "status": "running" },
 					"next_actions": [
@@ -73,7 +74,7 @@ func TestIncrease(t *testing.T) {
 			{
 				Method: "GET", Path: "/actions?id=10&id=20&page=1&sort=status&sort=id",
 				Status: 200,
-				Body: `{
+				JSONRaw: `{
 					"actions": [
 						{ "id": 10, "status": "success" },
 						{ "id": 20, "status": "success" }
@@ -83,7 +84,7 @@ func TestIncrease(t *testing.T) {
 			{
 				Method: "GET", Path: "/actions?id=30&id=40&page=1&sort=status&sort=id",
 				Status: 200,
-				Body: `{
+				JSONRaw: `{
 					"actions": [
 						{ "id": 30, "status": "success" },
 						{ "id": 40, "status": "success" }
@@ -109,29 +110,29 @@ func TestIncrease(t *testing.T) {
 }
 
 func TestDecrease(t *testing.T) {
-	server := httptest.NewServer(mocked.Handler(t,
-		[]mocked.Request{
-			mocked.GetLocationHel1Request,
-			mocked.GetServerTypeCPX11Request,
-			mocked.GetImageDebian12Request,
+	server := httptest.NewServer(mockutils.Handler(t,
+		[]mockutils.Request{
+			testutils.GetLocationHel1Request,
+			testutils.GetServerTypeCPX11Request,
+			testutils.GetImageDebian12Request,
 			{
 				Method: "DELETE", Path: "/servers/1",
 				Status: 200,
-				Body: `{
+				JSONRaw: `{
 					"action": { "id": 10, "status": "running" }
 				}`,
 			},
 			{
 				Method: "DELETE", Path: "/servers/2",
 				Status: 200,
-				Body: `{
+				JSONRaw: `{
 					"action": { "id": 20, "status": "running" }
 				}`,
 			},
 			{
 				Method: "GET", Path: "/actions?id=10&page=1&sort=status&sort=id",
 				Status: 200,
-				Body: `{
+				JSONRaw: `{
 					"actions": [
 						{ "id": 10, "status": "success" }
 					]
@@ -140,7 +141,7 @@ func TestDecrease(t *testing.T) {
 			{
 				Method: "GET", Path: "/actions?id=20&page=1&sort=status&sort=id",
 				Status: 200,
-				Body: `{
+				JSONRaw: `{
 					"actions": [
 						{ "id": 20, "status": "success" }
 					]

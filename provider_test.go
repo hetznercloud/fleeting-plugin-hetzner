@@ -3,8 +3,10 @@ package hetzner
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/go-hclog"
@@ -14,10 +16,11 @@ import (
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/kit/sshutils"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutils"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/schema"
 
 	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/instancegroup"
-	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/mocked"
+	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/testutils"
 )
 
 func sshKeyFixture(t *testing.T) ([]byte, schema.SSHKey) {
@@ -41,12 +44,15 @@ func TestInit(t *testing.T) {
 
 	testCases := []struct {
 		name     string
-		requests []mocked.Request
+		requests []mockutils.Request
 		run      func(t *testing.T, group *InstanceGroup, ctx context.Context, log hclog.Logger, settings provider.Settings)
 	}{
 		{name: "generated ssh key upload",
-			requests: []mocked.Request{
-				{Method: "GET", PathRegexp: `\/ssh_keys\?fingerprint=.*`,
+			requests: []mockutils.Request{
+				{Method: "GET",
+					Want: func(t *testing.T, r *http.Request) {
+						require.True(t, strings.HasPrefix(r.RequestURI, "/ssh_keys?fingerprint="))
+					},
 					Status: 200,
 					JSON:   schema.SSHKeyListResponse{SSHKeys: []schema.SSHKey{}},
 				},
@@ -58,9 +64,9 @@ func TestInit(t *testing.T) {
 					Status: 201,
 					JSON:   schema.SSHKeyCreateResponse{SSHKey: sshKey},
 				},
-				mocked.GetLocationHel1Request,
-				mocked.GetServerTypeCPX11Request,
-				mocked.GetImageDebian12Request,
+				testutils.GetLocationHel1Request,
+				testutils.GetServerTypeCPX11Request,
+				testutils.GetImageDebian12Request,
 				{Method: "GET", Path: "/ssh_keys?name=fleeting",
 					Status: 200,
 					JSON: schema.SSHKeyListResponse{
@@ -75,7 +81,7 @@ func TestInit(t *testing.T) {
 			},
 		},
 		{name: "static ssh key upload",
-			requests: []mocked.Request{
+			requests: []mockutils.Request{
 				{Method: "GET", Path: "/ssh_keys?fingerprint=" + url.QueryEscape(sshKey.Fingerprint),
 					Status: 200,
 					JSON: schema.SSHKeyListResponse{
@@ -92,9 +98,9 @@ func TestInit(t *testing.T) {
 					Status: 201,
 					JSON:   schema.SSHKeyCreateResponse{SSHKey: sshKey},
 				},
-				mocked.GetLocationHel1Request,
-				mocked.GetServerTypeCPX11Request,
-				mocked.GetImageDebian12Request,
+				testutils.GetLocationHel1Request,
+				testutils.GetServerTypeCPX11Request,
+				testutils.GetImageDebian12Request,
 				{Method: "GET", Path: "/ssh_keys?name=fleeting",
 					Status: 200,
 					JSON: schema.SSHKeyListResponse{
@@ -112,16 +118,16 @@ func TestInit(t *testing.T) {
 			},
 		},
 		{name: "static ssh key existing",
-			requests: []mocked.Request{
+			requests: []mockutils.Request{
 				{Method: "GET", Path: "/ssh_keys?fingerprint=" + url.QueryEscape(sshKey.Fingerprint),
 					Status: 200,
 					JSON: schema.SSHKeyListResponse{
 						SSHKeys: []schema.SSHKey{sshKey},
 					},
 				},
-				mocked.GetLocationHel1Request,
-				mocked.GetServerTypeCPX11Request,
-				mocked.GetImageDebian12Request,
+				testutils.GetLocationHel1Request,
+				testutils.GetServerTypeCPX11Request,
+				testutils.GetImageDebian12Request,
 				{Method: "GET", Path: "/ssh_keys?name=fleeting",
 					Status: 200,
 					JSON: schema.SSHKeyListResponse{
@@ -141,7 +147,7 @@ func TestInit(t *testing.T) {
 	}
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			server := httptest.NewServer(mocked.Handler(t, testCase.requests))
+			server := httptest.NewServer(mockutils.Handler(t, testCase.requests))
 
 			group := &InstanceGroup{
 				Name:       "fleeting",
