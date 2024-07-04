@@ -27,7 +27,7 @@ The [`[runners.autoscaler.plugin_config]` section](https://docs.gitlab.com/runne
     <td>string (<strong>required</strong>)</td>
     <td>
       <a href="https://docs.hetzner.com/cloud/api/getting-started/generating-api-token">Hetzner Cloud API token</a>
-      to access you project.
+      to access your Hetzner Cloud Project.
     </td>
   </tr>
   <tr>
@@ -73,6 +73,24 @@ The [`[runners.autoscaler.plugin_config]` section](https://docs.gitlab.com/runne
       Disable the instances public ipv4/ipv6. If no public IPs are enabled, you must
       enable a private network (see the <code>private_networks</code> config) to be able
       to communicate with the instances.
+    </td>
+  </tr>
+  <tr>
+    <td><code>public_ip_pool_enabled</code></td>
+    <td>boolean</td>
+    <td>
+      Enable a public IP pool, from which Hetzner Cloud Primary IPs will be picked when
+      creating new instances. This feature offers a way to have predictable public IPs
+      for the fleeting instances.
+    </td>
+  </tr>
+  <tr>
+    <td><code>public_ip_pool_selector</code></td>
+    <td>string</td>
+    <td>
+      Label selector (https://docs.hetzner.cloud/#label-selector) used to filter the
+      Hetzner Cloud Primary IPs in your Hetzner Cloud Project when populating the public
+      IP pool.
     </td>
   </tr>
   <tr>
