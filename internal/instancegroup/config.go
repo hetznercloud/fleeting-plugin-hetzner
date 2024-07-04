@@ -25,6 +25,12 @@ type Config struct {
 	PublicIPv4Disabled bool
 	// PublicIPv6Disabled disables the server public IPv6.
 	PublicIPv6Disabled bool
+	// PublicIPPoolEnabled enables the public IP pool, which offers a way to have
+	// predictable public IPs attached to new servers during there creations.
+	PublicIPPoolEnabled bool
+	// PublicIPPoolSelector is a label selector (https://docs.hetzner.cloud/#label-selector)
+	// used to filter the IPs when populating the IP pool.
+	PublicIPPoolSelector string
 
 	// PrivateNetworks is a list of Hetzner Cloud "Network" (name or id) to attach to
 	// the server. Run `hcloud network list` to list available ssh-keys.

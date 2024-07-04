@@ -9,6 +9,7 @@ import (
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/actionutils"
 
+	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/ippool"
 	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/utils"
 )
 
@@ -37,6 +38,7 @@ type instanceGroup struct {
 	config Config
 
 	client *hcloud.Client
+	ipPool *ippool.IPPool
 
 	location        *hcloud.Location
 	serverType      *hcloud.ServerType
@@ -107,6 +109,10 @@ func (g *instanceGroup) Init(ctx context.Context) (err error) {
 		maps.Copy(g.labels, map[string]string{"instance-group": g.name})
 	}
 
+	if g.config.PublicIPPoolEnabled {
+		g.ipPool = ippool.New(g.config.Location, g.config.PublicIPPoolSelector)
+	}
+
 	return nil
 }
 
@@ -114,6 +120,12 @@ func (g *instanceGroup) Increase(ctx context.Context, delta int) ([]int64, error
 	created := make([]int64, 0, delta)
 	errs := make([]error, 0, delta)
 	results := make([]resourceActions, 0, delta)
+
+	if g.config.PublicIPPoolEnabled {
+		if err := g.ipPool.Refresh(ctx, g.client); err != nil {
+			return nil, err
+		}
+	}
 
 	for i := delta; i > 0; i-- {
 		opts := hcloud.ServerCreateOpts{}
@@ -128,6 +140,25 @@ func (g *instanceGroup) Increase(ctx context.Context, delta int) ([]int64, error
 			EnableIPv4: !g.config.PublicIPv4Disabled,
 			EnableIPv6: !g.config.PublicIPv6Disabled,
 		}
+		if g.config.PublicIPPoolEnabled {
+			if !g.config.PublicIPv4Disabled {
+				ipv4, err := g.ipPool.NextIPv4()
+				if err != nil {
+					errs = append(errs, fmt.Errorf("could not get ipv4 from pool: %w", err))
+					continue
+				}
+				opts.PublicNet.IPv4 = ipv4
+			}
+			if !g.config.PublicIPv6Disabled {
+				ipv6, err := g.ipPool.NextIPv6()
+				if err != nil {
+					errs = append(errs, fmt.Errorf("could not get ipv6 from pool: %w", err))
+					continue
+				}
+				opts.PublicNet.IPv6 = ipv6
+			}
+		}
+
 		opts.Networks = g.privateNetworks
 		opts.SSHKeys = g.sshKeys
 
