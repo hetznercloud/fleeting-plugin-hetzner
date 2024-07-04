@@ -88,7 +88,7 @@ The [`[runners.autoscaler.plugin_config]` section](https://docs.gitlab.com/runne
     <td><code>public_ip_pool_selector</code></td>
     <td>string</td>
     <td>
-      Label selector (https://docs.hetzner.cloud/#label-selector) used to filter the
+      [Label selector](https://docs.hetzner.cloud/#label-selector) used to filter the
       Hetzner Cloud Primary IPs in your Hetzner Cloud Project when populating the public
       IP pool.
     </td>
