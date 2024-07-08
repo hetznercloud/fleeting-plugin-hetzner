@@ -7,7 +7,7 @@ require (
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hetznercloud/hcloud-go/v2 v2.10.2
 	github.com/stretchr/testify v1.9.0
-	gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20240531144118-752ebc78a2c0
+	gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20240708113315-42aa0a457699
 	go.uber.org/mock v0.4.0
 )
 
