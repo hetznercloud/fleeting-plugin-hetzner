@@ -7,7 +7,7 @@ require (
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hetznercloud/hcloud-go/v2 v2.10.2
 	github.com/stretchr/testify v1.9.0
-	gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20240708113315-42aa0a457699
+	gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20240710164541-562f7bd1e854
 	go.uber.org/mock v0.4.0
 )
 
@@ -34,7 +34,7 @@ require (
 	github.com/jcmturner/gokrb5/v8 v8.4.4 // indirect
 	github.com/jcmturner/rpc/v2 v2.0.3 // indirect
 	github.com/masterzen/simplexml v0.0.0-20190410153822-31eea3082786 // indirect
-	github.com/masterzen/winrm v0.0.0-20231227165926-e811dad5ac77 // indirect
+	github.com/masterzen/winrm v0.0.0-20240702205601-3fad6e106085 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
