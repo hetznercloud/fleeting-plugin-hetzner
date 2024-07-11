@@ -1,0 +1,13 @@
+services:
+  gitlab-runner:
+    build:
+      dockerfile: dev/Dockerfile
+    command:
+      - run
+      - --config=config.toml
+      - --listen-address=:9252
+    working_dir: /opt
+    volumes:
+      - ./dev/files:/opt
+    ports:
+      - 9252:9252

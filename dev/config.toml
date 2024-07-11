@@ -1,0 +1,62 @@
+concurrent = 10
+
+log_level = "info"
+log_format = "text"
+
+[[runners]]
+name = "hetzner-docker-autoscaler"
+url = "https://gitlab.com"
+token = "$RUNNER_TOKEN"
+
+executor = "docker-autoscaler"
+
+[runners.docker]
+image = "alpine:latest"
+volumes = ["/cache"]
+
+[runners.autoscaler]
+plugin = "fleeting-plugin-hetzner"
+
+capacity_per_instance = 2
+max_instances = 5
+max_use_count = 0
+
+instance_ready_command = "cloud-init status --wait || test $? -eq 2"
+
+[runners.autoscaler.plugin_config]
+name = "dev-docker-autoscaler"
+token = "$HCLOUD_TOKEN"
+
+location = "hel1"
+server_type = "cpx21"
+image = "ubuntu-24.04"
+
+user_data = """#cloud-config
+package_update: true
+package_upgrade: true
+
+apt:
+  sources:
+    docker.list:
+      source: deb [signed-by=$KEY_FILE] https://download.docker.com/linux/ubuntu $RELEASE stable
+      keyid: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+
+packages:
+  - ca-certificates
+  - docker-ce
+
+swap:
+  filename: /var/swap.bin
+  size: auto
+  maxsize: 4294967296 # 4GB
+"""
+
+[runners.autoscaler.connector_config]
+use_external_addr = true
+use_static_credentials = true
+username = "root"
+key_path = "./id_ed25519"
+
+[[runners.autoscaler.policy]]
+idle_count = 4
+idle_time = "20m0s"
