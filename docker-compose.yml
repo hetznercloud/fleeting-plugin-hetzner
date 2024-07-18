@@ -2,7 +2,9 @@ services:
   gitlab-runner:
     build:
       dockerfile: dev/Dockerfile
+    entrypoint: []
     command:
+      - gitlab-runner
       - run
       - --config=config.toml
       - --listen-address=:9252
