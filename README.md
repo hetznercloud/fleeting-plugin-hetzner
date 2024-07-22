@@ -18,7 +18,7 @@ make build
 
 ## Plugin Configuration
 
-See the [configuration reference](docs/configuration.md) for the available configuration.
+See the [configuration reference](docs/references/configuration.md) for the available configuration.
 
 ## Examples
 
