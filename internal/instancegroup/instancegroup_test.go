@@ -4,11 +4,9 @@ import (
 	"context"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutil"
 
 	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/testutils"
@@ -23,14 +21,6 @@ var (
 	}
 )
 
-func makeTestClient(endpoint string) *hcloud.Client {
-	return hcloud.NewClient(
-		hcloud.WithEndpoint(endpoint),
-		hcloud.WithRetryOpts(hcloud.RetryOpts{BackoffFunc: func(_ int) time.Duration { return 0 }, MaxRetries: 3}),
-		hcloud.WithPollBackoffFunc(func(_ int) time.Duration { return 0 }),
-	)
-}
-
 func TestInit(t *testing.T) {
 	server := httptest.NewServer(mockutil.Handler(t,
 		[]mockutil.Request{
@@ -40,7 +30,7 @@ func TestInit(t *testing.T) {
 		},
 	))
 
-	client := makeTestClient(server.URL)
+	client := testutils.MakeTestClient(server.URL)
 
 	group := New(client, "dummy", DefaultTestConfig)
 
@@ -99,7 +89,7 @@ func TestIncrease(t *testing.T) {
 		},
 	))
 
-	client := makeTestClient(server.URL)
+	client := testutils.MakeTestClient(server.URL)
 
 	group := New(client, "dummy", DefaultTestConfig)
 	err := group.Init(context.Background())
@@ -151,7 +141,7 @@ func TestDecrease(t *testing.T) {
 		},
 	))
 
-	client := makeTestClient(server.URL)
+	client := testutils.MakeTestClient(server.URL)
 
 	group := New(client, "dummy", DefaultTestConfig)
 	err := group.Init(context.Background())

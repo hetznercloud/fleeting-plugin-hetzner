@@ -10,6 +10,8 @@ import (
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutil"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/schema"
+
+	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/testutils"
 )
 
 func TestNextIP(t *testing.T) {
@@ -34,7 +36,7 @@ func TestNextIP(t *testing.T) {
 				JSON:   schema.PrimaryIPListResult{},
 			},
 		}))
-		testClient := hcloud.NewClient(hcloud.WithEndpoint(testServer.URL))
+		testClient := testutils.MakeTestClient(testServer.URL)
 
 		ipPool.Refresh(context.Background(), testClient)
 
@@ -71,7 +73,7 @@ func TestNextIP(t *testing.T) {
 				},
 			},
 		}))
-		testClient := hcloud.NewClient(hcloud.WithEndpoint(testServer.URL))
+		testClient := testutils.MakeTestClient(testServer.URL)
 
 		err := ipPool.Refresh(context.Background(), testClient)
 		require.NoError(t, err)
