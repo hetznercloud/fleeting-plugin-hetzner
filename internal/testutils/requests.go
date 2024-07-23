@@ -2,12 +2,12 @@ package testutils
 
 import (
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
-	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutils"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutil"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/schema"
 )
 
 var (
-	GetLocationHel1Request = mockutils.Request{
+	GetLocationHel1Request = mockutil.Request{
 		Method: "GET", Path: "/locations?name=hel1",
 		Status: 200,
 		JSON: schema.LocationListResponse{
@@ -16,7 +16,7 @@ var (
 			},
 		},
 	}
-	GetServerTypeCPX11Request = mockutils.Request{
+	GetServerTypeCPX11Request = mockutil.Request{
 		Method: "GET", Path: "/server_types?name=cpx11",
 		Status: 200,
 		JSON: schema.ServerTypeListResponse{
@@ -25,7 +25,7 @@ var (
 			},
 		},
 	}
-	GetImageDebian12Request = mockutils.Request{
+	GetImageDebian12Request = mockutil.Request{
 		Method: "GET", Path: "/images?architecture=x86&include_deprecated=true&name=debian-12",
 		Status: 200,
 		JSON: schema.ImageListResponse{
@@ -34,7 +34,7 @@ var (
 			},
 		},
 	}
-	ListServerEmptyRequest = mockutils.Request{
+	ListServerEmptyRequest = mockutil.Request{
 		Method: "GET", Path: "/servers?label_selector=instance-group%3Dfleeting&page=1",
 		Status: 200,
 		JSON:   schema.ServerListResponse{},

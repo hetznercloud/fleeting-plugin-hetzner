@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
-	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutils"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutil"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/schema"
 )
 
@@ -27,7 +27,7 @@ func TestNextIP(t *testing.T) {
 	t.Run("empty", func(t *testing.T) {
 		ipPool := New("hel1", "instance-group=fleeting")
 
-		testServer := httptest.NewServer(mockutils.Handler(t, []mockutils.Request{
+		testServer := httptest.NewServer(mockutil.Handler(t, []mockutil.Request{
 			{
 				Method: "GET", Path: "/primary_ips?label_selector=instance-group%3Dfleeting&page=1",
 				Status: 200,
@@ -53,7 +53,7 @@ func TestNextIP(t *testing.T) {
 		datacenterHel1 := schema.Datacenter{Location: schema.Location{Name: "hel1"}}
 		datacenterFsn1 := schema.Datacenter{Location: schema.Location{Name: "fsn1"}}
 
-		testServer := httptest.NewServer(mockutils.Handler(t, []mockutils.Request{
+		testServer := httptest.NewServer(mockutil.Handler(t, []mockutil.Request{
 			{
 				Method: "GET", Path: "/primary_ips?label_selector=instance-group%3Dfleeting&page=1",
 				Status: 200,

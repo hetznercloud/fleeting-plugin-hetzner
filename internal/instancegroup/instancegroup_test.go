@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
-	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutils"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutil"
 
 	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/testutils"
 )
@@ -23,20 +23,25 @@ var (
 	}
 )
 
+func makeTestClient(endpoint string) *hcloud.Client {
+	return hcloud.NewClient(
+		hcloud.WithEndpoint(endpoint),
+		hcloud.WithRetryOpts(hcloud.RetryOpts{BackoffFunc: func(_ int) time.Duration { return 0 }, MaxRetries: 3}),
+		hcloud.WithPollBackoffFunc(func(_ int) time.Duration { return 0 }),
+	)
+}
+
 func TestInit(t *testing.T) {
-	server := httptest.NewServer(mockutils.Handler(t,
-		[]mockutils.Request{
+	server := httptest.NewServer(mockutil.Handler(t,
+		[]mockutil.Request{
 			testutils.GetLocationHel1Request,
 			testutils.GetServerTypeCPX11Request,
 			testutils.GetImageDebian12Request,
 		},
 	))
 
-	client := hcloud.NewClient(
-		hcloud.WithEndpoint(server.URL),
-		hcloud.WithBackoffFunc(func(_ int) time.Duration { return 0 }),
-		hcloud.WithPollBackoffFunc(func(_ int) time.Duration { return 0 }),
-	)
+	client := makeTestClient(server.URL)
+
 	group := New(client, "dummy", DefaultTestConfig)
 
 	err := group.Init(context.Background())
@@ -44,8 +49,8 @@ func TestInit(t *testing.T) {
 }
 
 func TestIncrease(t *testing.T) {
-	server := httptest.NewServer(mockutils.Handler(t,
-		[]mockutils.Request{
+	server := httptest.NewServer(mockutil.Handler(t,
+		[]mockutil.Request{
 			testutils.GetLocationHel1Request,
 			testutils.GetServerTypeCPX11Request,
 			testutils.GetImageDebian12Request,
@@ -94,11 +99,7 @@ func TestIncrease(t *testing.T) {
 		},
 	))
 
-	client := hcloud.NewClient(
-		hcloud.WithEndpoint(server.URL),
-		hcloud.WithBackoffFunc(func(_ int) time.Duration { return 0 }),
-		hcloud.WithPollBackoffFunc(func(_ int) time.Duration { return 0 }),
-	)
+	client := makeTestClient(server.URL)
 
 	group := New(client, "dummy", DefaultTestConfig)
 	err := group.Init(context.Background())
@@ -110,8 +111,8 @@ func TestIncrease(t *testing.T) {
 }
 
 func TestDecrease(t *testing.T) {
-	server := httptest.NewServer(mockutils.Handler(t,
-		[]mockutils.Request{
+	server := httptest.NewServer(mockutil.Handler(t,
+		[]mockutil.Request{
 			testutils.GetLocationHel1Request,
 			testutils.GetServerTypeCPX11Request,
 			testutils.GetImageDebian12Request,
@@ -150,11 +151,7 @@ func TestDecrease(t *testing.T) {
 		},
 	))
 
-	client := hcloud.NewClient(
-		hcloud.WithEndpoint(server.URL),
-		hcloud.WithBackoffFunc(func(_ int) time.Duration { return 0 }),
-		hcloud.WithPollBackoffFunc(func(_ int) time.Duration { return 0 }),
-	)
+	client := makeTestClient(server.URL)
 
 	group := New(client, "dummy", DefaultTestConfig)
 	err := group.Init(context.Background())

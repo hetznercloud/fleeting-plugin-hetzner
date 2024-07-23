@@ -13,7 +13,7 @@ import (
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
-	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/kit/sshutils"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/kit/sshutil"
 
 	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/instancegroup"
 	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/utils"
@@ -71,7 +71,7 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 		hcloud.WithHTTPClient(&http.Client{
 			Timeout: 15 * time.Second,
 		}),
-		hcloud.WithPollBackoffFunc(utils.ExponentialBackoffWithOpts(utils.ExponentialBackoffOpts{
+		hcloud.WithPollBackoffFunc(hcloud.ExponentialBackoffWithOpts(hcloud.ExponentialBackoffOpts{
 			Base:       time.Second,
 			Multiplier: 2.0,
 			Cap:        5 * time.Second,
@@ -85,7 +85,7 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 	// Prepare credentials
 	if !g.settings.UseStaticCredentials {
 		g.log.Info("generating ssh key")
-		sshPrivateKey, sshPublicKey, err := sshutils.GenerateKeyPair()
+		sshPrivateKey, sshPublicKey, err := sshutil.GenerateKeyPair()
 		if err != nil {
 			return info, err
 		}
@@ -98,7 +98,7 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 		}
 	} else if len(g.settings.Key) > 0 {
 		g.log.Info("using static ssh key")
-		sshPublicKey, err := sshutils.GeneratePublicKey(g.settings.Key)
+		sshPublicKey, err := sshutil.GeneratePublicKey(g.settings.Key)
 		if err != nil {
 			return info, err
 		}

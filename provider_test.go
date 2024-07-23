@@ -15,8 +15,8 @@ import (
 	"go.uber.org/mock/gomock"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
-	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/kit/sshutils"
-	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutils"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/kit/sshutil"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutil"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/schema"
 
 	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/instancegroup"
@@ -26,12 +26,12 @@ import (
 func sshKeyFixture(t *testing.T) ([]byte, schema.SSHKey) {
 	t.Helper()
 
-	privateKey, publicKey, err := sshutils.GenerateKeyPair()
+	privateKey, publicKey, err := sshutil.GenerateKeyPair()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	fingerprint, err := sshutils.GetPublicKeyFingerprint(publicKey)
+	fingerprint, err := sshutil.GetPublicKeyFingerprint(publicKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -44,11 +44,11 @@ func TestInit(t *testing.T) {
 
 	testCases := []struct {
 		name     string
-		requests []mockutils.Request
+		requests []mockutil.Request
 		run      func(t *testing.T, group *InstanceGroup, ctx context.Context, log hclog.Logger, settings provider.Settings)
 	}{
 		{name: "generated ssh key upload",
-			requests: []mockutils.Request{
+			requests: []mockutil.Request{
 				{Method: "GET",
 					Want: func(t *testing.T, r *http.Request) {
 						require.True(t, strings.HasPrefix(r.RequestURI, "/ssh_keys?fingerprint="))
@@ -81,7 +81,7 @@ func TestInit(t *testing.T) {
 			},
 		},
 		{name: "static ssh key upload",
-			requests: []mockutils.Request{
+			requests: []mockutil.Request{
 				{Method: "GET", Path: "/ssh_keys?fingerprint=" + url.QueryEscape(sshKey.Fingerprint),
 					Status: 200,
 					JSON: schema.SSHKeyListResponse{
@@ -118,7 +118,7 @@ func TestInit(t *testing.T) {
 			},
 		},
 		{name: "static ssh key existing",
-			requests: []mockutils.Request{
+			requests: []mockutil.Request{
 				{Method: "GET", Path: "/ssh_keys?fingerprint=" + url.QueryEscape(sshKey.Fingerprint),
 					Status: 200,
 					JSON: schema.SSHKeyListResponse{
@@ -147,7 +147,7 @@ func TestInit(t *testing.T) {
 	}
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			server := httptest.NewServer(mockutils.Handler(t, testCase.requests))
+			server := httptest.NewServer(mockutil.Handler(t, testCase.requests))
 
 			group := &InstanceGroup{
 				Name:       "fleeting",
