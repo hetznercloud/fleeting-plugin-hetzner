@@ -138,6 +138,8 @@ gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20240708113315-42aa0a457699 h1:5A
 gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20240708113315-42aa0a457699/go.mod h1:jxlU7KMun1XSMt5QvlraEffPHOnU4sxZQxJ1aBhfoOg=
 gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20240710164541-562f7bd1e854 h1:7BAjGLYG27+PtGv9VUgXDw1NITPDf+Y2niBhTpYSlVc=
 gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20240710164541-562f7bd1e854/go.mod h1:OsXzbzavwzLlPVwNEhPHtMnd4qCMABf2jDH3JGVQifA=
+gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20240723062336-da5f142b3c7d h1:TDTLHxsbUrbs/CsczQbGBQ2+TVpiASCYessypVe5ugY=
+gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20240723062336-da5f142b3c7d/go.mod h1:OsXzbzavwzLlPVwNEhPHtMnd4qCMABf2jDH3JGVQifA=
 go.uber.org/mock v0.4.0 h1:VcM4ZOtdbR4f6VXfiOpwpVJDL6lCReaZ6mw31wqh7KU=
 go.uber.org/mock v0.4.0/go.mod h1:a6FSlNadKUHUa9IP5Vyt1zh4fC7uAwxMutEAscFbkZc=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
