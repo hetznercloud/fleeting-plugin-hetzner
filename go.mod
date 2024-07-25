@@ -5,7 +5,7 @@ go 1.22
 require (
 	github.com/boumenot/gocover-cobertura v1.2.0
 	github.com/hashicorp/go-hclog v1.6.3
-	github.com/hetznercloud/hcloud-go/v2 v2.11.0
+	github.com/hetznercloud/hcloud-go/v2 v2.12.0
 	github.com/stretchr/testify v1.9.0
 	gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20240723062336-da5f142b3c7d
 	go.uber.org/mock v0.4.0

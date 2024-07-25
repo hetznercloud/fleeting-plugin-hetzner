@@ -71,11 +71,13 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 		hcloud.WithHTTPClient(&http.Client{
 			Timeout: 15 * time.Second,
 		}),
-		hcloud.WithPollBackoffFunc(hcloud.ExponentialBackoffWithOpts(hcloud.ExponentialBackoffOpts{
-			Base:       time.Second,
-			Multiplier: 2.0,
-			Cap:        5 * time.Second,
-		})),
+		hcloud.WithPollOpts(hcloud.PollOpts{
+			BackoffFunc: hcloud.ExponentialBackoffWithOpts(hcloud.ExponentialBackoffOpts{
+				Base:       time.Second,
+				Multiplier: 2.0,
+				Cap:        5 * time.Second,
+			}),
+		}),
 	}
 	if g.Endpoint != "" {
 		clientOptions = append(clientOptions, hcloud.WithEndpoint(g.Endpoint))
