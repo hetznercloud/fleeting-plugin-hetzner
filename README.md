@@ -82,6 +82,7 @@ swap:
 """
 
 [runners.autoscaler.connector_config]
+# without private network, the instances are only reachable through their public addresses.
 use_external_addr = true
 
 [[runners.autoscaler.policy]]

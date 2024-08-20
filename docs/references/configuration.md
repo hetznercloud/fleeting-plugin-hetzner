@@ -117,7 +117,7 @@ The [`[runners.autoscaler.plugin_config]` section](https://docs.gitlab.com/runne
 
 ## Autoscaler configuration
 
-The [`[runners.autoscaler]` section](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-runnersautoscaler-section) have parameters that may interest you:
+Below are parameters from the [`[runners.autoscaler]` section](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-runnersautoscaler-section) that are important for our plugin:
 
 <table>
   <tr>
@@ -136,12 +136,19 @@ The [`[runners.autoscaler]` section](https://docs.gitlab.com/runner/configuratio
 
 ## Connector configuration
 
-The [`[runners.autoscaler.connector_config]` section](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-runnersautoscalerconnector_config-section) have parameters that are only partially supported:
+Below are parameters from the [`[runners.autoscaler.connector_config]` section](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-runnersautoscalerconnector_config-section) that are important for our plugin:
 
 <table>
   <tr>
     <th>Parameter</th>
     <th>Value</th>
+  </tr>
+  <tr>
+    <td><code>use_external_addr</code></td>
+    <td>
+      Access the instances through their public addresses. Note that without private
+      networks, this field must be set to <code>true</code>.
+    </td>
   </tr>
   <tr>
     <td><code>os</code></td>
