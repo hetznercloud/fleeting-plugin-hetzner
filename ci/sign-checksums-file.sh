@@ -2,14 +2,12 @@
 
 set -e
 
-if [ -z "${GPG_KEY_FILE}" ]
-then
+if [ -z "${GPG_KEY_FILE}" ]; then
   echo "No GPG key file specified. Signing skipped."
   exit 0
 fi
 
-if [ -z "${GPG_KEY_PASSWORD_FILE}" ]
-then
+if [ -z "${GPG_KEY_PASSWORD_FILE}" ]; then
   echo "No GPG key password file specified. Signing skipped."
   exit 0
 fi
