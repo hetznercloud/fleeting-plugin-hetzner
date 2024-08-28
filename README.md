@@ -44,6 +44,9 @@ image = "busybox:latest"
 [runners.autoscaler]
 plugin = "hetznercloud/fleeting-plugin-hetzner:latest"
 
+update_interval = "1m"
+update_interval_when_expecting = "5s"
+
 capacity_per_instance = 4
 max_instances = 5
 max_use_count = 0
