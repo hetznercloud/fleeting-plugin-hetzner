@@ -1,15 +1,29 @@
+x- gitlab-runner: &gitlab-runner
+  build:
+    dockerfile: dev/Dockerfile
+  entrypoint: []
+  environment:
+    CONFIG_FILE: config.toml
+    FLEETING_PLUGIN_PATH: /opt
+  working_dir: /opt
+  volumes:
+    - ./dev/files:/opt
+
 services:
-  gitlab-runner:
-    build:
-      dockerfile: dev/Dockerfile
-    entrypoint: []
+  # init:
+  #   <<: *gitlab-runner
+  #   command:
+  #     - gitlab-runner
+  #     - fleeting
+  #     - install
+
+  run:
+    <<: *gitlab-runner
     command:
       - gitlab-runner
       - run
-      - --config=config.toml
-      - --listen-address=:9252
-    working_dir: /opt
-    volumes:
-      - ./dev/files:/opt
     ports:
       - 9252:9252
+    # depends_on:
+    #   init:
+    #     condition: service_completed_successfully

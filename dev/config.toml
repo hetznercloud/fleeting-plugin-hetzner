@@ -1,5 +1,7 @@
 concurrent = 10
 
+listen_address = ":9252"
+
 log_level = "info"
 log_format = "text"
 
