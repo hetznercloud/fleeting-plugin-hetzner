@@ -2,6 +2,8 @@ module gitlab.com/hetznercloud/fleeting-plugin-hetzner
 
 go 1.22
 
+toolchain go1.23.1
+
 require (
 	github.com/boumenot/gocover-cobertura v1.2.0
 	github.com/hashicorp/go-hclog v1.6.3

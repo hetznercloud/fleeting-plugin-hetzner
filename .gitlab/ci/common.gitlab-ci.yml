@@ -1,5 +1,5 @@
 variables:
-  GO_VERSION: 1.22
+  GO_VERSION: 1.23
   CGO_ENABLED: 0
   OUT_PATH: out
   PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/releases"
