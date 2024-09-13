@@ -7,7 +7,6 @@ import (
 	"maps"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
-	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/actionutil"
 
 	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/ippool"
 	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/utils"
@@ -119,7 +118,8 @@ func (g *instanceGroup) Init(ctx context.Context) (err error) {
 func (g *instanceGroup) Increase(ctx context.Context, delta int) ([]int64, error) {
 	created := make([]int64, 0, delta)
 	errs := make([]error, 0, delta)
-	results := make([]resourceActions, 0, delta)
+	failed := make([]*Instance, 0, delta)
+	instances := make([]*Instance, 0, delta)
 
 	if g.config.PublicIPPoolEnabled {
 		if err := g.ipPool.Refresh(ctx, g.client); err != nil {
@@ -127,6 +127,7 @@ func (g *instanceGroup) Increase(ctx context.Context, delta int) ([]int64, error
 		}
 	}
 
+	// Create instances
 	for i := delta; i > 0; i-- {
 		opts := hcloud.ServerCreateOpts{}
 
@@ -164,22 +165,37 @@ func (g *instanceGroup) Increase(ctx context.Context, delta int) ([]int64, error
 
 		opts.UserData = g.config.UserData
 
-		result, _, err := g.client.Server.Create(ctx, opts)
+		instance, err := CreateInstance(ctx, g.client, opts)
 		if err != nil {
-			errs = append(errs, fmt.Errorf("could not request instance creation: %w", err))
+			errs = append(errs, err)
 			continue
 		}
 
-		results = append(results, newResourceActions(result.Server.ID, actionutil.AppendNext(result.Action, result.NextActions)...))
+		instances = append(instances, instance)
 	}
 
-	for _, result := range results {
-		if err := g.client.Action.WaitFor(ctx, result.Actions...); err != nil {
-			errs = append(errs, fmt.Errorf("could not create instance: %w", err))
-			continue
+	// Wait for instances to be created
+	for _, instance := range instances {
+		if err := instance.Wait(); err != nil {
+			errs = append(errs, err)
+			failed = append(failed, instance)
+		} else {
+			created = append(created, instance.ID)
 		}
+	}
 
-		created = append(created, result.ID)
+	// Delete instances that failed
+	for _, instance := range failed {
+		if err := instance.Delete(ctx, g.client); err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	// Wait for failed instances to be deleted
+	for _, instance := range failed {
+		if err := instance.Wait(); err != nil {
+			errs = append(errs, err)
+		}
 	}
 
 	return created, errors.Join(errs...)
@@ -188,25 +204,27 @@ func (g *instanceGroup) Increase(ctx context.Context, delta int) ([]int64, error
 func (g *instanceGroup) Decrease(ctx context.Context, ids []int64) ([]int64, error) {
 	deleted := make([]int64, 0, len(ids))
 	errs := make([]error, 0, len(ids))
-	results := make([]resourceActions, 0, len(ids))
+	instances := make([]*Instance, 0, len(ids))
 
+	// Delete instances
 	for _, id := range ids {
-		result, _, err := g.client.Server.DeleteWithResult(ctx, &hcloud.Server{ID: id})
-		if err != nil {
-			errs = append(errs, fmt.Errorf("could not request instance deletion: %w", err))
+		instance := NewInstance(id)
+
+		if err := instance.Delete(ctx, g.client); err != nil {
+			errs = append(errs, err)
 			continue
 		}
 
-		results = append(results, newResourceActions(id, result.Action))
+		instances = append(instances, instance)
 	}
 
-	for _, result := range results {
-		if err := g.client.Action.WaitFor(ctx, result.Actions...); err != nil {
-			errs = append(errs, fmt.Errorf("could not delete instance: %w", err))
-			continue
+	// Wait for instances to be deleted
+	for _, instance := range instances {
+		if err := instance.Wait(); err != nil {
+			errs = append(errs, err)
+		} else {
+			deleted = append(deleted, instance.ID)
 		}
-
-		deleted = append(deleted, result.ID)
 	}
 
 	return deleted, errors.Join(errs...)
