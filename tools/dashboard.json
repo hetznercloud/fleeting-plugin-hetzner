@@ -1,0 +1,883 @@
+{
+  "uid": "cdxp1hasmx2bkc",
+  "title": "gitlab-runner",
+  "tags": [
+    "gitlab-runner",
+    "generated"
+  ],
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 1,
+  "time": {
+    "from": "now-2d",
+    "to": "now"
+  },
+  "fiscalYearStartMonth": 0,
+  "refresh": "1m",
+  "schemaVersion": 39,
+  "panels": [
+    {
+      "type": "row",
+      "collapsed": false,
+      "title": "Overview",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 0,
+      "panels": null
+    },
+    {
+      "type": "table",
+      "targets": [
+        {
+          "expr": "gitlab_runner_version_info{job=~\"${job}\"}",
+          "instant": true,
+          "range": false,
+          "format": "table",
+          "refId": ""
+        }
+      ],
+      "title": "Info",
+      "transparent": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "includeByName": {
+              "instance": true,
+              "pod": true,
+              "version": true
+            },
+            "indexByName": {
+              "instance": 1,
+              "pod": 0,
+              "version": 2
+            }
+          }
+        }
+      ],
+      "options": {
+        "frameIndex": 0,
+        "showHeader": true,
+        "showTypeIcons": false,
+        "footer": {
+          "show": false,
+          "reducer": [],
+          "countRows": false
+        },
+        "cellHeight": "sm"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "inspect": false
+          }
+        },
+        "overrides": null
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (job) (\ngitlab_runner_jobs{job=~\"${job}\"}\n)",
+          "legendFormat": "{{job}}",
+          "refId": "",
+          "interval": "1m"
+        }
+      ],
+      "title": "Jobs running",
+      "description": "Number of running jobs.",
+      "transparent": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 7
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "lineWidth": 0,
+            "fillOpacity": 100,
+            "barWidthFactor": 1
+          }
+        },
+        "overrides": null
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (job, failure_reason) (\nincrease(gitlab_runner_failed_jobs_total{job=~\"${job}\"}[$__rate_interval])\n)",
+          "legendFormat": "{{failure_reason}}",
+          "refId": "",
+          "interval": "1m"
+        }
+      ],
+      "title": "Jobs failed",
+      "description": "Number of failed jobs per failure reason.",
+      "transparent": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 7
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "lineWidth": 0,
+            "fillOpacity": 100,
+            "barWidthFactor": 1
+          }
+        },
+        "overrides": null
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (job) (gitlab_runner_jobs{job=~\"${job}\"})\n/\nsum by (job) (gitlab_runner_concurrent{job=~\"${job}\"})",
+          "legendFormat": "{{job}}",
+          "refId": "",
+          "interval": "1m"
+        }
+      ],
+      "title": "Runner saturation",
+      "description": "Saturation of the runner job capacity.",
+      "transparent": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 15
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "max": 1,
+          "custom": {
+            "drawStyle": "bars",
+            "lineWidth": 0,
+            "fillOpacity": 100,
+            "barWidthFactor": 1
+          }
+        },
+        "overrides": null
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (job, level) (\nincrease(gitlab_runner_errors_total{job=~\"${job}\"}[$__rate_interval])\n)",
+          "legendFormat": "{{job}}: {{level}}",
+          "refId": "",
+          "interval": "1m"
+        }
+      ],
+      "title": "Error rate",
+      "description": "Rate of errors being logged.",
+      "transparent": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 15
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "lineWidth": 0,
+            "fillOpacity": 100,
+            "barWidthFactor": 1
+          }
+        },
+        "overrides": null
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (job) (\nrate(gitlab_runner_job_duration_seconds_sum{job=~\"${job}\"}[$__rate_interval])\n/\nrate(gitlab_runner_job_duration_seconds_count{job=~\"${job}\"}[$__rate_interval])\n)",
+          "legendFormat": "{{job}}",
+          "refId": "",
+          "interval": "1m"
+        }
+      ],
+      "title": "Average job duration",
+      "transparent": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 23
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "drawStyle": "bars",
+            "lineWidth": 0,
+            "fillOpacity": 100,
+            "barWidthFactor": 1
+          }
+        },
+        "overrides": null
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (job) (\nrate(gitlab_runner_job_queue_duration_seconds_sum{job=~\"${job}\"}[$__rate_interval])\n/\nrate(gitlab_runner_job_queue_duration_seconds_count{job=~\"${job}\"}[$__rate_interval])\n)",
+          "legendFormat": "{{job}}",
+          "refId": "",
+          "interval": "1m"
+        }
+      ],
+      "title": "Average pending job duration",
+      "transparent": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 23
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "drawStyle": "bars",
+            "lineWidth": 0,
+            "fillOpacity": 100,
+            "barWidthFactor": 1
+          }
+        },
+        "overrides": null
+      }
+    },
+    {
+      "type": "heatmap",
+      "targets": [
+        {
+          "expr": "sum by (le) (\nincrease(gitlab_runner_job_duration_seconds_bucket{job=~\"${job}\"}[$__rate_interval])\n)",
+          "format": "heatmap",
+          "refId": "",
+          "interval": "1m"
+        }
+      ],
+      "title": "Job duration histogram",
+      "transparent": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 31
+      },
+      "options": {
+        "calculate": false,
+        "color": {
+          "mode": "scheme",
+          "scheme": "Viridis",
+          "fill": "",
+          "exponent": 0,
+          "steps": 16,
+          "reverse": false
+        },
+        "filterValues": {
+          "le": 1e-09
+        },
+        "showValue": "auto",
+        "cellGap": 1,
+        "yAxis": {
+          "unit": "s"
+        },
+        "legend": {
+          "show": false
+        },
+        "tooltip": {
+          "mode": "single"
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "selectionMode": "x"
+      }
+    },
+    {
+      "type": "heatmap",
+      "targets": [
+        {
+          "expr": "sum by (le) (\nincrease(gitlab_runner_job_queue_duration_seconds_bucket{job=~\"${job}\"}[$__rate_interval])\n)",
+          "format": "heatmap",
+          "refId": "",
+          "interval": "1m"
+        }
+      ],
+      "title": "Pending job duration histogram",
+      "transparent": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 31
+      },
+      "options": {
+        "calculate": false,
+        "color": {
+          "mode": "scheme",
+          "scheme": "Viridis",
+          "fill": "",
+          "exponent": 0,
+          "steps": 16,
+          "reverse": false
+        },
+        "filterValues": {
+          "le": 1e-09
+        },
+        "showValue": "auto",
+        "cellGap": 1,
+        "yAxis": {
+          "unit": "s"
+        },
+        "legend": {
+          "show": false
+        },
+        "tooltip": {
+          "mode": "single"
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "selectionMode": "x"
+      }
+    },
+    {
+      "type": "row",
+      "collapsed": false,
+      "title": "Autoscaling",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 39
+      },
+      "id": 0,
+      "panels": null
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (job) (fleeting_taskscaler_tasks{job=~\"${job}\", state!~\"idle|reserved\"})\n/\nsum by (job) (\nfleeting_provisioner_max_instances{job=~\"${job}\"}\n*\nfleeting_taskscaler_max_tasks_per_instance{job=~\"${job}\"}\n)",
+          "legendFormat": "{{job}}",
+          "refId": "",
+          "interval": "1m"
+        }
+      ],
+      "title": "Taskscaler saturation",
+      "description": "Saturation of the instances job capacity (capacity per instance * max instances).",
+      "transparent": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 40
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "max": 1,
+          "custom": {
+            "drawStyle": "bars",
+            "lineWidth": 0,
+            "fillOpacity": 100,
+            "barWidthFactor": 1
+          }
+        },
+        "overrides": null
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (job) (fleeting_provisioner_instances{job=~\"${job}\", state=~\"running|deleting\"})\n/\nsum by (job) (fleeting_provisioner_max_instances{job=~\"${job}\"})",
+          "legendFormat": "{{job}}",
+          "refId": "",
+          "interval": "1m"
+        }
+      ],
+      "title": "Fleeting saturation",
+      "description": "Saturation of the max instances limit.",
+      "transparent": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 40
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "max": 1,
+          "custom": {
+            "drawStyle": "bars",
+            "lineWidth": 0,
+            "fillOpacity": 100,
+            "barWidthFactor": 1
+          }
+        },
+        "overrides": null
+      }
+    },
+    {
+      "type": "heatmap",
+      "targets": [
+        {
+          "expr": "sum by (le) (\nincrease(fleeting_provisioner_instance_creation_time_seconds_bucket{job=~\"${job}\"}[$__rate_interval])\n)",
+          "format": "heatmap",
+          "refId": "",
+          "interval": "1m"
+        }
+      ],
+      "title": "Fleeting instance creation timing",
+      "transparent": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 48
+      },
+      "options": {
+        "calculate": false,
+        "color": {
+          "mode": "scheme",
+          "scheme": "Viridis",
+          "fill": "",
+          "exponent": 0,
+          "steps": 16,
+          "reverse": false
+        },
+        "filterValues": {
+          "le": 1e-09
+        },
+        "showValue": "auto",
+        "cellGap": 1,
+        "yAxis": {
+          "unit": "s"
+        },
+        "legend": {
+          "show": false
+        },
+        "tooltip": {
+          "mode": "single"
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "selectionMode": "x"
+      }
+    },
+    {
+      "type": "heatmap",
+      "targets": [
+        {
+          "expr": "sum by (le) (\nincrease(fleeting_taskscaler_task_instance_readiness_time_seconds_bucket{job=~\"${job}\"}[$__rate_interval])\n)",
+          "format": "heatmap",
+          "refId": "",
+          "interval": "1m"
+        }
+      ],
+      "title": "Fleeting instance ready timing",
+      "transparent": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 48
+      },
+      "options": {
+        "calculate": false,
+        "color": {
+          "mode": "scheme",
+          "scheme": "Viridis",
+          "fill": "",
+          "exponent": 0,
+          "steps": 16,
+          "reverse": false
+        },
+        "filterValues": {
+          "le": 1e-09
+        },
+        "showValue": "auto",
+        "cellGap": 1,
+        "yAxis": {
+          "unit": "s"
+        },
+        "legend": {
+          "show": false
+        },
+        "tooltip": {
+          "mode": "single"
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "selectionMode": "x"
+      }
+    },
+    {
+      "type": "heatmap",
+      "targets": [
+        {
+          "expr": "sum by (le) (\nincrease(fleeting_provisioner_instance_deletion_time_seconds_bucket{job=~\"${job}\"}[$__rate_interval])\n)",
+          "format": "heatmap",
+          "refId": "",
+          "interval": "1m"
+        }
+      ],
+      "title": "Fleeting instance deletion timing",
+      "transparent": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 56
+      },
+      "options": {
+        "calculate": false,
+        "color": {
+          "mode": "scheme",
+          "scheme": "Viridis",
+          "fill": "",
+          "exponent": 0,
+          "steps": 16,
+          "reverse": false
+        },
+        "filterValues": {
+          "le": 1e-09
+        },
+        "showValue": "auto",
+        "cellGap": 1,
+        "yAxis": {
+          "unit": "s"
+        },
+        "legend": {
+          "show": false
+        },
+        "tooltip": {
+          "mode": "single"
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "selectionMode": "x"
+      }
+    },
+    {
+      "type": "heatmap",
+      "targets": [
+        {
+          "expr": "sum by (le) (\nincrease(fleeting_provisioner_instance_life_duration_seconds_bucket{job=~\"${job}\"}[$__rate_interval])\n)",
+          "format": "heatmap",
+          "refId": "",
+          "interval": "1m"
+        }
+      ],
+      "title": "Fleeting instance life duration",
+      "transparent": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 56
+      },
+      "options": {
+        "calculate": false,
+        "color": {
+          "mode": "scheme",
+          "scheme": "Viridis",
+          "fill": "",
+          "exponent": 0,
+          "steps": 16,
+          "reverse": false
+        },
+        "filterValues": {
+          "le": 1e-09
+        },
+        "showValue": "auto",
+        "cellGap": 1,
+        "yAxis": {
+          "unit": "s"
+        },
+        "legend": {
+          "show": false
+        },
+        "tooltip": {
+          "mode": "single"
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "selectionMode": "x"
+      }
+    },
+    {
+      "type": "row",
+      "collapsed": false,
+      "title": "HTTP",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 64
+      },
+      "id": 0,
+      "panels": null
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (endpoint, status) (\nrate(gitlab_runner_api_request_statuses_total{job=~\"${job}\",}[$__rate_interval])\n)",
+          "legendFormat": "{{endpoint}}: {{status}}",
+          "refId": "",
+          "interval": "1m"
+        }
+      ],
+      "title": "Total number of GitLab API requests",
+      "transparent": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 65
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      }
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "type": "datasource",
+        "name": "datasource",
+        "query": "prometheus"
+      },
+      {
+        "type": "query",
+        "name": "job",
+        "query": "label_values(gitlab_runner_version_info, job)",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${datasource}"
+        }
+      }
+    ]
+  },
+  "annotations": {
+    "list": [
+      {
+        "name": "Annotations & Alerts",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "super-light-purple",
+        "type": "dashboard",
+        "builtIn": 1
+      }
+    ]
+  }
+}
