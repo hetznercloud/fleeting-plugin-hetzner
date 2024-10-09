@@ -1,6 +1,6 @@
 pre-commit:
   stage: test
-  image: python:3.12
+  image: python:3.13
   extends:
     - .rules:merge_request_or_release
   variables:
