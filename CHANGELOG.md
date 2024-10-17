@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.5.1](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v0.5.1)
+
+### Bug Fixes
+
+- use first host ip in public ipv6 network (hetznercloud/fleeting-plugin-hetzner!130)
+
 ## [v0.5.0](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/tags/v0.5.0)
 
 ### Features
