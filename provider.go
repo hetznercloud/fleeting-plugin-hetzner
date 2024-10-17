@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"net/netip"
 	"path"
 	"time"
 
@@ -241,7 +242,12 @@ func (g *InstanceGroup) ConnectInfo(ctx context.Context, instance string) (provi
 	case !server.PublicNet.IPv4.IsUnspecified():
 		info.ExternalAddr = server.PublicNet.IPv4.IP.String()
 	case !server.PublicNet.IPv6.IsUnspecified():
-		info.ExternalAddr = server.PublicNet.IPv6.IP.String()
+		network, ok := netip.AddrFromSlice(server.PublicNet.IPv6.IP)
+		if ok {
+			info.ExternalAddr = network.Next().String()
+		} else {
+			return info, fmt.Errorf("could not parse server public ipv6: %s", server.PublicNet.IPv6.IP.String())
+		}
 	}
 
 	if len(server.PrivateNet) > 0 {

@@ -355,6 +355,48 @@ func TestConnectInfo(t *testing.T) {
 				}, result)
 			},
 		},
+		{name: "success ipv6",
+			run: func(t *testing.T, mock *instancegroup.MockInstanceGroup, group *InstanceGroup, ctx context.Context) {
+				group.settings.UseStaticCredentials = true
+				group.settings.Key = []byte("-----BEGIN OPENSSH PRIVATE KEY-----")
+
+				mock.EXPECT().Get(ctx, gomock.Any()).Return(hcloud.ServerFromSchema(
+					schema.Server{
+						ID:     1,
+						Name:   "existing-1",
+						Status: "running",
+						Image: &schema.Image{
+							OSFlavor:  "debian",
+							OSVersion: hcloud.Ptr("12"),
+						},
+						ServerType: schema.ServerType{
+							Name:         "cpx11",
+							Architecture: "x86",
+						},
+						PublicNet: schema.ServerPublicNet{
+							IPv6: schema.ServerPublicNetIPv6{
+								IP: "2a01:4f8:1c19:1403::/64",
+							},
+						},
+					},
+				), nil)
+
+				result, err := group.ConnectInfo(ctx, "1")
+				require.NoError(t, err)
+				require.Equal(t, provider.ConnectInfo{
+					ConnectorConfig: provider.ConnectorConfig{
+						OS:                   "debian",
+						Arch:                 "amd64",
+						Protocol:             "ssh",
+						UseStaticCredentials: true,
+						Username:             "root",
+						Key:                  []byte("-----BEGIN OPENSSH PRIVATE KEY-----"),
+					},
+					ID:           "1",
+					ExternalAddr: "2a01:4f8:1c19:1403::1",
+				}, result)
+			},
+		},
 		{name: "failure",
 			run: func(t *testing.T, mock *instancegroup.MockInstanceGroup, group *InstanceGroup, ctx context.Context) {
 				mock.EXPECT().Get(ctx, gomock.Any()).Return(nil, fmt.Errorf("some error"))
