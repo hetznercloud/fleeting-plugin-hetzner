@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := build
 
 export NAME ?= $(shell basename $(shell pwd))
-export VERSION := v$(shell cat VERSION)
+export VERSION := v0.5.0 # x-releaser-pleaser-version
 export OUT_PATH ?= out
 export CGO_ENABLED ?= 0
 
@@ -68,16 +68,3 @@ release:
 
 release-oci-artifacts:
 	ci/release-oci-artifacts.sh
-
-.PHONY: do-release
-do-release:
-	git tag -s $(VERSION) -m "Version $(VERSION)"
-	git push origin $(VERSION)
-
-# Note: the PREVIOUS_VERSION variable must be set for this to work as expected. Use like this:
-#
-#     make release-notes PREVIOUS_VERSION=0.1.0
-#
-.PHONY: release-notes
-release-notes:
-	git log --oneline --no-decorate v$${PREVIOUS_VERSION}..HEAD | (while read LINE; do echo '* '$$LINE ; done)

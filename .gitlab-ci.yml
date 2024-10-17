@@ -11,3 +11,9 @@ include:
   - local: /.gitlab/ci/test.gitlab-ci.yml
   - local: /.gitlab/ci/upload.gitlab-ci.yml
   - local: /.gitlab/ci/release.gitlab-ci.yml
+
+  - component: $CI_SERVER_FQDN/apricote/releaser-pleaser/run@v0.4.0
+    inputs:
+      token: $HCLOUD_BOT_TOKEN
+      extra-files: |
+        Makefile

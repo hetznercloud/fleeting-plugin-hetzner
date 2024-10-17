@@ -144,17 +144,9 @@ Use an approach like this:
 **Follow [Semantic Versioning](https://semver.org/)**. Don't be afraid to bump the major version
 when you are making changes to the public API.
 
-1. Make sure the `VERSION` file is up-to-date. This file is typically edited at the beginning of the
-   new release cycle (in other words "work towrads version x.y.z" rather than "release version x.y.z")
-2. If not, commit the changes to that file, using a commit message in line with this: `git commit VERSION -m "Bump version to v0.2.0"`. Make sure to `git push` the commit as well.
-3. Run `make do-release`. This creates a tag, which in turns triggers some CI logic in
-   [`.gitlab/ci/release.gitlab-ci.yml`](.gitlab/ci/release.gitlab-ci.yml) which creates a GitLab
-   release.
-4. Edit the release notes in
-   https://gitlab.com/fleeting-plugin-hetzner/fleeting-plugin-hetzner/-/releases. For inspiration, use
-   https://gitlab.com/fleeting-plugin-hetzner/fleeting-plugin-hetzner/-/releases/v0.1.0 as an example.
-   The "Full changelog" content can be retrieved using `make release-notes PREVIOUS_VERSION=0.1.0`
-   (replace the version number with the "real" version number of the previous release)
+We leverage the [releaser-pleaser](https://github.com/apricote/releaser-pleaser) tool to
+prepare and cut releases. To cut a new release, you need to merge the Merge Request that
+was prepared by releaser-pleaser.
 
 ### History
 
