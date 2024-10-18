@@ -37,7 +37,7 @@ func TestProvisioning(t *testing.T) {
 
 					Location:   "hel1",
 					ServerType: "cpx11",
-					Image:      "ubuntu-24.04",
+					Image:      "debian-12",
 				},
 				ConnectorConfig: provider.ConnectorConfig{
 					Timeout: 10 * time.Minute,
@@ -64,7 +64,7 @@ func TestProvisioning(t *testing.T) {
 
 					Location:   "hel1",
 					ServerType: "cpx11",
-					Image:      "ubuntu-24.04",
+					Image:      "debian-12",
 				},
 				ConnectorConfig: provider.ConnectorConfig{
 					Timeout: 10 * time.Minute,
@@ -128,7 +128,7 @@ func TestProvisioning(t *testing.T) {
 
 					Location:   "hel1",
 					ServerType: "cpx11",
-					Image:      "ubuntu-24.04",
+					Image:      "debian-12",
 
 					PublicIPPoolEnabled:  true,
 					PublicIPPoolSelector: fmt.Sprintf("pool=%s", name),
