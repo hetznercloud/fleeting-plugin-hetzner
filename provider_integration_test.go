@@ -145,4 +145,30 @@ func TestProvisioning(t *testing.T) {
 			},
 		)
 	})
+
+	t.Run("ipv6 only", func(t *testing.T) {
+		t.Parallel()
+
+		integration.TestProvisioning(t,
+			pluginBinary,
+			integration.Config{
+				PluginConfig: InstanceGroup{
+					Name: "fleeting-" + utils.GenerateRandomID(),
+
+					Token: os.Getenv("HCLOUD_TOKEN"),
+
+					Location:   "hel1",
+					ServerType: "cpx11",
+					Image:      "debian-12",
+
+					PublicIPv4Disabled: true,
+				},
+				ConnectorConfig: provider.ConnectorConfig{
+					Timeout: 10 * time.Minute,
+				},
+				MaxInstances:    3,
+				UseExternalAddr: true,
+			},
+		)
+	})
 }
