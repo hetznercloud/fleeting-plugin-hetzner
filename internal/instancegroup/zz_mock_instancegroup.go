@@ -21,6 +21,7 @@ import (
 type MockInstanceGroup struct {
 	ctrl     *gomock.Controller
 	recorder *MockInstanceGroupMockRecorder
+	isgomock struct{}
 }
 
 // MockInstanceGroupMockRecorder is the mock recorder for MockInstanceGroup.
@@ -41,75 +42,75 @@ func (m *MockInstanceGroup) EXPECT() *MockInstanceGroupMockRecorder {
 }
 
 // Decrease mocks base method.
-func (m *MockInstanceGroup) Decrease(arg0 context.Context, arg1 []int64) ([]int64, error) {
+func (m *MockInstanceGroup) Decrease(ctx context.Context, ids []int64) ([]int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Decrease", arg0, arg1)
+	ret := m.ctrl.Call(m, "Decrease", ctx, ids)
 	ret0, _ := ret[0].([]int64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Decrease indicates an expected call of Decrease.
-func (mr *MockInstanceGroupMockRecorder) Decrease(arg0, arg1 any) *gomock.Call {
+func (mr *MockInstanceGroupMockRecorder) Decrease(ctx, ids any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Decrease", reflect.TypeOf((*MockInstanceGroup)(nil).Decrease), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Decrease", reflect.TypeOf((*MockInstanceGroup)(nil).Decrease), ctx, ids)
 }
 
 // Get mocks base method.
-func (m *MockInstanceGroup) Get(arg0 context.Context, arg1 int64) (*hcloud.Server, error) {
+func (m *MockInstanceGroup) Get(ctx context.Context, id int64) (*hcloud.Server, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get", arg0, arg1)
+	ret := m.ctrl.Call(m, "Get", ctx, id)
 	ret0, _ := ret[0].(*hcloud.Server)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Get indicates an expected call of Get.
-func (mr *MockInstanceGroupMockRecorder) Get(arg0, arg1 any) *gomock.Call {
+func (mr *MockInstanceGroupMockRecorder) Get(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockInstanceGroup)(nil).Get), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockInstanceGroup)(nil).Get), ctx, id)
 }
 
 // Increase mocks base method.
-func (m *MockInstanceGroup) Increase(arg0 context.Context, arg1 int) ([]int64, error) {
+func (m *MockInstanceGroup) Increase(ctx context.Context, delta int) ([]int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Increase", arg0, arg1)
+	ret := m.ctrl.Call(m, "Increase", ctx, delta)
 	ret0, _ := ret[0].([]int64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Increase indicates an expected call of Increase.
-func (mr *MockInstanceGroupMockRecorder) Increase(arg0, arg1 any) *gomock.Call {
+func (mr *MockInstanceGroupMockRecorder) Increase(ctx, delta any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Increase", reflect.TypeOf((*MockInstanceGroup)(nil).Increase), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Increase", reflect.TypeOf((*MockInstanceGroup)(nil).Increase), ctx, delta)
 }
 
 // Init mocks base method.
-func (m *MockInstanceGroup) Init(arg0 context.Context) error {
+func (m *MockInstanceGroup) Init(ctx context.Context) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Init", arg0)
+	ret := m.ctrl.Call(m, "Init", ctx)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Init indicates an expected call of Init.
-func (mr *MockInstanceGroupMockRecorder) Init(arg0 any) *gomock.Call {
+func (mr *MockInstanceGroupMockRecorder) Init(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Init", reflect.TypeOf((*MockInstanceGroup)(nil).Init), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Init", reflect.TypeOf((*MockInstanceGroup)(nil).Init), ctx)
 }
 
 // List mocks base method.
-func (m *MockInstanceGroup) List(arg0 context.Context) ([]*hcloud.Server, error) {
+func (m *MockInstanceGroup) List(ctx context.Context) ([]*hcloud.Server, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "List", arg0)
+	ret := m.ctrl.Call(m, "List", ctx)
 	ret0, _ := ret[0].([]*hcloud.Server)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // List indicates an expected call of List.
-func (mr *MockInstanceGroupMockRecorder) List(arg0 any) *gomock.Call {
+func (mr *MockInstanceGroupMockRecorder) List(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockInstanceGroup)(nil).List), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockInstanceGroup)(nil).List), ctx)
 }
