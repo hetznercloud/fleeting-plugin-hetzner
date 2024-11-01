@@ -23,17 +23,17 @@ func TestCreateInstance(t *testing.T) {
 					Status: 201,
 					JSON: schema.ServerCreateResponse{
 						Server:      schema.Server{ID: 1},
-						Action:      schema.Action{ID: 10, Status: "running"},
-						NextActions: []schema.Action{{ID: 20, Status: "running"}},
+						Action:      schema.Action{ID: 101, Status: "running"},
+						NextActions: []schema.Action{{ID: 102, Status: "running"}},
 					},
 				},
 				{
-					Method: "GET", Path: "/actions?id=10&id=20&page=1&sort=status&sort=id",
+					Method: "GET", Path: "/actions?id=101&id=102&page=1&sort=status&sort=id",
 					Status: 200,
 					JSON: schema.ActionListResponse{
 						Actions: []schema.Action{
-							{ID: 10, Status: "success"},
-							{ID: 20, Status: "success"},
+							{ID: 101, Status: "success"},
+							{ID: 102, Status: "success"},
 						},
 					},
 				},
@@ -64,17 +64,17 @@ func TestCreateInstance(t *testing.T) {
 					Status: 201,
 					JSON: schema.ServerCreateResponse{
 						Server:      schema.Server{ID: 1},
-						Action:      schema.Action{ID: 10, Status: "running"},
-						NextActions: []schema.Action{{ID: 20, Status: "running"}},
+						Action:      schema.Action{ID: 101, Status: "running"},
+						NextActions: []schema.Action{{ID: 102, Status: "running"}},
 					},
 				},
 				{
-					Method: "GET", Path: "/actions?id=10&id=20&page=1&sort=status&sort=id",
+					Method: "GET", Path: "/actions?id=101&id=102&page=1&sort=status&sort=id",
 					Status: 200,
 					JSON: schema.ActionListResponse{
 						Actions: []schema.Action{
-							{ID: 10, Status: "error", Error: &schema.ActionError{Code: "failure", Message: "Something failed"}},
-							{ID: 20, Status: "success"},
+							{ID: 101, Status: "error", Error: &schema.ActionError{Code: "failure", Message: "Something failed"}},
+							{ID: 102, Status: "success"},
 						},
 					},
 				},
@@ -105,15 +105,15 @@ func TestInstanceDelete(t *testing.T) {
 				Method: "DELETE", Path: "/servers/1",
 				Status: 201,
 				JSON: schema.ServerDeleteResponse{
-					Action: schema.Action{ID: 10, Status: "running"},
+					Action: schema.Action{ID: 103, Status: "running"},
 				},
 			},
 			{
-				Method: "GET", Path: "/actions?id=10&page=1&sort=status&sort=id",
+				Method: "GET", Path: "/actions?id=103&page=1&sort=status&sort=id",
 				Status: 200,
 				JSON: schema.ActionListResponse{
 					Actions: []schema.Action{
-						{ID: 10, Status: "success"},
+						{ID: 103, Status: "success"},
 					},
 				},
 			},
