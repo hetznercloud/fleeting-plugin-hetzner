@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutil"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/schema"
 
 	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/testutils"
 )
@@ -48,44 +49,40 @@ func TestIncrease(t *testing.T) {
 				{
 					Method: "POST", Path: "/servers",
 					Status: 201,
-					JSONRaw: `{
-						"server": { "id": 1 },
-						"action": { "id": 10, "status": "running" },
-						"next_actions": [
-							{ "id": 20, "status": "running" }
-						]
-					}`,
+					JSON: schema.ServerCreateResponse{
+						Server:      schema.Server{ID: 1},
+						Action:      schema.Action{ID: 101, Status: "running"},
+						NextActions: []schema.Action{{ID: 102, Status: "running"}},
+					},
 				},
 				{
 					Method: "POST", Path: "/servers",
 					Status: 201,
-					JSONRaw: `{
-						"server": { "id": 2 },
-						"action": { "id": 30, "status": "running" },
-						"next_actions": [
-							{ "id": 40, "status": "running" }
-						]
-					}`,
+					JSON: schema.ServerCreateResponse{
+						Server:      schema.Server{ID: 2},
+						Action:      schema.Action{ID: 201, Status: "running"},
+						NextActions: []schema.Action{{ID: 202, Status: "running"}},
+					},
 				},
 				{
-					Method: "GET", Path: "/actions?id=10&id=20&page=1&sort=status&sort=id",
+					Method: "GET", Path: "/actions?id=101&id=102&page=1&sort=status&sort=id",
 					Status: 200,
-					JSONRaw: `{
-						"actions": [
-							{ "id": 10, "status": "success" },
-							{ "id": 20, "status": "success" }
-						]
-					}`,
+					JSON: schema.ActionListResponse{
+						Actions: []schema.Action{
+							{ID: 101, Status: "success"},
+							{ID: 102, Status: "success"},
+						},
+					},
 				},
 				{
-					Method: "GET", Path: "/actions?id=30&id=40&page=1&sort=status&sort=id",
+					Method: "GET", Path: "/actions?id=201&id=202&page=1&sort=status&sort=id",
 					Status: 200,
-					JSONRaw: `{
-						"actions": [
-							{ "id": 30, "status": "success" },
-							{ "id": 40, "status": "success" }
-						]
-					}`,
+					JSON: schema.ActionListResponse{
+						Actions: []schema.Action{
+							{ID: 201, Status: "success"},
+							{ID: 202, Status: "success"},
+						},
+					},
 				},
 			},
 		))
@@ -110,60 +107,56 @@ func TestIncrease(t *testing.T) {
 				{
 					Method: "POST", Path: "/servers",
 					Status: 201,
-					JSONRaw: `{
-						"server": { "id": 1 },
-						"action": { "id": 10, "status": "running" },
-						"next_actions": [
-							{ "id": 20, "status": "running" }
-						]
-					}`,
+					JSON: schema.ServerCreateResponse{
+						Server:      schema.Server{ID: 1},
+						Action:      schema.Action{ID: 101, Status: "running"},
+						NextActions: []schema.Action{{ID: 102, Status: "running"}},
+					},
 				},
 				{
 					Method: "POST", Path: "/servers",
 					Status: 201,
-					JSONRaw: `{
-						"server": { "id": 2 },
-						"action": { "id": 30, "status": "running" },
-						"next_actions": [
-							{ "id": 40, "status": "running" }
-						]
-					}`,
+					JSON: schema.ServerCreateResponse{
+						Server:      schema.Server{ID: 2},
+						Action:      schema.Action{ID: 201, Status: "running"},
+						NextActions: []schema.Action{{ID: 202, Status: "running"}},
+					},
 				},
 				{
-					Method: "GET", Path: "/actions?id=10&id=20&page=1&sort=status&sort=id",
+					Method: "GET", Path: "/actions?id=101&id=102&page=1&sort=status&sort=id",
 					Status: 200,
-					JSONRaw: `{
-						"actions": [
-							{ "id": 10, "status": "error", "error": { "code": "failure", "message": "Something failed" }},
-							{ "id": 20, "status": "success" }
-						]
-					}`,
+					JSON: schema.ActionListResponse{
+						Actions: []schema.Action{
+							{ID: 101, Status: "error", Error: &schema.ActionError{Code: "failure", Message: "Something failed"}},
+							{ID: 102, Status: "success"},
+						},
+					},
 				},
 				{
-					Method: "GET", Path: "/actions?id=30&id=40&page=1&sort=status&sort=id",
+					Method: "GET", Path: "/actions?id=201&id=202&page=1&sort=status&sort=id",
 					Status: 200,
-					JSONRaw: `{
-						"actions": [
-							{ "id": 30, "status": "success" },
-							{ "id": 40, "status": "success" }
-						]
-					}`,
+					JSON: schema.ActionListResponse{
+						Actions: []schema.Action{
+							{ID: 201, Status: "success"},
+							{ID: 202, Status: "success"},
+						},
+					},
 				},
 				{
 					Method: "DELETE", Path: "/servers/1",
 					Status: 200,
-					JSONRaw: `{
-						"action": { "id": 10, "status": "running" }
-					}`,
+					JSON: schema.ServerDeleteResponse{
+						Action: schema.Action{ID: 103, Status: "running"},
+					},
 				},
 				{
-					Method: "GET", Path: "/actions?id=10&page=1&sort=status&sort=id",
+					Method: "GET", Path: "/actions?id=103&page=1&sort=status&sort=id",
 					Status: 200,
-					JSONRaw: `{
-						"actions": [
-							{ "id": 10, "status": "success" }
-						]
-					}`,
+					JSON: schema.ActionListResponse{
+						Actions: []schema.Action{
+							{ID: 103, Status: "success"},
+						},
+					},
 				},
 			},
 		))
@@ -189,34 +182,34 @@ func TestDecrease(t *testing.T) {
 			{
 				Method: "DELETE", Path: "/servers/1",
 				Status: 200,
-				JSONRaw: `{
-					"action": { "id": 10, "status": "running" }
-				}`,
+				JSON: schema.ServerDeleteResponse{
+					Action: schema.Action{ID: 103, Status: "running"},
+				},
 			},
 			{
 				Method: "DELETE", Path: "/servers/2",
 				Status: 200,
-				JSONRaw: `{
-					"action": { "id": 20, "status": "running" }
-				}`,
+				JSON: schema.ServerDeleteResponse{
+					Action: schema.Action{ID: 203, Status: "running"},
+				},
 			},
 			{
-				Method: "GET", Path: "/actions?id=10&page=1&sort=status&sort=id",
+				Method: "GET", Path: "/actions?id=103&page=1&sort=status&sort=id",
 				Status: 200,
-				JSONRaw: `{
-					"actions": [
-						{ "id": 10, "status": "success" }
-					]
-				}`,
+				JSON: schema.ActionListResponse{
+					Actions: []schema.Action{
+						{ID: 103, Status: "success"},
+					},
+				},
 			},
 			{
-				Method: "GET", Path: "/actions?id=20&page=1&sort=status&sort=id",
+				Method: "GET", Path: "/actions?id=203&page=1&sort=status&sort=id",
 				Status: 200,
-				JSONRaw: `{
-					"actions": [
-						{ "id": 20, "status": "success" }
-					]
-				}`,
+				JSON: schema.ActionListResponse{
+					Actions: []schema.Action{
+						{ID: 203, Status: "success"},
+					},
+				},
 			},
 		},
 	))

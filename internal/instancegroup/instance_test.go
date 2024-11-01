@@ -9,6 +9,7 @@ import (
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutil"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/schema"
 
 	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/testutils"
 )
@@ -20,23 +21,21 @@ func TestCreateInstance(t *testing.T) {
 				{
 					Method: "POST", Path: "/servers",
 					Status: 201,
-					JSONRaw: `{
-						"server": { "id": 1 },
-						"action": { "id": 10, "status": "running" },
-						"next_actions": [
-							{ "id": 20, "status": "running" }
-						]
-					}`,
+					JSON: schema.ServerCreateResponse{
+						Server:      schema.Server{ID: 1},
+						Action:      schema.Action{ID: 10, Status: "running"},
+						NextActions: []schema.Action{{ID: 20, Status: "running"}},
+					},
 				},
 				{
 					Method: "GET", Path: "/actions?id=10&id=20&page=1&sort=status&sort=id",
 					Status: 200,
-					JSONRaw: `{
-						"actions": [
-							{ "id": 10, "status": "success" },
-							{ "id": 20, "status": "success" }
-						]
-					}`,
+					JSON: schema.ActionListResponse{
+						Actions: []schema.Action{
+							{ID: 10, Status: "success"},
+							{ID: 20, Status: "success"},
+						},
+					},
 				},
 			},
 		))
@@ -63,23 +62,21 @@ func TestCreateInstance(t *testing.T) {
 				{
 					Method: "POST", Path: "/servers",
 					Status: 201,
-					JSONRaw: `{
-						"server": { "id": 1 },
-						"action": { "id": 10, "status": "running" },
-						"next_actions": [
-							{ "id": 20, "status": "running" }
-						]
-					}`,
+					JSON: schema.ServerCreateResponse{
+						Server:      schema.Server{ID: 1},
+						Action:      schema.Action{ID: 10, Status: "running"},
+						NextActions: []schema.Action{{ID: 20, Status: "running"}},
+					},
 				},
 				{
 					Method: "GET", Path: "/actions?id=10&id=20&page=1&sort=status&sort=id",
 					Status: 200,
-					JSONRaw: `{
-						"actions": [
-							{ "id": 10, "status": "error", "error": { "code": "failure", "message": "Something failed" }},
-							{ "id": 20, "status": "success" }
-						]
-					}`,
+					JSON: schema.ActionListResponse{
+						Actions: []schema.Action{
+							{ID: 10, Status: "error", Error: &schema.ActionError{Code: "failure", Message: "Something failed"}},
+							{ID: 20, Status: "success"},
+						},
+					},
 				},
 			},
 		))
@@ -107,18 +104,18 @@ func TestInstanceDelete(t *testing.T) {
 			{
 				Method: "DELETE", Path: "/servers/1",
 				Status: 201,
-				JSONRaw: `{
-					"action": { "id": 10, "status": "running" }
-				}`,
+				JSON: schema.ServerDeleteResponse{
+					Action: schema.Action{ID: 10, Status: "running"},
+				},
 			},
 			{
 				Method: "GET", Path: "/actions?id=10&page=1&sort=status&sort=id",
 				Status: 200,
-				JSONRaw: `{
-					"actions": [
-						{ "id": 10, "status": "success" }
-					]
-				}`,
+				JSON: schema.ActionListResponse{
+					Actions: []schema.Action{
+						{ID: 10, Status: "success"},
+					},
+				},
 			},
 		},
 	))
