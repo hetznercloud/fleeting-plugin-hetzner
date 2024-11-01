@@ -33,7 +33,7 @@ func TestInit(t *testing.T) {
 
 	client := testutils.MakeTestClient(server.URL)
 
-	group := New(client, "dummy", DefaultTestConfig)
+	group := New(client, "fleeting", DefaultTestConfig)
 
 	err := group.Init(context.Background())
 	require.NoError(t, err)
@@ -89,7 +89,7 @@ func TestIncrease(t *testing.T) {
 
 		client := testutils.MakeTestClient(server.URL)
 
-		group := New(client, "dummy", DefaultTestConfig)
+		group := New(client, "fleeting", DefaultTestConfig)
 		err := group.Init(context.Background())
 		require.NoError(t, err)
 
@@ -163,7 +163,7 @@ func TestIncrease(t *testing.T) {
 
 		client := testutils.MakeTestClient(server.URL)
 
-		group := New(client, "dummy", DefaultTestConfig)
+		group := New(client, "fleeting", DefaultTestConfig)
 		err := group.Init(context.Background())
 		require.NoError(t, err)
 
@@ -216,7 +216,7 @@ func TestDecrease(t *testing.T) {
 
 	client := testutils.MakeTestClient(server.URL)
 
-	group := New(client, "dummy", DefaultTestConfig)
+	group := New(client, "fleeting", DefaultTestConfig)
 	err := group.Init(context.Background())
 	require.NoError(t, err)
 

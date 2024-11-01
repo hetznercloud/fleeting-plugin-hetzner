@@ -177,7 +177,9 @@ func TestIncrease(t *testing.T) {
 			run: func(t *testing.T, mock *instancegroup.MockInstanceGroup, group *InstanceGroup, ctx context.Context) {
 				group.size = 3
 
-				mock.EXPECT().Increase(ctx, 2).Return([]int64{1, 2}, nil)
+				mock.EXPECT().
+					Increase(ctx, 2).
+					Return([]int64{1, 2}, nil)
 
 				count, err := group.Increase(ctx, 2)
 				require.NoError(t, err)
@@ -189,7 +191,9 @@ func TestIncrease(t *testing.T) {
 			run: func(t *testing.T, mock *instancegroup.MockInstanceGroup, group *InstanceGroup, ctx context.Context) {
 				group.size = 3
 
-				mock.EXPECT().Increase(ctx, 2).Return([]int64{1}, fmt.Errorf("some error"))
+				mock.EXPECT().
+					Increase(ctx, 2).
+					Return([]int64{1}, fmt.Errorf("some error"))
 
 				count, err := group.Increase(ctx, 2)
 				require.Error(t, err)
@@ -222,7 +226,9 @@ func TestDecrease(t *testing.T) {
 			run: func(t *testing.T, mock *instancegroup.MockInstanceGroup, group *InstanceGroup, ctx context.Context) {
 				group.size = 2
 
-				mock.EXPECT().Decrease(ctx, []int64{1, 2}).Return([]int64{1, 2}, nil)
+				mock.EXPECT().
+					Decrease(ctx, []int64{1, 2}).
+					Return([]int64{1, 2}, nil)
 
 				result, err := group.Decrease(ctx, []string{"1", "2"})
 				require.NoError(t, err)
@@ -235,7 +241,9 @@ func TestDecrease(t *testing.T) {
 			run: func(t *testing.T, mock *instancegroup.MockInstanceGroup, group *InstanceGroup, ctx context.Context) {
 				group.size = 2
 
-				mock.EXPECT().Decrease(ctx, []int64{1, 2}).Return([]int64{1}, fmt.Errorf("some error"))
+				mock.EXPECT().
+					Decrease(ctx, []int64{1, 2}).
+					Return([]int64{1}, fmt.Errorf("some error"))
 
 				result, err := group.Decrease(ctx, []string{"1", "2"})
 				require.Error(t, err)
@@ -267,7 +275,9 @@ func TestUpdate(t *testing.T) {
 	}{
 		{name: "success",
 			run: func(t *testing.T, mock *instancegroup.MockInstanceGroup, group *InstanceGroup, ctx context.Context) {
-				mock.EXPECT().List(ctx).Return([]*hcloud.Server{{ID: 1, Status: hcloud.ServerStatusRunning}}, nil)
+				mock.EXPECT().
+					List(ctx).
+					Return([]*hcloud.Server{{ID: 1, Status: hcloud.ServerStatusRunning}}, nil)
 
 				updateIDs := make([]string, 0)
 				err := group.Update(ctx, func(id string, state provider.State) {
@@ -280,7 +290,9 @@ func TestUpdate(t *testing.T) {
 		},
 		{name: "failure",
 			run: func(t *testing.T, mock *instancegroup.MockInstanceGroup, group *InstanceGroup, ctx context.Context) {
-				mock.EXPECT().List(ctx).Return(nil, fmt.Errorf("some error"))
+				mock.EXPECT().
+					List(ctx).
+					Return(nil, fmt.Errorf("some error"))
 
 				err := group.Update(ctx, func(id string, state provider.State) {
 					require.Fail(t, "update should not have been called")
@@ -314,8 +326,9 @@ func TestConnectInfo(t *testing.T) {
 				group.settings.UseStaticCredentials = true
 				group.settings.Key = []byte("-----BEGIN OPENSSH PRIVATE KEY-----")
 
-				mock.EXPECT().Get(ctx, gomock.Any()).Return(hcloud.ServerFromSchema(
-					schema.Server{
+				mock.EXPECT().
+					Get(ctx, gomock.Any()).
+					Return(hcloud.ServerFromSchema(schema.Server{
 						ID:     1,
 						Name:   "existing-1",
 						Status: "running",
@@ -335,8 +348,7 @@ func TestConnectInfo(t *testing.T) {
 						PrivateNet: []schema.ServerPrivateNet{
 							{IP: "10.0.1.2"},
 						},
-					},
-				), nil)
+					}), nil)
 
 				result, err := group.ConnectInfo(ctx, "1")
 				require.NoError(t, err)
@@ -360,8 +372,9 @@ func TestConnectInfo(t *testing.T) {
 				group.settings.UseStaticCredentials = true
 				group.settings.Key = []byte("-----BEGIN OPENSSH PRIVATE KEY-----")
 
-				mock.EXPECT().Get(ctx, gomock.Any()).Return(hcloud.ServerFromSchema(
-					schema.Server{
+				mock.EXPECT().
+					Get(ctx, gomock.Any()).
+					Return(hcloud.ServerFromSchema(schema.Server{
 						ID:     1,
 						Name:   "existing-1",
 						Status: "running",
@@ -378,8 +391,7 @@ func TestConnectInfo(t *testing.T) {
 								IP: "2a01:4f8:1c19:1403::/64",
 							},
 						},
-					},
-				), nil)
+					}), nil)
 
 				result, err := group.ConnectInfo(ctx, "1")
 				require.NoError(t, err)
@@ -399,7 +411,9 @@ func TestConnectInfo(t *testing.T) {
 		},
 		{name: "failure",
 			run: func(t *testing.T, mock *instancegroup.MockInstanceGroup, group *InstanceGroup, ctx context.Context) {
-				mock.EXPECT().Get(ctx, gomock.Any()).Return(nil, fmt.Errorf("some error"))
+				mock.EXPECT().
+					Get(ctx, gomock.Any()).
+					Return(nil, fmt.Errorf("some error"))
 
 				result, err := group.ConnectInfo(ctx, "1")
 				require.Error(t, err)
