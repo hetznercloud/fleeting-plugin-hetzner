@@ -176,7 +176,7 @@ func (g *instanceGroup) Increase(ctx context.Context, delta int) ([]int64, error
 
 	// Wait for instances to be created
 	for _, instance := range instances {
-		if err := instance.Wait(); err != nil {
+		if err := instance.wait(); err != nil {
 			errs = append(errs, err)
 			failed = append(failed, instance)
 		} else {
@@ -193,7 +193,7 @@ func (g *instanceGroup) Increase(ctx context.Context, delta int) ([]int64, error
 
 	// Wait for failed instances to be deleted
 	for _, instance := range failed {
-		if err := instance.Wait(); err != nil {
+		if err := instance.wait(); err != nil {
 			errs = append(errs, err)
 		}
 	}
@@ -220,7 +220,7 @@ func (g *instanceGroup) Decrease(ctx context.Context, ids []int64) ([]int64, err
 
 	// Wait for instances to be deleted
 	for _, instance := range instances {
-		if err := instance.Wait(); err != nil {
+		if err := instance.wait(); err != nil {
 			errs = append(errs, err)
 		} else {
 			deleted = append(deleted, instance.ID)

@@ -49,11 +49,11 @@ func TestCreateInstance(t *testing.T) {
 			Image:      &hcloud.Image{Name: "debian-12"},
 		})
 		require.NoError(t, err)
-		require.NotNil(t, instance.waitFunc)
+		require.NotNil(t, instance.waitFn)
 
-		err = instance.Wait()
+		err = instance.wait()
 		require.NoError(t, err)
-		require.Nil(t, instance.waitFunc)
+		require.Nil(t, instance.waitFn)
 	})
 
 	t.Run("failure", func(t *testing.T) {
@@ -90,11 +90,11 @@ func TestCreateInstance(t *testing.T) {
 			Image:      &hcloud.Image{Name: "debian-12"},
 		})
 		require.NoError(t, err)
-		require.NotNil(t, instance.waitFunc)
+		require.NotNil(t, instance.waitFn)
 
-		err = instance.Wait()
+		err = instance.wait()
 		require.Error(t, err)
-		require.Nil(t, instance.waitFunc)
+		require.Nil(t, instance.waitFn)
 	})
 }
 
@@ -127,9 +127,9 @@ func TestInstanceDelete(t *testing.T) {
 
 	err := instance.Delete(ctx, client)
 	require.NoError(t, err)
-	require.NotNil(t, instance.waitFunc)
+	require.NotNil(t, instance.waitFn)
 
-	err = instance.Wait()
+	err = instance.wait()
 	require.NoError(t, err)
-	require.Nil(t, instance.waitFunc)
+	require.Nil(t, instance.waitFn)
 }

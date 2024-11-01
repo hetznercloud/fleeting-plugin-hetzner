@@ -11,7 +11,13 @@ import (
 type Instance struct {
 	ID int64
 
-	waitFunc func() error
+	// waitFn is used to postpone long background/remote tasks in between each handlers.
+	//
+	// This allows to trigger the creation of 3 servers in parallel, and only wait once
+	// all "create server" action have been triggered. The execution order changes from
+	// [create, wait 1m, create, wait 1m, create wait 1m] which could take ~ 3 minutes,
+	// to [create, create, create, wait 1m].
+	waitFn func() error
 }
 
 func NewInstance(id int64) *Instance {
@@ -28,7 +34,7 @@ func CreateInstance(ctx context.Context, client *hcloud.Client, opts hcloud.Serv
 
 	i := &Instance{}
 	i.ID = result.Server.ID
-	i.waitFunc = func() error {
+	i.waitFn = func() error {
 		if err := client.Action.WaitFor(ctx, actionutil.AppendNext(result.Action, result.NextActions)...); err != nil {
 			return fmt.Errorf("could not create instance: %w", err)
 		}
@@ -39,16 +45,16 @@ func CreateInstance(ctx context.Context, client *hcloud.Client, opts hcloud.Serv
 	return i, nil
 }
 
-func (i *Instance) Wait() error {
-	if i.waitFunc != nil {
-		defer func() {
-			i.waitFunc = nil
-		}()
-
-		return i.waitFunc()
+func (i *Instance) wait() error {
+	if i.waitFn == nil {
+		return nil
 	}
 
-	return nil
+	defer func() {
+		i.waitFn = nil
+	}()
+
+	return i.waitFn()
 }
 
 func (i *Instance) Delete(ctx context.Context, client *hcloud.Client) error {
@@ -57,7 +63,7 @@ func (i *Instance) Delete(ctx context.Context, client *hcloud.Client) error {
 		return fmt.Errorf("could not request instance deletion: %w", err)
 	}
 
-	i.waitFunc = func() error {
+	i.waitFn = func() error {
 		if err := client.Action.WaitFor(ctx, result.Action); err != nil {
 			return fmt.Errorf("could not delete instance: %w", err)
 		}
