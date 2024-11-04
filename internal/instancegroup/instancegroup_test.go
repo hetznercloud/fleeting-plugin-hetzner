@@ -24,21 +24,56 @@ var (
 )
 
 func TestInit(t *testing.T) {
-	server := httptest.NewServer(mockutil.Handler(t,
-		[]mockutil.Request{
-			testutils.GetLocationHel1Request,
-			testutils.GetServerTypeCPX11Request,
-			testutils.GetImageDebian12Request,
+	testCases := []struct {
+		name   string
+		config Config
+		want   func(t *testing.T, group *instanceGroup)
+	}{
+		{
+			name:   "success",
+			config: DefaultTestConfig,
+			want: func(t *testing.T, group *instanceGroup) {
+				require.NotNil(t, group.location)
+				require.NotNil(t, group.serverType)
+				require.NotNil(t, group.image)
+				require.Equal(t, map[string]string{"instance-group": "fleeting"}, group.labels)
+			},
 		},
-	))
+		{
+			name: "success extra labels",
+			config: Config{
+				Location:   "hel1",
+				ServerType: "cpx11",
+				Image:      "debian-12",
+				Labels:     map[string]string{"foo": "bar"},
+			},
+			want: func(t *testing.T, group *instanceGroup) {
+				require.NotNil(t, group.location)
+				require.NotNil(t, group.serverType)
+				require.NotNil(t, group.image)
+				require.Equal(t, map[string]string{"instance-group": "fleeting", "foo": "bar"}, group.labels)
+			},
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			server := httptest.NewServer(mockutil.Handler(t,
+				[]mockutil.Request{
+					testutils.GetLocationHel1Request,
+					testutils.GetServerTypeCPX11Request,
+					testutils.GetImageDebian12Request,
+				},
+			))
 
-	client := testutils.MakeTestClient(server.URL)
+			client := testutils.MakeTestClient(server.URL)
 
-	config := DefaultTestConfig
+			group := &instanceGroup{name: "fleeting", config: testCase.config, client: client}
+			err := group.Init(context.Background())
+			require.NoError(t, err)
 
-	group := &instanceGroup{name: "fleeting", config: config, client: client}
-	err := group.Init(context.Background())
-	require.NoError(t, err)
+			testCase.want(t, group)
+		})
+	}
 }
 
 func TestIncrease(t *testing.T) {

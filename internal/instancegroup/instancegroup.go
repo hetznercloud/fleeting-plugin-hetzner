@@ -104,10 +104,11 @@ func (g *instanceGroup) Init(ctx context.Context) (err error) {
 		g.sshKeys = append(g.sshKeys, sshKey)
 	}
 
+	g.labels = make(map[string]string, len(g.config.Labels)+1)
 	if g.config.Labels != nil {
-		g.labels = maps.Clone(g.config.Labels)
-		maps.Copy(g.labels, map[string]string{"instance-group": g.name})
+		maps.Copy(g.labels, g.config.Labels)
 	}
+	g.labels["instance-group"] = g.name
 
 	if g.config.PublicIPPoolEnabled {
 		g.ipPool = ippool.New(g.config.Location, g.config.PublicIPPoolSelector)
