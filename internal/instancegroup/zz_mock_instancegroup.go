@@ -13,7 +13,6 @@ import (
 	context "context"
 	reflect "reflect"
 
-	hcloud "github.com/hetznercloud/hcloud-go/v2/hcloud"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -42,40 +41,40 @@ func (m *MockInstanceGroup) EXPECT() *MockInstanceGroupMockRecorder {
 }
 
 // Decrease mocks base method.
-func (m *MockInstanceGroup) Decrease(ctx context.Context, ids []int64) ([]int64, error) {
+func (m *MockInstanceGroup) Decrease(ctx context.Context, iids []string) ([]string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Decrease", ctx, ids)
-	ret0, _ := ret[0].([]int64)
+	ret := m.ctrl.Call(m, "Decrease", ctx, iids)
+	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Decrease indicates an expected call of Decrease.
-func (mr *MockInstanceGroupMockRecorder) Decrease(ctx, ids any) *gomock.Call {
+func (mr *MockInstanceGroupMockRecorder) Decrease(ctx, iids any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Decrease", reflect.TypeOf((*MockInstanceGroup)(nil).Decrease), ctx, ids)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Decrease", reflect.TypeOf((*MockInstanceGroup)(nil).Decrease), ctx, iids)
 }
 
 // Get mocks base method.
-func (m *MockInstanceGroup) Get(ctx context.Context, id int64) (*hcloud.Server, error) {
+func (m *MockInstanceGroup) Get(ctx context.Context, iid string) (*Instance, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get", ctx, id)
-	ret0, _ := ret[0].(*hcloud.Server)
+	ret := m.ctrl.Call(m, "Get", ctx, iid)
+	ret0, _ := ret[0].(*Instance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Get indicates an expected call of Get.
-func (mr *MockInstanceGroupMockRecorder) Get(ctx, id any) *gomock.Call {
+func (mr *MockInstanceGroupMockRecorder) Get(ctx, iid any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockInstanceGroup)(nil).Get), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockInstanceGroup)(nil).Get), ctx, iid)
 }
 
 // Increase mocks base method.
-func (m *MockInstanceGroup) Increase(ctx context.Context, delta int) ([]int64, error) {
+func (m *MockInstanceGroup) Increase(ctx context.Context, delta int) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Increase", ctx, delta)
-	ret0, _ := ret[0].([]int64)
+	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -101,10 +100,10 @@ func (mr *MockInstanceGroupMockRecorder) Init(ctx any) *gomock.Call {
 }
 
 // List mocks base method.
-func (m *MockInstanceGroup) List(ctx context.Context) ([]*hcloud.Server, error) {
+func (m *MockInstanceGroup) List(ctx context.Context) ([]*Instance, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "List", ctx)
-	ret0, _ := ret[0].([]*hcloud.Server)
+	ret0, _ := ret[0].([]*Instance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

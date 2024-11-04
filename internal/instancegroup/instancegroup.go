@@ -15,11 +15,11 @@ import (
 type InstanceGroup interface {
 	Init(ctx context.Context) error
 
-	Increase(ctx context.Context, delta int) ([]int64, error)
-	Decrease(ctx context.Context, ids []int64) ([]int64, error)
+	Increase(ctx context.Context, delta int) ([]string, error)
+	Decrease(ctx context.Context, iids []string) ([]string, error)
 
-	List(ctx context.Context) ([]*hcloud.Server, error)
-	Get(ctx context.Context, id int64) (*hcloud.Server, error)
+	List(ctx context.Context) ([]*Instance, error)
+	Get(ctx context.Context, iid string) (*Instance, error)
 }
 
 var _ InstanceGroup = (*instanceGroup)(nil)
@@ -115,8 +115,8 @@ func (g *instanceGroup) Init(ctx context.Context) (err error) {
 	return nil
 }
 
-func (g *instanceGroup) Increase(ctx context.Context, delta int) ([]int64, error) {
-	created := make([]int64, 0, delta)
+func (g *instanceGroup) Increase(ctx context.Context, delta int) ([]string, error) {
+	created := make([]string, 0, delta)
 	errs := make([]error, 0, delta)
 	failed := make([]*Instance, 0, delta)
 	instances := make([]*Instance, 0, delta)
@@ -180,7 +180,7 @@ func (g *instanceGroup) Increase(ctx context.Context, delta int) ([]int64, error
 			errs = append(errs, err)
 			failed = append(failed, instance)
 		} else {
-			created = append(created, instance.ID)
+			created = append(created, instance.IID())
 		}
 	}
 
@@ -201,14 +201,18 @@ func (g *instanceGroup) Increase(ctx context.Context, delta int) ([]int64, error
 	return created, errors.Join(errs...)
 }
 
-func (g *instanceGroup) Decrease(ctx context.Context, ids []int64) ([]int64, error) {
-	deleted := make([]int64, 0, len(ids))
-	errs := make([]error, 0, len(ids))
-	instances := make([]*Instance, 0, len(ids))
+func (g *instanceGroup) Decrease(ctx context.Context, iids []string) ([]string, error) {
+	deleted := make([]string, 0, len(iids))
+	errs := make([]error, 0, len(iids))
+	instances := make([]*Instance, 0, len(iids))
 
 	// Delete instances
-	for _, id := range ids {
-		instance := NewInstance(id)
+	for _, iid := range iids {
+		instance, err := InstanceFromIID(iid)
+		if err != nil {
+			errs = append(errs, err)
+			continue
+		}
 
 		if err := instance.Delete(ctx, g.client); err != nil {
 			errs = append(errs, err)
@@ -223,15 +227,15 @@ func (g *instanceGroup) Decrease(ctx context.Context, ids []int64) ([]int64, err
 		if err := instance.wait(); err != nil {
 			errs = append(errs, err)
 		} else {
-			deleted = append(deleted, instance.ID)
+			deleted = append(deleted, instance.IID())
 		}
 	}
 
 	return deleted, errors.Join(errs...)
 }
 
-func (g *instanceGroup) List(ctx context.Context) ([]*hcloud.Server, error) {
-	result, err := g.client.Server.AllWithOpts(ctx,
+func (g *instanceGroup) List(ctx context.Context) ([]*Instance, error) {
+	servers, err := g.client.Server.AllWithOpts(ctx,
 		hcloud.ServerListOpts{
 			ListOpts: hcloud.ListOpts{
 				LabelSelector: fmt.Sprintf("instance-group=%s", g.name),
@@ -242,13 +246,24 @@ func (g *instanceGroup) List(ctx context.Context) ([]*hcloud.Server, error) {
 		return nil, fmt.Errorf("could not list instances: %w", err)
 	}
 
-	return result, nil
+	instances := make([]*Instance, 0, len(servers))
+	for _, server := range servers {
+		instances = append(instances, InstanceFromServer(server))
+	}
+
+	return instances, nil
 }
 
-func (g *instanceGroup) Get(ctx context.Context, id int64) (*hcloud.Server, error) {
-	result, _, err := g.client.Server.GetByID(ctx, id)
+func (g *instanceGroup) Get(ctx context.Context, iid string) (*Instance, error) {
+	instance, err := InstanceFromIID(iid)
+	if err != nil {
+		return nil, err
+	}
+
+	server, _, err := g.client.Server.GetByID(ctx, instance.ID)
 	if err != nil {
 		return nil, fmt.Errorf("could not get instance: %w", err)
 	}
-	return result, nil
+
+	return InstanceFromServer(server), nil
 }

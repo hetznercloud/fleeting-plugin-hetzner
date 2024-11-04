@@ -17,7 +17,6 @@ import (
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/kit/sshutil"
 
 	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/instancegroup"
-	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/utils"
 )
 
 var _ provider.InstanceGroup = (*InstanceGroup)(nil)
@@ -144,7 +143,7 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 	}, nil
 }
 
-func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state provider.State)) error {
+func (g *InstanceGroup) Update(ctx context.Context, update func(string, provider.State)) error {
 	instances, err := g.group.List(ctx)
 	if err != nil {
 		return err
@@ -153,9 +152,11 @@ func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state
 	g.size = len(instances)
 
 	for _, instance := range instances {
+		id := instance.IID()
+
 		var state provider.State
 
-		switch instance.Status {
+		switch instance.Server.Status {
 		case hcloud.ServerStatusStopping, hcloud.ServerStatusDeleting:
 			state = provider.StateDeleting
 
@@ -171,13 +172,13 @@ func (g *InstanceGroup) Update(ctx context.Context, update func(id string, state
 			state = provider.StateRunning
 
 		case hcloud.ServerStatusMigrating, hcloud.ServerStatusRebuilding, hcloud.ServerStatusUnknown:
-			g.log.Debug("unhandled instance status", "id", utils.FormatID(instance.ID), "status", instance.Status)
+			g.log.Debug("unhandled instance status", "id", id, "status", instance.Server.Status)
 
 		default:
-			g.log.Error("unexpected instance status", "id", utils.FormatID(instance.ID), "status", instance.Status)
+			g.log.Error("unexpected instance status", "id", id, "status", instance.Server.Status)
 		}
 
-		update(utils.FormatID(instance.ID), state)
+		update(id, state)
 	}
 
 	return nil
@@ -191,67 +192,52 @@ func (g *InstanceGroup) Increase(ctx context.Context, delta int) (int, error) {
 	return len(created), err
 }
 
-func (g *InstanceGroup) Decrease(ctx context.Context, instances []string) ([]string, error) {
-	if len(instances) == 0 {
+func (g *InstanceGroup) Decrease(ctx context.Context, iids []string) ([]string, error) {
+	if len(iids) == 0 {
 		return nil, nil
 	}
 
-	ids, err := utils.ParseIDList(instances)
-	if err != nil {
-		return nil, err
-	}
-
-	errs := make([]error, 0)
-
-	deleted, err := g.group.Decrease(ctx, ids)
-	if err != nil {
-		errs = append(errs, err)
-	}
+	deleted, err := g.group.Decrease(ctx, iids)
 
 	g.size -= len(deleted)
 
-	return utils.FormatIDList(deleted), errors.Join(errs...)
+	return deleted, err
 }
 
-func (g *InstanceGroup) ConnectInfo(ctx context.Context, instance string) (provider.ConnectInfo, error) {
+func (g *InstanceGroup) ConnectInfo(ctx context.Context, iid string) (provider.ConnectInfo, error) {
 	info := provider.ConnectInfo{ConnectorConfig: g.settings.ConnectorConfig}
 
-	id, err := utils.ParseID(instance)
-	if err != nil {
-		return info, fmt.Errorf("could not parse instance id: %w", err)
-	}
-
-	server, err := g.group.Get(ctx, id)
+	instance, err := g.group.Get(ctx, iid)
 	if err != nil {
 		return info, fmt.Errorf("could not get instance: %w", err)
 	}
 
-	info.ID = instance
-	info.OS = server.Image.OSFlavor
+	info.ID = iid
+	info.OS = instance.Server.Image.OSFlavor
 
-	switch server.ServerType.Architecture {
+	switch instance.Server.ServerType.Architecture {
 	case hcloud.ArchitectureX86:
 		info.Arch = "amd64"
 	case hcloud.ArchitectureARM:
 		info.Arch = "arm64"
 	default:
-		g.log.Warn("unsupported architecture", "architecture", server.ServerType.Architecture)
+		g.log.Warn("unsupported architecture", "architecture", instance.Server.ServerType.Architecture)
 	}
 
 	switch {
-	case !server.PublicNet.IPv4.IsUnspecified():
-		info.ExternalAddr = server.PublicNet.IPv4.IP.String()
-	case !server.PublicNet.IPv6.IsUnspecified():
-		network, ok := netip.AddrFromSlice(server.PublicNet.IPv6.IP)
+	case !instance.Server.PublicNet.IPv4.IsUnspecified():
+		info.ExternalAddr = instance.Server.PublicNet.IPv4.IP.String()
+	case !instance.Server.PublicNet.IPv6.IsUnspecified():
+		network, ok := netip.AddrFromSlice(instance.Server.PublicNet.IPv6.IP)
 		if ok {
 			info.ExternalAddr = network.Next().String()
 		} else {
-			return info, fmt.Errorf("could not parse server public ipv6: %s", server.PublicNet.IPv6.IP.String())
+			return info, fmt.Errorf("could not parse server public ipv6: %s", instance.Server.PublicNet.IPv6.IP.String())
 		}
 	}
 
-	if len(server.PrivateNet) > 0 {
-		info.InternalAddr = server.PrivateNet[0].IP.String()
+	if len(instance.Server.PrivateNet) > 0 {
+		info.InternalAddr = instance.Server.PrivateNet[0].IP.String()
 	}
 
 	return info, err
@@ -261,7 +247,7 @@ func (g *InstanceGroup) Shutdown(ctx context.Context) error {
 	errs := make([]error, 0)
 
 	if g.sshKey != nil {
-		g.log.Debug("deleting ssh key", "id", utils.FormatID(g.sshKey.ID))
+		g.log.Debug("deleting ssh key", "id", fmt.Sprint(g.sshKey.ID))
 		_, err := g.client.SSHKey.Delete(ctx, g.sshKey)
 		if err != nil {
 			errs = append(errs, err)

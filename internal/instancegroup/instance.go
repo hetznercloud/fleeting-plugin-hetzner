@@ -3,13 +3,21 @@ package instancegroup
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/actionutil"
 )
 
 type Instance struct {
+	// Name of the instance, used for the underlying server and other attached resources.
+	Name string
+	// ID of the instance's underlying server.
 	ID int64
+
+	// Server is the instance's underlying server, and must never be partially populated.
+	Server *hcloud.Server
 
 	// waitFn is used to postpone long background/remote tasks in between each handlers.
 	//
@@ -20,10 +28,35 @@ type Instance struct {
 	waitFn func() error
 }
 
-func NewInstance(id int64) *Instance {
-	return &Instance{
-		ID: id,
+func NewInstance(name string) *Instance {
+	return &Instance{Name: name}
+}
+
+func InstanceFromServer(server *hcloud.Server) *Instance {
+	return &Instance{Name: server.Name, ID: server.ID, Server: server}
+}
+
+func InstanceFromIID(value string) (*Instance, error) {
+	parts := strings.Split(value, ":")
+
+	// Handle iid and extract name and id
+	if len(parts) == 2 {
+		name := parts[0]
+
+		id, err := strconv.ParseInt(parts[1], 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("could not parse instance id: %w", err)
+		}
+
+		return &Instance{Name: name, ID: id}, nil
 	}
+
+	return nil, fmt.Errorf("invalid instance id: %s", value)
+}
+
+// IID holds to data to identify the instance outside of the instance group.
+func (i *Instance) IID() string {
+	return fmt.Sprintf("%s:%d", i.Name, i.ID)
 }
 
 func CreateInstance(ctx context.Context, client *hcloud.Client, opts hcloud.ServerCreateOpts) (*Instance, error) {
@@ -32,8 +65,8 @@ func CreateInstance(ctx context.Context, client *hcloud.Client, opts hcloud.Serv
 		return nil, fmt.Errorf("could not request instance creation: %w", err)
 	}
 
-	i := &Instance{}
-	i.ID = result.Server.ID
+	i := InstanceFromServer(result.Server)
+
 	i.waitFn = func() error {
 		if err := client.Action.WaitFor(ctx, actionutil.AppendNext(result.Action, result.NextActions)...); err != nil {
 			return fmt.Errorf("could not create instance: %w", err)

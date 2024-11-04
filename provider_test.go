@@ -179,7 +179,7 @@ func TestIncrease(t *testing.T) {
 
 				mock.EXPECT().
 					Increase(ctx, 2).
-					Return([]int64{1, 2}, nil)
+					Return([]string{"fleeting-a:1", "fleeting-b:2"}, nil)
 
 				count, err := group.Increase(ctx, 2)
 				require.NoError(t, err)
@@ -193,7 +193,7 @@ func TestIncrease(t *testing.T) {
 
 				mock.EXPECT().
 					Increase(ctx, 2).
-					Return([]int64{1}, fmt.Errorf("some error"))
+					Return([]string{"fleeting-a:1"}, fmt.Errorf("some error"))
 
 				count, err := group.Increase(ctx, 2)
 				require.Error(t, err)
@@ -227,12 +227,12 @@ func TestDecrease(t *testing.T) {
 				group.size = 2
 
 				mock.EXPECT().
-					Decrease(ctx, []int64{1, 2}).
-					Return([]int64{1, 2}, nil)
+					Decrease(ctx, []string{"fleeting-a:1", "fleeting-b:2"}).
+					Return([]string{"fleeting-a:1", "fleeting-b:2"}, nil)
 
-				result, err := group.Decrease(ctx, []string{"1", "2"})
+				result, err := group.Decrease(ctx, []string{"fleeting-a:1", "fleeting-b:2"})
 				require.NoError(t, err)
-				require.Equal(t, []string{"1", "2"}, result)
+				require.Equal(t, []string{"fleeting-a:1", "fleeting-b:2"}, result)
 
 				require.Equal(t, 0, group.size)
 			},
@@ -242,12 +242,12 @@ func TestDecrease(t *testing.T) {
 				group.size = 2
 
 				mock.EXPECT().
-					Decrease(ctx, []int64{1, 2}).
-					Return([]int64{1}, fmt.Errorf("some error"))
+					Decrease(ctx, []string{"fleeting-a:1", "fleeting-b:2"}).
+					Return([]string{"fleeting-a:1"}, fmt.Errorf("some error"))
 
-				result, err := group.Decrease(ctx, []string{"1", "2"})
+				result, err := group.Decrease(ctx, []string{"fleeting-a:1", "fleeting-b:2"})
 				require.Error(t, err)
-				require.Equal(t, []string{"1"}, result)
+				require.Equal(t, []string{"fleeting-a:1"}, result)
 
 				require.Equal(t, 1, group.size)
 			},
@@ -275,16 +275,22 @@ func TestUpdate(t *testing.T) {
 	}{
 		{name: "success",
 			run: func(t *testing.T, mock *instancegroup.MockInstanceGroup, group *InstanceGroup, ctx context.Context) {
+				instance := &instancegroup.Instance{
+					Name:   "fleeting-a",
+					ID:     1,
+					Server: &hcloud.Server{Status: hcloud.ServerStatusRunning},
+				}
+
 				mock.EXPECT().
 					List(ctx).
-					Return([]*hcloud.Server{{ID: 1, Status: hcloud.ServerStatusRunning}}, nil)
+					Return([]*instancegroup.Instance{instance}, nil)
 
 				updateIDs := make([]string, 0)
 				err := group.Update(ctx, func(id string, state provider.State) {
 					updateIDs = append(updateIDs, id)
 				})
 				require.NoError(t, err)
-				require.Equal(t, []string{"1"}, updateIDs)
+				require.Equal(t, []string{"fleeting-a:1"}, updateIDs)
 				require.Equal(t, 1, group.size)
 			},
 		},
@@ -328,29 +334,30 @@ func TestConnectInfo(t *testing.T) {
 
 				mock.EXPECT().
 					Get(ctx, gomock.Any()).
-					Return(hcloud.ServerFromSchema(schema.Server{
-						ID:     1,
-						Name:   "existing-1",
-						Status: "running",
-						Image: &schema.Image{
-							OSFlavor:  "debian",
-							OSVersion: hcloud.Ptr("12"),
-						},
-						ServerType: schema.ServerType{
-							Name:         "cpx11",
-							Architecture: "x86",
-						},
-						PublicNet: schema.ServerPublicNet{
-							IPv4: schema.ServerPublicNetIPv4{
-								IP: "37.1.1.1",
+					Return(instancegroup.InstanceFromServer(hcloud.ServerFromSchema(
+						schema.Server{
+							ID:     1,
+							Name:   "fleeting-a",
+							Status: "running",
+							Image: &schema.Image{
+								OSFlavor:  "debian",
+								OSVersion: hcloud.Ptr("12"),
 							},
-						},
-						PrivateNet: []schema.ServerPrivateNet{
-							{IP: "10.0.1.2"},
-						},
-					}), nil)
+							ServerType: schema.ServerType{
+								Name:         "cpx11",
+								Architecture: "x86",
+							},
+							PublicNet: schema.ServerPublicNet{
+								IPv4: schema.ServerPublicNetIPv4{
+									IP: "37.1.1.1",
+								},
+							},
+							PrivateNet: []schema.ServerPrivateNet{
+								{IP: "10.0.1.2"},
+							},
+						})), nil)
 
-				result, err := group.ConnectInfo(ctx, "1")
+				result, err := group.ConnectInfo(ctx, "fleeting-a:1")
 				require.NoError(t, err)
 				require.Equal(t, provider.ConnectInfo{
 					ConnectorConfig: provider.ConnectorConfig{
@@ -361,7 +368,7 @@ func TestConnectInfo(t *testing.T) {
 						Username:             "root",
 						Key:                  []byte("-----BEGIN OPENSSH PRIVATE KEY-----"),
 					},
-					ID:           "1",
+					ID:           "fleeting-a:1",
 					ExternalAddr: "37.1.1.1",
 					InternalAddr: "10.0.1.2",
 				}, result)
@@ -374,26 +381,27 @@ func TestConnectInfo(t *testing.T) {
 
 				mock.EXPECT().
 					Get(ctx, gomock.Any()).
-					Return(hcloud.ServerFromSchema(schema.Server{
-						ID:     1,
-						Name:   "existing-1",
-						Status: "running",
-						Image: &schema.Image{
-							OSFlavor:  "debian",
-							OSVersion: hcloud.Ptr("12"),
-						},
-						ServerType: schema.ServerType{
-							Name:         "cpx11",
-							Architecture: "x86",
-						},
-						PublicNet: schema.ServerPublicNet{
-							IPv6: schema.ServerPublicNetIPv6{
-								IP: "2a01:4f8:1c19:1403::/64",
+					Return(instancegroup.InstanceFromServer(hcloud.ServerFromSchema(
+						schema.Server{
+							ID:     1,
+							Name:   "fleeting-a",
+							Status: "running",
+							Image: &schema.Image{
+								OSFlavor:  "debian",
+								OSVersion: hcloud.Ptr("12"),
 							},
-						},
-					}), nil)
+							ServerType: schema.ServerType{
+								Name:         "cpx11",
+								Architecture: "x86",
+							},
+							PublicNet: schema.ServerPublicNet{
+								IPv6: schema.ServerPublicNetIPv6{
+									IP: "2a01:4f8:1c19:1403::/64",
+								},
+							},
+						})), nil)
 
-				result, err := group.ConnectInfo(ctx, "1")
+				result, err := group.ConnectInfo(ctx, "fleeting-a:1")
 				require.NoError(t, err)
 				require.Equal(t, provider.ConnectInfo{
 					ConnectorConfig: provider.ConnectorConfig{
@@ -404,7 +412,7 @@ func TestConnectInfo(t *testing.T) {
 						Username:             "root",
 						Key:                  []byte("-----BEGIN OPENSSH PRIVATE KEY-----"),
 					},
-					ID:           "1",
+					ID:           "fleeting-a:1",
 					ExternalAddr: "2a01:4f8:1c19:1403::1",
 				}, result)
 			},
@@ -415,7 +423,7 @@ func TestConnectInfo(t *testing.T) {
 					Get(ctx, gomock.Any()).
 					Return(nil, fmt.Errorf("some error"))
 
-				result, err := group.ConnectInfo(ctx, "1")
+				result, err := group.ConnectInfo(ctx, "fleeting-a:1")
 				require.Error(t, err)
 				require.Equal(t, provider.ConnectInfo{
 					ConnectorConfig: provider.ConnectorConfig{

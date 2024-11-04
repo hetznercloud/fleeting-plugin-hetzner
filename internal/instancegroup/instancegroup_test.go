@@ -50,7 +50,7 @@ func TestIncrease(t *testing.T) {
 					Method: "POST", Path: "/servers",
 					Status: 201,
 					JSON: schema.ServerCreateResponse{
-						Server:      schema.Server{ID: 1},
+						Server:      schema.Server{ID: 1, Name: "fleeting-a"},
 						Action:      schema.Action{ID: 101, Status: "running"},
 						NextActions: []schema.Action{{ID: 102, Status: "running"}},
 					},
@@ -59,7 +59,7 @@ func TestIncrease(t *testing.T) {
 					Method: "POST", Path: "/servers",
 					Status: 201,
 					JSON: schema.ServerCreateResponse{
-						Server:      schema.Server{ID: 2},
+						Server:      schema.Server{ID: 2, Name: "fleeting-b"},
 						Action:      schema.Action{ID: 201, Status: "running"},
 						NextActions: []schema.Action{{ID: 202, Status: "running"}},
 					},
@@ -95,7 +95,7 @@ func TestIncrease(t *testing.T) {
 
 		created, err := group.Increase(context.Background(), 2)
 		require.NoError(t, err)
-		require.Equal(t, []int64{1, 2}, created)
+		require.Equal(t, []string{"fleeting-a:1", "fleeting-b:2"}, created)
 	})
 
 	t.Run("failure", func(t *testing.T) {
@@ -108,7 +108,7 @@ func TestIncrease(t *testing.T) {
 					Method: "POST", Path: "/servers",
 					Status: 201,
 					JSON: schema.ServerCreateResponse{
-						Server:      schema.Server{ID: 1},
+						Server:      schema.Server{ID: 1, Name: "fleeting-a"},
 						Action:      schema.Action{ID: 101, Status: "running"},
 						NextActions: []schema.Action{{ID: 102, Status: "running"}},
 					},
@@ -117,7 +117,7 @@ func TestIncrease(t *testing.T) {
 					Method: "POST", Path: "/servers",
 					Status: 201,
 					JSON: schema.ServerCreateResponse{
-						Server:      schema.Server{ID: 2},
+						Server:      schema.Server{ID: 2, Name: "fleeting-b"},
 						Action:      schema.Action{ID: 201, Status: "running"},
 						NextActions: []schema.Action{{ID: 202, Status: "running"}},
 					},
@@ -169,7 +169,7 @@ func TestIncrease(t *testing.T) {
 
 		created, err := group.Increase(context.Background(), 2)
 		require.Error(t, err)
-		require.Equal(t, []int64{2}, created)
+		require.Equal(t, []string{"fleeting-b:2"}, created)
 	})
 }
 
@@ -220,7 +220,7 @@ func TestDecrease(t *testing.T) {
 	err := group.Init(context.Background())
 	require.NoError(t, err)
 
-	deleted, err := group.Decrease(context.Background(), []int64{1, 2})
+	deleted, err := group.Decrease(context.Background(), []string{"fleeting-a:1", "fleeting-b:2"})
 	require.NoError(t, err)
-	require.Equal(t, []int64{1, 2}, deleted)
+	require.Equal(t, []string{"fleeting-a:1", "fleeting-b:2"}, deleted)
 }
