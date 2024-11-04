@@ -16,7 +16,7 @@ func TestServerHandlerCreate(t *testing.T) {
 		ctx := context.Background()
 		config := DefaultTestConfig
 
-		group := makeTestInstanceGroup(t, config, []mockutil.Request{
+		group := setupInstanceGroup(t, config, []mockutil.Request{
 			{
 				Method: "POST", Path: "/servers",
 				Status: 201,
@@ -48,7 +48,7 @@ func TestServerHandlerCleanup(t *testing.T) {
 		ctx := context.Background()
 		config := DefaultTestConfig
 
-		group := makeTestInstanceGroup(t, config, []mockutil.Request{
+		group := setupInstanceGroup(t, config, []mockutil.Request{
 			{
 				Method: "DELETE", Path: "/servers/1",
 				Status: 200,
@@ -73,7 +73,7 @@ func TestServerHandlerCleanup(t *testing.T) {
 		ctx := context.Background()
 		config := DefaultTestConfig
 
-		group := makeTestInstanceGroup(t, config, []mockutil.Request{})
+		group := setupInstanceGroup(t, config, []mockutil.Request{})
 
 		instance := &Instance{Name: "fleeting-a"}
 

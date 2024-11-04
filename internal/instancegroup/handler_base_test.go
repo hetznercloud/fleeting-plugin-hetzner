@@ -14,7 +14,7 @@ func TestBaseHandlerCreate(t *testing.T) {
 	ctx := context.Background()
 	config := DefaultTestConfig
 
-	group := makeTestInstanceGroup(t, config, []mockutil.Request{})
+	group := setupInstanceGroup(t, config, []mockutil.Request{})
 
 	instance := NewInstance("fleeting-a")
 

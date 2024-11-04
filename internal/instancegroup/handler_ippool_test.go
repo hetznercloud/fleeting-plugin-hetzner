@@ -18,7 +18,7 @@ func TestIPPoolHandlerCreate(t *testing.T) {
 		config.PublicIPPoolEnabled = true
 		config.PublicIPPoolSelector = "fleeting"
 
-		group := makeTestInstanceGroup(t, config, []mockutil.Request{
+		group := setupInstanceGroup(t, config, []mockutil.Request{
 			{
 				Method: "GET", Path: "/primary_ips?label_selector=fleeting&page=1",
 				Status: 200,
@@ -67,7 +67,7 @@ func TestIPPoolHandlerCreate(t *testing.T) {
 		ctx := context.Background()
 		config := DefaultTestConfig
 
-		group := makeTestInstanceGroup(t, config, []mockutil.Request{})
+		group := setupInstanceGroup(t, config, []mockutil.Request{})
 
 		instance := NewInstance("fleeting-a")
 		{
