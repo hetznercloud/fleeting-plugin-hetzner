@@ -2,6 +2,7 @@ package instancegroup
 
 import (
 	"context"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -48,6 +49,17 @@ func TestIncrease(t *testing.T) {
 				testutils.GetImageDebian12Request,
 				{
 					Method: "POST", Path: "/servers",
+					Want: func(t *testing.T, r *http.Request) {
+						require.Equal(t, "/servers", r.RequestURI)
+
+						var payload schema.ServerCreateRequest
+						mustUnmarshal(t, r.Body, &payload)
+						require.Equal(t, "3", payload.Location)
+						require.Equal(t, float64(114690387), payload.Image.(float64))
+						require.Equal(t, float64(1), payload.ServerType.(float64))
+						require.Equal(t, false, payload.PublicNet.EnableIPv4)
+						require.Equal(t, true, payload.PublicNet.EnableIPv6)
+					},
 					Status: 201,
 					JSON: schema.ServerCreateResponse{
 						Server:      schema.Server{ID: 1, Name: "fleeting-a"},
@@ -57,6 +69,17 @@ func TestIncrease(t *testing.T) {
 				},
 				{
 					Method: "POST", Path: "/servers",
+					Want: func(t *testing.T, r *http.Request) {
+						require.Equal(t, "/servers", r.RequestURI)
+
+						var payload schema.ServerCreateRequest
+						mustUnmarshal(t, r.Body, &payload)
+						require.Equal(t, "3", payload.Location)
+						require.Equal(t, float64(114690387), payload.Image.(float64))
+						require.Equal(t, float64(1), payload.ServerType.(float64))
+						require.Equal(t, false, payload.PublicNet.EnableIPv4)
+						require.Equal(t, true, payload.PublicNet.EnableIPv6)
+					},
 					Status: 201,
 					JSON: schema.ServerCreateResponse{
 						Server:      schema.Server{ID: 2, Name: "fleeting-b"},
@@ -89,7 +112,9 @@ func TestIncrease(t *testing.T) {
 
 		client := testutils.MakeTestClient(server.URL)
 
-		group := New(client, "fleeting", DefaultTestConfig)
+		config := DefaultTestConfig
+
+		group := New(client, "fleeting", config)
 		err := group.Init(context.Background())
 		require.NoError(t, err)
 
@@ -163,7 +188,9 @@ func TestIncrease(t *testing.T) {
 
 		client := testutils.MakeTestClient(server.URL)
 
-		group := New(client, "fleeting", DefaultTestConfig)
+		config := DefaultTestConfig
+
+		group := New(client, "fleeting", config)
 		err := group.Init(context.Background())
 		require.NoError(t, err)
 
@@ -216,7 +243,9 @@ func TestDecrease(t *testing.T) {
 
 	client := testutils.MakeTestClient(server.URL)
 
-	group := New(client, "fleeting", DefaultTestConfig)
+	config := DefaultTestConfig
+
+	group := New(client, "fleeting", config)
 	err := group.Init(context.Background())
 	require.NoError(t, err)
 

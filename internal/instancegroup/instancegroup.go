@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"maps"
+	"slices"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 
@@ -116,119 +117,163 @@ func (g *instanceGroup) Init(ctx context.Context) (err error) {
 }
 
 func (g *instanceGroup) Increase(ctx context.Context, delta int) ([]string, error) {
-	created := make([]string, 0, delta)
-	errs := make([]error, 0, delta)
-	failed := make([]*Instance, 0, delta)
-	instances := make([]*Instance, 0, delta)
+	handlers := []CreateHandler{
+		&BaseHandler{},   // Configure the instance server create options from the instance group config.
+		&IPPoolHandler{}, // Configure the IPs in the instance server create options.
+		&ServerHandler{}, // Create a server from the instance server create options.
+	}
 
-	if g.config.PublicIPPoolEnabled {
-		if err := g.ipPool.Refresh(ctx, g.client); err != nil {
+	// Run all pre increase handlers
+	for _, handler := range handlers {
+		h, ok := handler.(PreIncreaseHandler)
+		if !ok {
+			continue
+		}
+
+		if err := h.PreIncrease(ctx, g); err != nil {
 			return nil, err
 		}
 	}
 
-	// Create instances
-	for i := delta; i > 0; i-- {
-		opts := hcloud.ServerCreateOpts{}
+	errs := make([]error, 0)
 
-		opts.Name = g.name + "-" + utils.GenerateRandomID()
-		opts.Labels = g.labels
+	instances := make([]*Instance, 0, delta)
+	failed := make([]*Instance, 0, delta)
 
-		opts.Location = g.location
-		opts.ServerType = g.serverType
-		opts.Image = g.image
-		opts.PublicNet = &hcloud.ServerCreatePublicNet{
-			EnableIPv4: !g.config.PublicIPv4Disabled,
-			EnableIPv6: !g.config.PublicIPv6Disabled,
-		}
-		if g.config.PublicIPPoolEnabled {
-			if !g.config.PublicIPv4Disabled {
-				ipv4, err := g.ipPool.NextIPv4()
-				if err != nil {
-					errs = append(errs, fmt.Errorf("could not get ipv4 from pool: %w", err))
-					continue
-				}
-				opts.PublicNet.IPv4 = ipv4
-			}
-			if !g.config.PublicIPv6Disabled {
-				ipv6, err := g.ipPool.NextIPv6()
-				if err != nil {
-					errs = append(errs, fmt.Errorf("could not get ipv6 from pool: %w", err))
-					continue
-				}
-				opts.PublicNet.IPv6 = ipv6
-			}
-		}
-
-		opts.Networks = g.privateNetworks
-		opts.SSHKeys = g.sshKeys
-
-		opts.UserData = g.config.UserData
-
-		instance, err := CreateInstance(ctx, g.client, opts)
-		if err != nil {
-			errs = append(errs, err)
-			continue
-		}
-
-		instances = append(instances, instance)
+	// Create a list of new instances
+	for i := 0; i < delta; i++ {
+		instances = append(instances, NewInstance(g.name+"-"+utils.GenerateRandomID()))
 	}
 
-	// Wait for instances to be created
+	// Run all create handlers on each instance
+	for _, handler := range handlers {
+		{
+			succeeded := make([]*Instance, 0, len(instances))
+			for _, instance := range instances {
+				if err := handler.Create(ctx, g, instance); err != nil {
+					errs = append(errs, err)
+					failed = append(failed, instance)
+				} else {
+					succeeded = append(succeeded, instance)
+				}
+			}
+			instances = succeeded
+		}
+
+		// Wait for each instance background tasks to complete
+		{
+			succeeded := make([]*Instance, 0, len(instances))
+			for _, instance := range instances {
+				if err := instance.wait(); err != nil {
+					errs = append(errs, err)
+					failed = append(failed, instance)
+				} else {
+					succeeded = append(succeeded, instance)
+				}
+			}
+			instances = succeeded
+		}
+	}
+
+	// Cleanup failed instances
+	if len(failed) > 0 {
+		// During cleanup, the handlers must be run backwards
+		slices.Reverse(handlers)
+
+		// Run all cleanup handlers on each failed instance
+		for _, handler := range handlers {
+			h, ok := handler.(CleanupHandler)
+			if !ok {
+				continue
+			}
+
+			for _, instance := range failed {
+				if err := h.Cleanup(ctx, g, instance); err != nil {
+					errs = append(errs, err)
+				}
+			}
+
+			// Wait for each instance background tasks to complete
+			for _, instance := range failed {
+				if err := instance.wait(); err != nil {
+					errs = append(errs, err)
+				}
+			}
+		}
+	}
+
+	// Collect created instances IIDs
+	created := make([]string, 0, len(instances))
 	for _, instance := range instances {
-		if err := instance.wait(); err != nil {
-			errs = append(errs, err)
-			failed = append(failed, instance)
-		} else {
-			created = append(created, instance.IID())
-		}
-	}
-
-	// Delete instances that failed
-	for _, instance := range failed {
-		if err := instance.Delete(ctx, g.client); err != nil {
-			errs = append(errs, err)
-		}
-	}
-
-	// Wait for failed instances to be deleted
-	for _, instance := range failed {
-		if err := instance.wait(); err != nil {
-			errs = append(errs, err)
-		}
+		created = append(created, instance.IID())
 	}
 
 	return created, errors.Join(errs...)
 }
 
 func (g *instanceGroup) Decrease(ctx context.Context, iids []string) ([]string, error) {
-	deleted := make([]string, 0, len(iids))
-	errs := make([]error, 0, len(iids))
+	handlers := []CleanupHandler{
+		&ServerHandler{}, // Delete the server of the instance.
+	}
+
+	// Run all pre decrease handlers
+	for _, handler := range handlers {
+		h, ok := handler.(PreDecreaseHandler)
+		if !ok {
+			continue
+		}
+
+		if err := h.PreDecrease(ctx, g); err != nil {
+			return nil, err
+		}
+	}
+
+	errs := make([]error, 0)
+
 	instances := make([]*Instance, 0, len(iids))
 
-	// Delete instances
+	// Populate a list of instances from their IIDs
 	for _, iid := range iids {
 		instance, err := InstanceFromIID(iid)
 		if err != nil {
 			errs = append(errs, err)
 			continue
 		}
-
-		if err := instance.Delete(ctx, g.client); err != nil {
-			errs = append(errs, err)
-			continue
-		}
-
 		instances = append(instances, instance)
 	}
 
-	// Wait for instances to be deleted
-	for _, instance := range instances {
-		if err := instance.wait(); err != nil {
-			errs = append(errs, err)
-		} else {
-			deleted = append(deleted, instance.IID())
+	// Run all cleanup handlers on each instance
+	for _, handler := range handlers {
+		{
+			succeeded := make([]*Instance, 0, len(instances))
+			for _, instance := range instances {
+				if err := handler.Cleanup(ctx, g, instance); err != nil {
+					errs = append(errs, err)
+				} else {
+					succeeded = append(succeeded, instance)
+				}
+			}
+			instances = succeeded
 		}
+
+		// Wait for each instance background tasks to complete
+		{
+			succeeded := make([]*Instance, 0, len(instances))
+			for _, instance := range instances {
+				if err := instance.wait(); err != nil {
+					errs = append(errs, err)
+				} else {
+					succeeded = append(succeeded, instance)
+				}
+			}
+			instances = succeeded
+		}
+	}
+
+	// Collect deleted instances IIDs
+	deleted := make([]string, 0, len(instances))
+	for _, instance := range instances {
+		deleted = append(deleted, instance.IID())
 	}
 
 	return deleted, errors.Join(errs...)
