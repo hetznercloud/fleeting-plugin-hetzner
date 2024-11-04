@@ -46,9 +46,17 @@ type instanceGroup struct {
 	privateNetworks []*hcloud.Network
 	sshKeys         []*hcloud.SSHKey
 	labels          map[string]string
+
+	randomNameFn func() string
 }
 
 func (g *instanceGroup) Init(ctx context.Context) (err error) {
+	if g.randomNameFn == nil {
+		g.randomNameFn = func() string {
+			return g.name + "-" + utils.GenerateRandomID()
+		}
+	}
+
 	// Location
 	g.location, _, err = g.client.Location.Get(ctx, g.config.Location)
 	if err != nil {
@@ -143,7 +151,7 @@ func (g *instanceGroup) Increase(ctx context.Context, delta int) ([]string, erro
 
 	// Create a list of new instances
 	for i := 0; i < delta; i++ {
-		instances = append(instances, NewInstance(g.name+"-"+utils.GenerateRandomID()))
+		instances = append(instances, NewInstance(g.randomNameFn()))
 	}
 
 	// Run all create handlers on each instance

@@ -38,9 +38,27 @@ func setupInstanceGroup(t *testing.T, config Config, requests []mockutil.Request
 	client := testutils.MakeTestClient(server.URL)
 
 	group := &instanceGroup{name: "fleeting", config: config, client: client}
+	group.randomNameFn = makeRandomNameFn(group.name)
 
 	err := group.Init(context.Background())
 	require.NoError(t, err)
 
 	return group
+}
+
+func makeRandomNameFn(prefix string) func() string {
+	offset := 96
+	index := 0
+	return func() string {
+		index++
+		return prefix + "-" + string(byte(offset+index))
+	}
+}
+
+func TestMakeRandomNameFn(t *testing.T) {
+	fn := makeRandomNameFn("fleeting")
+	require.Equal(t, "fleeting-a", fn())
+	require.Equal(t, "fleeting-b", fn())
+	require.Equal(t, "fleeting-c", fn())
+	require.Equal(t, "fleeting-d", fn())
 }
