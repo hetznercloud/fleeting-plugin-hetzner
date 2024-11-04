@@ -34,8 +34,9 @@ func TestInit(t *testing.T) {
 
 	client := testutils.MakeTestClient(server.URL)
 
-	group := New(client, "fleeting", DefaultTestConfig)
+	config := DefaultTestConfig
 
+	group := &instanceGroup{name: "fleeting", config: config, client: client}
 	err := group.Init(context.Background())
 	require.NoError(t, err)
 }
@@ -114,7 +115,7 @@ func TestIncrease(t *testing.T) {
 
 		config := DefaultTestConfig
 
-		group := New(client, "fleeting", config)
+		group := &instanceGroup{name: "fleeting", config: config, client: client}
 		err := group.Init(context.Background())
 		require.NoError(t, err)
 
@@ -190,7 +191,7 @@ func TestIncrease(t *testing.T) {
 
 		config := DefaultTestConfig
 
-		group := New(client, "fleeting", config)
+		group := &instanceGroup{name: "fleeting", config: config, client: client}
 		err := group.Init(context.Background())
 		require.NoError(t, err)
 
@@ -245,7 +246,7 @@ func TestDecrease(t *testing.T) {
 
 	config := DefaultTestConfig
 
-	group := New(client, "fleeting", config)
+	group := &instanceGroup{name: "fleeting", config: config, client: client}
 	err := group.Init(context.Background())
 	require.NoError(t, err)
 
