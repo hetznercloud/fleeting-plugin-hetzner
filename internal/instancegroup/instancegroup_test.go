@@ -135,8 +135,8 @@ func TestIncrease(t *testing.T) {
 						var payload schema.ServerCreateRequest
 						mustUnmarshal(t, r.Body, &payload)
 						require.Equal(t, "3", payload.Location)
-						require.Equal(t, float64(114690387), payload.Image.(float64))
-						require.Equal(t, float64(1), payload.ServerType.(float64))
+						require.Equal(t, int64(114690387), payload.Image.ID)
+						require.Equal(t, int64(1), payload.ServerType.ID)
 						require.Equal(t, int64(1), payload.Volumes[0])
 						require.Equal(t, false, payload.PublicNet.EnableIPv4)
 						require.Equal(t, true, payload.PublicNet.EnableIPv6)
@@ -156,8 +156,8 @@ func TestIncrease(t *testing.T) {
 						var payload schema.ServerCreateRequest
 						mustUnmarshal(t, r.Body, &payload)
 						require.Equal(t, "3", payload.Location)
-						require.Equal(t, float64(114690387), payload.Image.(float64))
-						require.Equal(t, float64(1), payload.ServerType.(float64))
+						require.Equal(t, int64(114690387), payload.Image.ID)
+						require.Equal(t, int64(1), payload.ServerType.ID)
 						require.Equal(t, int64(2), payload.Volumes[0])
 						require.Equal(t, false, payload.PublicNet.EnableIPv4)
 						require.Equal(t, true, payload.PublicNet.EnableIPv6)
