@@ -33,6 +33,8 @@ type InstanceGroup struct {
 	UserData     string `json:"user_data"`
 	UserDataFile string `json:"user_data_file"`
 
+	VolumeSize int `json:"volume_size"`
+
 	PublicIPv4Disabled   bool   `json:"public_ipv4_disabled"`
 	PublicIPv6Disabled   bool   `json:"public_ipv6_disabled"`
 	PublicIPPoolEnabled  bool   `json:"public_ip_pool_enabled"`
@@ -123,6 +125,7 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 		PublicIPPoolSelector: g.PublicIPPoolSelector,
 		PrivateNetworks:      g.PrivateNetworks,
 		Labels:               g.labels,
+		VolumeSize:           g.VolumeSize,
 	}
 
 	if g.sshKey != nil {

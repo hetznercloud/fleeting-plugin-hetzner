@@ -36,6 +36,9 @@ type Config struct {
 	// the server. Run `hcloud network list` to list available ssh-keys.
 	PrivateNetworks []string
 
+	// VolumeSize is the size in GB of the volume that will be attached to the server.
+	VolumeSize int
+
 	// Labels is a map of key value pairs to create the server with.
 	Labels map[string]string
 }

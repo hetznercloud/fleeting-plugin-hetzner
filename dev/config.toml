@@ -32,6 +32,7 @@ token = "$HCLOUD_TOKEN"
 location = "hel1"
 server_type = "cpx21"
 image = "ubuntu-24.04"
+volume_size = 15
 
 user_data = """#cloud-config
 package_update: true
@@ -51,6 +52,10 @@ swap:
   filename: /var/swap.bin
   size: auto
   maxsize: 4294967296 # 4GB
+
+bootcmd:
+  - mkfs.ext4 -F -m 0 /dev/disk/by-id/scsi-SHC_Volume_*
+  - mount /dev/disk/by-id/scsi-SHC_Volume_* /mnt
 """
 
 [runners.autoscaler.connector_config]

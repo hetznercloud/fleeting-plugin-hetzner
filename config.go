@@ -41,6 +41,10 @@ func (g *InstanceGroup) validate() error {
 		errs = append(errs, fmt.Errorf("missing required plugin config: image"))
 	}
 
+	if g.VolumeSize != 0 && g.VolumeSize < 10 {
+		errs = append(errs, fmt.Errorf("invalid plugin config value: volume_size must be >= 10"))
+	}
+
 	if g.UserData != "" && g.UserDataFile != "" {
 		errs = append(errs, fmt.Errorf("mutually exclusive plugin config provided: user_data, user_data_file"))
 	}

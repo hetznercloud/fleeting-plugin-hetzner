@@ -129,6 +129,7 @@ func (g *instanceGroup) Increase(ctx context.Context, delta int) ([]string, erro
 	handlers := []CreateHandler{
 		&BaseHandler{},   // Configure the instance server create options from the instance group config.
 		&IPPoolHandler{}, // Configure the IPs in the instance server create options.
+		&VolumeHandler{}, // Create and configure a volume in the instance server create options.
 		&ServerHandler{}, // Create a server from the instance server create options.
 	}
 
@@ -223,6 +224,7 @@ func (g *instanceGroup) Increase(ctx context.Context, delta int) ([]string, erro
 func (g *instanceGroup) Decrease(ctx context.Context, iids []string) ([]string, error) {
 	handlers := []CleanupHandler{
 		&ServerHandler{}, // Delete the server of the instance.
+		&VolumeHandler{}, // Delete the volume of the instance.
 	}
 
 	// Run all pre decrease handlers

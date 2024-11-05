@@ -113,6 +113,15 @@ The [`[runners.autoscaler.plugin_config]` section](https://docs.gitlab.com/runne
       Note that <code>user_data</code> and <code>user_data_file</code> are mutually exclusive.
     </td>
   </tr>
+  <tr>
+    <td><code>volume_size</code></td>
+    <td>integer</td>
+    <td>
+      Size in GB for the <a href="https://docs.hetzner.com/cloud/volumes/overview">volume</a>
+      that will be attached to each instance. No volume will be attached if the
+      <code>volume_size</code> is 0 GB. The minimal <code>volume_size</code> is 10 GB.
+    </td>
+  </tr>
 </table>
 
 ## Autoscaler configuration

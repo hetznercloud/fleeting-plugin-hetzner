@@ -19,6 +19,7 @@ var (
 		Location:           "hel1",
 		ServerType:         "cpx11",
 		Image:              "debian-12",
+		VolumeSize:         10,
 		PublicIPv4Disabled: true,
 	}
 )
@@ -84,6 +85,49 @@ func TestIncrease(t *testing.T) {
 		group := setupInstanceGroup(t, config,
 			[]mockutil.Request{
 				{
+					Method: "POST", Path: "/volumes",
+					Want: func(t *testing.T, r *http.Request) {
+						require.Equal(t, "/volumes", r.RequestURI)
+
+						var payload schema.VolumeCreateRequest
+						mustUnmarshal(t, r.Body, &payload)
+						require.Equal(t, "fleeting-a", payload.Name)
+						require.Equal(t, 10, payload.Size)
+						require.Equal(t, &map[string]string{"instance-group": "fleeting"}, payload.Labels)
+					},
+					Status: 201,
+					JSON: schema.VolumeCreateResponse{
+						Volume: schema.Volume{ID: 1, Name: "fleeting-a"},
+						Action: &schema.Action{ID: 101, Status: "running"},
+					},
+				},
+				{
+					Method: "POST", Path: "/volumes",
+					Status: 201,
+					JSON: schema.VolumeCreateResponse{
+						Volume: schema.Volume{ID: 2, Name: "fleeting-b"},
+						Action: &schema.Action{ID: 201, Status: "running"},
+					},
+				},
+				{
+					Method: "GET", Path: "/actions?id=101&page=1&sort=status&sort=id",
+					Status: 200,
+					JSON: schema.ActionListResponse{
+						Actions: []schema.Action{
+							{ID: 101, Status: "success"},
+						},
+					},
+				},
+				{
+					Method: "GET", Path: "/actions?id=201&page=1&sort=status&sort=id",
+					Status: 200,
+					JSON: schema.ActionListResponse{
+						Actions: []schema.Action{
+							{ID: 201, Status: "success"},
+						},
+					},
+				},
+				{
 					Method: "POST", Path: "/servers",
 					Want: func(t *testing.T, r *http.Request) {
 						require.Equal(t, "/servers", r.RequestURI)
@@ -93,6 +137,7 @@ func TestIncrease(t *testing.T) {
 						require.Equal(t, "3", payload.Location)
 						require.Equal(t, float64(114690387), payload.Image.(float64))
 						require.Equal(t, float64(1), payload.ServerType.(float64))
+						require.Equal(t, int64(1), payload.Volumes[0])
 						require.Equal(t, false, payload.PublicNet.EnableIPv4)
 						require.Equal(t, true, payload.PublicNet.EnableIPv6)
 					},
@@ -113,6 +158,7 @@ func TestIncrease(t *testing.T) {
 						require.Equal(t, "3", payload.Location)
 						require.Equal(t, float64(114690387), payload.Image.(float64))
 						require.Equal(t, float64(1), payload.ServerType.(float64))
+						require.Equal(t, int64(2), payload.Volumes[0])
 						require.Equal(t, false, payload.PublicNet.EnableIPv4)
 						require.Equal(t, true, payload.PublicNet.EnableIPv6)
 					},
@@ -156,6 +202,40 @@ func TestIncrease(t *testing.T) {
 
 		group := setupInstanceGroup(t, config,
 			[]mockutil.Request{
+				{
+					Method: "POST", Path: "/volumes",
+					Status: 201,
+					JSON: schema.VolumeCreateResponse{
+						Volume: schema.Volume{ID: 1, Name: "fleeting-a"},
+						Action: &schema.Action{ID: 101, Status: "running"},
+					},
+				},
+				{
+					Method: "POST", Path: "/volumes",
+					Status: 201,
+					JSON: schema.VolumeCreateResponse{
+						Volume: schema.Volume{ID: 2, Name: "fleeting-b"},
+						Action: &schema.Action{ID: 201, Status: "running"},
+					},
+				},
+				{
+					Method: "GET", Path: "/actions?id=101&page=1&sort=status&sort=id",
+					Status: 200,
+					JSON: schema.ActionListResponse{
+						Actions: []schema.Action{
+							{ID: 101, Status: "success"},
+						},
+					},
+				},
+				{
+					Method: "GET", Path: "/actions?id=201&page=1&sort=status&sort=id",
+					Status: 200,
+					JSON: schema.ActionListResponse{
+						Actions: []schema.Action{
+							{ID: 201, Status: "success"},
+						},
+					},
+				},
 				{
 					Method: "POST", Path: "/servers",
 					Status: 201,
@@ -210,6 +290,10 @@ func TestIncrease(t *testing.T) {
 						},
 					},
 				},
+				{
+					Method: "DELETE", Path: "/volumes/1",
+					Status: 204,
+				},
 			},
 		)
 
@@ -226,6 +310,16 @@ func TestDecrease(t *testing.T) {
 
 		group := setupInstanceGroup(t, config,
 			[]mockutil.Request{
+				{
+					Method: "GET", Path: "/volumes?label_selector=instance-group%3Dfleeting&page=1",
+					Status: 200,
+					JSON: schema.VolumeListResponse{
+						Volumes: []schema.Volume{
+							{ID: 1, Name: "fleeting-a"},
+							{ID: 2, Name: "fleeting-b"},
+						},
+					},
+				},
 				{
 					Method: "DELETE", Path: "/servers/1",
 					Status: 200,
@@ -257,6 +351,14 @@ func TestDecrease(t *testing.T) {
 							{ID: 203, Status: "success"},
 						},
 					},
+				},
+				{
+					Method: "DELETE", Path: "/volumes/1",
+					Status: 204,
+				},
+				{
+					Method: "DELETE", Path: "/volumes/2",
+					Status: 204,
 				},
 			},
 		)

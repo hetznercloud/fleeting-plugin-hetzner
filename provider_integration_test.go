@@ -191,6 +191,36 @@ func TestProvisioning(t *testing.T) {
 		ensureNoServers(t, ctx, client, name)
 		ensureNoVolumes(t, ctx, client, name)
 	})
+
+	t.Run("volume", func(t *testing.T) {
+		t.Parallel()
+
+		name := "fleeting-" + utils.GenerateRandomID()
+
+		integration.TestProvisioning(t,
+			pluginBinary,
+			integration.Config{
+				PluginConfig: InstanceGroup{
+					Name: name,
+
+					Token: os.Getenv("HCLOUD_TOKEN"),
+
+					Location:   "hel1",
+					ServerType: "cpx11",
+					Image:      "debian-12",
+					VolumeSize: 10,
+				},
+				ConnectorConfig: provider.ConnectorConfig{
+					Timeout: 10 * time.Minute,
+				},
+				MaxInstances:    3,
+				UseExternalAddr: true,
+			},
+		)
+
+		ensureNoServers(t, ctx, client, name)
+		ensureNoVolumes(t, ctx, client, name)
+	})
 }
 
 // Ensure all servers were cleaned.

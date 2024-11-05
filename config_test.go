@@ -24,6 +24,7 @@ func TestValidate(t *testing.T) {
 				Location:   "hel1",
 				ServerType: "cpx11",
 				Image:      "debian-12",
+				VolumeSize: 15,
 			},
 			assert: func(t *testing.T, group InstanceGroup, err error) {
 				assert.NoError(t, err)
@@ -76,6 +77,21 @@ missing required plugin config: image`, err.Error())
 			assert: func(t *testing.T, group InstanceGroup, err error) {
 				assert.Error(t, err)
 				assert.Equal(t, "mutually exclusive plugin config provided: user_data, user_data_file", err.Error())
+			},
+		},
+		{
+			name: "volume size",
+			group: InstanceGroup{
+				Name:       "fleeting",
+				Token:      "dummy",
+				Location:   "hel1",
+				ServerType: "cpx11",
+				Image:      "debian-12",
+				VolumeSize: 8,
+			},
+			assert: func(t *testing.T, group InstanceGroup, err error) {
+				assert.Error(t, err)
+				assert.Equal(t, "invalid plugin config value: volume_size must be >= 10", err.Error())
 			},
 		},
 	}
