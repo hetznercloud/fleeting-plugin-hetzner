@@ -22,15 +22,17 @@ pre-commit:
 
 test:
   stage: test
+
+  id_tokens:
+    TPS_ID_TOKEN:
+      aud: tps
+
   image: golang:$GO_VERSION
   extends:
     - .rules:merge_request_or_release
     - .go-cache
   before_script:
-    - >
-      if $CI_COMMIT_REF_PROTECTED; then
-        export HCLOUD_TOKEN="$(hack/get-tmp-hcloud-token.sh)";
-      fi
+    - export HCLOUD_TOKEN="$(hack/get-tmp-hcloud-token.sh)"
   script:
     - go mod download
     - go test -v -timeout=30m -coverprofile=coverage.txt -covermode count ./...

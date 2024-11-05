@@ -14,5 +14,5 @@ curl \
   --fail-with-body \
   --request "POST" \
   --user-agent "tps-client/unknown" \
-  --header "Authorization: Bearer $TPS_TOKEN" \
+  --header "Authorization: Bearer $TPS_ID_TOKEN" \
   "$TPS_URL" || error "could not generate temporary token!"
