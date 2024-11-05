@@ -1,5 +1,19 @@
 # Changelog
 
+## [v0.6.0](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v0.6.0)
+
+### Features
+
+- add instance name to instance id (hetznercloud/fleeting-plugin-hetzner!148)
+
+### Bug Fixes
+
+- populate instance group labels when config has no labels (hetznercloud/fleeting-plugin-hetzner!152)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.15.0 (hetznercloud/fleeting-plugin-hetzner!146)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.14.0 (hetznercloud/fleeting-plugin-hetzner!141)
+- **deps**: update module github.com/boumenot/gocover-cobertura to v1.3.0 (hetznercloud/fleeting-plugin-hetzner!140)
+- **deps**: update module go.uber.org/mock to v0.5.0 (hetznercloud/fleeting-plugin-hetzner!135)
+
 ## [v0.5.1](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v0.5.1)
 
 ### Bug Fixes
