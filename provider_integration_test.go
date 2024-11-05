@@ -22,16 +22,25 @@ func TestProvisioning(t *testing.T) {
 		t.Skip("mandatory environment variable HCLOUD_TOKEN not set")
 	}
 
+	ctx := context.Background()
+
+	client := hcloud.NewClient(
+		hcloud.WithApplication(Version.Name, Version.String()),
+		hcloud.WithToken(os.Getenv("HCLOUD_TOKEN")),
+	)
+
 	pluginBinary := integration.BuildPluginBinary(t, "cmd/fleeting-plugin-hetzner", "fleeting-plugin-hetzner")
 
 	t.Run("generated credentials", func(t *testing.T) {
 		t.Parallel()
 
+		name := "fleeting-" + utils.GenerateRandomID()
+
 		integration.TestProvisioning(t,
 			pluginBinary,
 			integration.Config{
 				PluginConfig: InstanceGroup{
-					Name: "fleeting-" + utils.GenerateRandomID(),
+					Name: name,
 
 					Token: os.Getenv("HCLOUD_TOKEN"),
 
@@ -46,10 +55,15 @@ func TestProvisioning(t *testing.T) {
 				UseExternalAddr: true,
 			},
 		)
+
+		ensureNoServers(t, ctx, client, name)
+		ensureNoVolumes(t, ctx, client, name)
 	})
 
 	t.Run("static credentials", func(t *testing.T) {
 		t.Parallel()
+
+		name := "fleeting-" + utils.GenerateRandomID()
 
 		sshPrivateKey, _, err := sshutil.GenerateKeyPair()
 		require.NoError(t, err)
@@ -58,7 +72,7 @@ func TestProvisioning(t *testing.T) {
 			pluginBinary,
 			integration.Config{
 				PluginConfig: InstanceGroup{
-					Name: "fleeting-" + utils.GenerateRandomID(),
+					Name: name,
 
 					Token: os.Getenv("HCLOUD_TOKEN"),
 
@@ -77,20 +91,18 @@ func TestProvisioning(t *testing.T) {
 				UseExternalAddr: true,
 			},
 		)
+
+		ensureNoServers(t, ctx, client, name)
+		ensureNoVolumes(t, ctx, client, name)
 	})
 
 	t.Run("public ip pool", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+
 		name := "fleeting-" + utils.GenerateRandomID()
 
 		sshPrivateKey, _, err := sshutil.GenerateKeyPair()
 		require.NoError(t, err)
-
-		client := hcloud.NewClient(
-			hcloud.WithApplication(Version.Name, Version.String()),
-			hcloud.WithToken(os.Getenv("HCLOUD_TOKEN")),
-		)
 
 		primaryIPs := make([]*hcloud.PrimaryIP, 0, 3*2)
 		actions := make([]*hcloud.Action, 0, 3*2)
@@ -144,16 +156,21 @@ func TestProvisioning(t *testing.T) {
 				UseExternalAddr: true,
 			},
 		)
+
+		ensureNoServers(t, ctx, client, name)
+		ensureNoVolumes(t, ctx, client, name)
 	})
 
 	t.Run("ipv6 only", func(t *testing.T) {
 		t.Parallel()
 
+		name := "fleeting-" + utils.GenerateRandomID()
+
 		integration.TestProvisioning(t,
 			pluginBinary,
 			integration.Config{
 				PluginConfig: InstanceGroup{
-					Name: "fleeting-" + utils.GenerateRandomID(),
+					Name: name,
 
 					Token: os.Getenv("HCLOUD_TOKEN"),
 
@@ -170,5 +187,34 @@ func TestProvisioning(t *testing.T) {
 				UseExternalAddr: true,
 			},
 		)
+
+		ensureNoServers(t, ctx, client, name)
+		ensureNoVolumes(t, ctx, client, name)
 	})
+}
+
+// Ensure all servers were cleaned.
+func ensureNoServers(t *testing.T, ctx context.Context, client *hcloud.Client, name string) { // nolint: revive
+	t.Helper()
+
+	result, err := client.Server.AllWithOpts(ctx, hcloud.ServerListOpts{
+		ListOpts: hcloud.ListOpts{
+			LabelSelector: "instance-group=" + name,
+		},
+	})
+	require.NoError(t, err)
+	require.Len(t, result, 0)
+}
+
+// Ensure all volumes were cleaned.
+func ensureNoVolumes(t *testing.T, ctx context.Context, client *hcloud.Client, name string) { // nolint: revive
+	t.Helper()
+
+	result, err := client.Volume.AllWithOpts(ctx, hcloud.VolumeListOpts{
+		ListOpts: hcloud.ListOpts{
+			LabelSelector: "instance-group=" + name,
+		},
+	})
+	require.NoError(t, err)
+	require.Len(t, result, 0)
 }
