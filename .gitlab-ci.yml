@@ -14,6 +14,10 @@ include:
 
   - component: $CI_SERVER_FQDN/apricote/releaser-pleaser/run@v0.4.1
     inputs:
+      stage: release
       token: $HCLOUD_BOT_TOKEN
       extra-files: |
         Makefile
+
+releaser-pleaser:
+  needs: []
