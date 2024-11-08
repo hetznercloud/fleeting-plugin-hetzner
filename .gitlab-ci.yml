@@ -12,7 +12,7 @@ include:
   - local: /.gitlab/ci/upload.gitlab-ci.yml
   - local: /.gitlab/ci/release.gitlab-ci.yml
 
-  - component: $CI_SERVER_FQDN/apricote/releaser-pleaser/run@v0.4.1
+  - component: $CI_SERVER_FQDN/apricote/releaser-pleaser/run@v0.4.2
     inputs:
       stage: release
       token: $HCLOUD_BOT_TOKEN
