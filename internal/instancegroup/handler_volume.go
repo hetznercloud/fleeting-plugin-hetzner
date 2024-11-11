@@ -88,7 +88,7 @@ func (h *VolumeHandler) Cleanup(ctx context.Context, group *instanceGroup, insta
 
 	_, err := group.client.Volume.Delete(ctx, volume)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not request volume deletion: %w", err)
 	}
 
 	return nil
