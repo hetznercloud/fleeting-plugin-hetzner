@@ -24,10 +24,16 @@ func TestProvisioning(t *testing.T) {
 
 	ctx := context.Background()
 
-	client := hcloud.NewClient(
+	opts := []hcloud.ClientOption{
 		hcloud.WithApplication(Version.Name, Version.String()),
 		hcloud.WithToken(os.Getenv("HCLOUD_TOKEN")),
-	)
+	}
+
+	if endpoint := os.Getenv("HCLOUD_ENDPOINT"); endpoint != "" {
+		opts = append(opts, hcloud.WithEndpoint(endpoint))
+	}
+
+	client := hcloud.NewClient(opts...)
 
 	pluginBinary := integration.BuildPluginBinary(t, "cmd/fleeting-plugin-hetzner", "fleeting-plugin-hetzner")
 
@@ -42,7 +48,8 @@ func TestProvisioning(t *testing.T) {
 				PluginConfig: InstanceGroup{
 					Name: name,
 
-					Token: os.Getenv("HCLOUD_TOKEN"),
+					Token:    os.Getenv("HCLOUD_TOKEN"),
+					Endpoint: os.Getenv("HCLOUD_ENDPOINT"),
 
 					Location:   "hel1",
 					ServerType: "cpx11",
@@ -74,7 +81,8 @@ func TestProvisioning(t *testing.T) {
 				PluginConfig: InstanceGroup{
 					Name: name,
 
-					Token: os.Getenv("HCLOUD_TOKEN"),
+					Token:    os.Getenv("HCLOUD_TOKEN"),
+					Endpoint: os.Getenv("HCLOUD_ENDPOINT"),
 
 					Location:   "hel1",
 					ServerType: "cpx11",
@@ -136,7 +144,8 @@ func TestProvisioning(t *testing.T) {
 				PluginConfig: InstanceGroup{
 					Name: name,
 
-					Token: os.Getenv("HCLOUD_TOKEN"),
+					Token:    os.Getenv("HCLOUD_TOKEN"),
+					Endpoint: os.Getenv("HCLOUD_ENDPOINT"),
 
 					Location:   "hel1",
 					ServerType: "cpx11",
@@ -172,7 +181,8 @@ func TestProvisioning(t *testing.T) {
 				PluginConfig: InstanceGroup{
 					Name: name,
 
-					Token: os.Getenv("HCLOUD_TOKEN"),
+					Token:    os.Getenv("HCLOUD_TOKEN"),
+					Endpoint: os.Getenv("HCLOUD_ENDPOINT"),
 
 					Location:   "hel1",
 					ServerType: "cpx11",
@@ -203,7 +213,8 @@ func TestProvisioning(t *testing.T) {
 				PluginConfig: InstanceGroup{
 					Name: name,
 
-					Token: os.Getenv("HCLOUD_TOKEN"),
+					Token:    os.Getenv("HCLOUD_TOKEN"),
+					Endpoint: os.Getenv("HCLOUD_ENDPOINT"),
 
 					Location:   "hel1",
 					ServerType: "cpx11",
