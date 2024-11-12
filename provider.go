@@ -132,7 +132,7 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 		groupConfig.SSHKeys = []string{g.sshKey.Name}
 	}
 
-	g.group = instancegroup.New(g.client, g.Name, groupConfig)
+	g.group = instancegroup.New(g.client, g.log, g.Name, groupConfig)
 
 	if err = g.group.Init(ctx); err != nil {
 		return

@@ -7,6 +7,8 @@ import (
 	"maps"
 	"slices"
 
+	"github.com/hashicorp/go-hclog"
+
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 
 	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/ippool"
@@ -25,10 +27,11 @@ type InstanceGroup interface {
 
 var _ InstanceGroup = (*instanceGroup)(nil)
 
-func New(client *hcloud.Client, name string, config Config) InstanceGroup {
+func New(client *hcloud.Client, log hclog.Logger, name string, config Config) InstanceGroup {
 	return &instanceGroup{
 		name:   name,
 		config: config,
+		log:    log,
 		client: client,
 	}
 }
@@ -37,6 +40,9 @@ type instanceGroup struct {
 	name   string
 	config Config
 
+	// TODO: Replace with slog once https://github.com/hashicorp/go-hclog/pull/144 is
+	// merged.
+	log    hclog.Logger
 	client *hcloud.Client
 	ipPool *ippool.IPPool
 

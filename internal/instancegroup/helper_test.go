@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/hashicorp/go-hclog"
 	"github.com/stretchr/testify/require"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutil"
@@ -37,7 +38,9 @@ func setupInstanceGroup(t *testing.T, config Config, requests []mockutil.Request
 	server := httptest.NewServer(mockutil.Handler(t, requests))
 	client := testutils.MakeTestClient(server.URL)
 
-	group := &instanceGroup{name: "fleeting", config: config, client: client}
+	log := hclog.New(hclog.DefaultOptions)
+
+	group := &instanceGroup{name: "fleeting", config: config, log: log, client: client}
 	group.randomNameFn = makeRandomNameFn(group.name)
 
 	err := group.Init(context.Background())

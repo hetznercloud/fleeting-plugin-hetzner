@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/hashicorp/go-hclog"
 	"github.com/stretchr/testify/require"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutil"
@@ -68,7 +69,9 @@ func TestInit(t *testing.T) {
 
 			client := testutils.MakeTestClient(server.URL)
 
-			group := &instanceGroup{name: "fleeting", config: testCase.config, client: client}
+			log := hclog.New(hclog.DefaultOptions)
+
+			group := &instanceGroup{name: "fleeting", config: testCase.config, log: log, client: client}
 			err := group.Init(context.Background())
 			require.NoError(t, err)
 
