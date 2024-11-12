@@ -1,4 +1,5 @@
 concurrent = 10
+check_interval = 10
 
 listen_address = ":9252"
 
@@ -28,6 +29,7 @@ instance_ready_command = "cloud-init status --wait || test $? -eq 2"
 [runners.autoscaler.plugin_config]
 name = "dev-docker-autoscaler"
 token = "$HCLOUD_TOKEN"
+endpoint = "http://proxy:8080/v1"
 
 location = "hel1"
 server_type = "cpx21"

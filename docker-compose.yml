@@ -24,6 +24,19 @@ services:
       - run
     ports:
       - 9252:9252
+    depends_on:
+      - proxy
     # depends_on:
     #   init:
     #     condition: service_completed_successfully
+
+  proxy:
+    image: mitmproxy/mitmproxy
+    command:
+      - mitmweb
+      - --mode
+      - reverse:https://api.hetzner.cloud
+      - --web-host
+      - 0.0.0.0
+    ports:
+      - 8081:8081
