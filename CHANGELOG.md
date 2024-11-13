@@ -5,6 +5,7 @@
 ### Features
 
 - add instance name to instance id (hetznercloud/fleeting-plugin-hetzner!148)
+- allow attaching a volume to an instance (hetznercloud/fleeting-plugin-hetzner!144)
 
 ### Bug Fixes
 
