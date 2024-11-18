@@ -1,5 +1,16 @@
 # Changelog
 
+## [v0.7.0](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v0.7.0)
+
+### Features
+
+- add volume sanity check (hetznercloud/fleeting-plugin-hetzner!168)
+
+### Bug Fixes
+
+- do not error when deleting a resource that is not found (hetznercloud/fleeting-plugin-hetzner!164)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.16.0 (hetznercloud/fleeting-plugin-hetzner!158)
+
 ## [v0.6.0](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v0.6.0)
 
 ### Features
