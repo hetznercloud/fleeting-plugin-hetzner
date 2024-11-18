@@ -113,3 +113,17 @@ func (mr *MockInstanceGroupMockRecorder) List(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockInstanceGroup)(nil).List), ctx)
 }
+
+// Sanity mocks base method.
+func (m *MockInstanceGroup) Sanity(ctx context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Sanity", ctx)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Sanity indicates an expected call of Sanity.
+func (mr *MockInstanceGroupMockRecorder) Sanity(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Sanity", reflect.TypeOf((*MockInstanceGroup)(nil).Sanity), ctx)
+}

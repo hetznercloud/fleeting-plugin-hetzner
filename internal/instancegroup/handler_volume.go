@@ -97,3 +97,30 @@ func (h *VolumeHandler) Cleanup(ctx context.Context, group *instanceGroup, insta
 
 	return nil
 }
+
+func (h *VolumeHandler) Sanity(ctx context.Context, group *instanceGroup) error {
+	volumes, err := group.client.Volume.AllWithOpts(ctx,
+		hcloud.VolumeListOpts{
+			ListOpts: hcloud.ListOpts{
+				LabelSelector: fmt.Sprintf("instance-group=%s", group.name),
+			},
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("could not list volumes: %w", err)
+	}
+
+	for _, volume := range volumes {
+		if volume.Server != nil {
+			continue
+		}
+
+		group.log.Warn("deleting dangling volume", "name", volume.Name)
+		_, err := group.client.Volume.Delete(ctx, volume)
+		if err != nil {
+			return fmt.Errorf("could not request volume deletion: %w", err)
+		}
+	}
+
+	return nil
+}

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"maps"
+	"reflect"
 	"slices"
 
 	"github.com/hashicorp/go-hclog"
@@ -23,6 +24,8 @@ type InstanceGroup interface {
 
 	List(ctx context.Context) ([]*Instance, error)
 	Get(ctx context.Context, iid string) (*Instance, error)
+
+	Sanity(ctx context.Context) error
 }
 
 var _ InstanceGroup = (*instanceGroup)(nil)
@@ -328,4 +331,19 @@ func (g *instanceGroup) Get(ctx context.Context, iid string) (*Instance, error) 
 	}
 
 	return InstanceFromServer(server), nil
+}
+
+func (g *instanceGroup) Sanity(ctx context.Context) error {
+	handlers := []SanityHandler{
+		&VolumeHandler{}, // Delete dangling volumes.
+	}
+
+	// Run all sanity handlers
+	for _, h := range handlers {
+		if err := h.Sanity(ctx, g); err != nil {
+			g.log.With("handler", reflect.TypeOf(h).String()).Error(err.Error())
+		}
+	}
+
+	return nil
 }

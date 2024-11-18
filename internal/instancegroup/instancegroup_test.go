@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/go-hclog"
 	"github.com/stretchr/testify/require"
 
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutil"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/schema"
 
@@ -369,5 +370,34 @@ func TestDecrease(t *testing.T) {
 		deleted, err := group.Decrease(ctx, []string{"fleeting-a:1", "fleeting-b:2"})
 		require.NoError(t, err)
 		require.Equal(t, []string{"fleeting-a:1", "fleeting-b:2"}, deleted)
+	})
+}
+
+func TestSanity(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		ctx := context.Background()
+		config := DefaultTestConfig
+
+		group := setupInstanceGroup(t, config,
+			[]mockutil.Request{
+				{
+					Method: "GET", Path: "/volumes?label_selector=instance-group%3Dfleeting&page=1",
+					Status: 200,
+					JSON: schema.VolumeListResponse{
+						Volumes: []schema.Volume{
+							{ID: 1, Name: "fleeting-a", Server: hcloud.Ptr[int64](1)},
+							{ID: 2, Name: "fleeting-b"},
+						},
+					},
+				},
+				{
+					Method: "DELETE", Path: "/volumes/2",
+					Status: 204,
+				},
+			},
+		)
+
+		err := group.Sanity(ctx)
+		require.NoError(t, err)
 	})
 }

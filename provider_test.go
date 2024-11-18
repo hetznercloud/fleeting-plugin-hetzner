@@ -181,6 +181,10 @@ func TestIncrease(t *testing.T) {
 					Increase(ctx, 2).
 					Return([]string{"fleeting-a:1", "fleeting-b:2"}, nil)
 
+				mock.EXPECT().
+					Sanity(ctx).
+					Return(nil)
+
 				count, err := group.Increase(ctx, 2)
 				require.NoError(t, err)
 				require.Equal(t, 2, count)
@@ -194,6 +198,10 @@ func TestIncrease(t *testing.T) {
 				mock.EXPECT().
 					Increase(ctx, 2).
 					Return([]string{"fleeting-a:1"}, fmt.Errorf("some error"))
+
+				mock.EXPECT().
+					Sanity(ctx).
+					Return(nil)
 
 				count, err := group.Increase(ctx, 2)
 				require.Error(t, err)
@@ -230,6 +238,10 @@ func TestDecrease(t *testing.T) {
 					Decrease(ctx, []string{"fleeting-a:1", "fleeting-b:2"}).
 					Return([]string{"fleeting-a:1", "fleeting-b:2"}, nil)
 
+				mock.EXPECT().
+					Sanity(ctx).
+					Return(nil)
+
 				result, err := group.Decrease(ctx, []string{"fleeting-a:1", "fleeting-b:2"})
 				require.NoError(t, err)
 				require.Equal(t, []string{"fleeting-a:1", "fleeting-b:2"}, result)
@@ -244,6 +256,10 @@ func TestDecrease(t *testing.T) {
 				mock.EXPECT().
 					Decrease(ctx, []string{"fleeting-a:1", "fleeting-b:2"}).
 					Return([]string{"fleeting-a:1"}, fmt.Errorf("some error"))
+
+				mock.EXPECT().
+					Sanity(ctx).
+					Return(nil)
 
 				result, err := group.Decrease(ctx, []string{"fleeting-a:1", "fleeting-b:2"})
 				require.Error(t, err)

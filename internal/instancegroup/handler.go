@@ -29,3 +29,9 @@ type CleanupHandler interface {
 	// next handler.
 	Cleanup(ctx context.Context, group *instanceGroup, instance *Instance) error
 }
+
+type SanityHandler interface {
+	// Sanity is run once per sanity check. Any error during this phase will only be
+	// logged.
+	Sanity(ctx context.Context, group *instanceGroup) error
+}

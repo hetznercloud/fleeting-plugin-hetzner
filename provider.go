@@ -192,6 +192,10 @@ func (g *InstanceGroup) Increase(ctx context.Context, delta int) (int, error) {
 
 	g.size += len(created)
 
+	if sanityErr := g.group.Sanity(ctx); sanityErr != nil {
+		g.log.Error("sanity check failed", "error", sanityErr)
+	}
+
 	return len(created), err
 }
 
@@ -203,6 +207,10 @@ func (g *InstanceGroup) Decrease(ctx context.Context, iids []string) ([]string, 
 	deleted, err := g.group.Decrease(ctx, iids)
 
 	g.size -= len(deleted)
+
+	if sanityErr := g.group.Sanity(ctx); sanityErr != nil {
+		g.log.Error("sanity check failed", "error", sanityErr)
+	}
 
 	return deleted, err
 }
