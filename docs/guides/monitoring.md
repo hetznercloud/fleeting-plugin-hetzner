@@ -1,6 +1,6 @@
 # Set up monitoring
 
-With the dynamic nature of auto scaling, it is recommended to monitor your GitLab CI infrastructure to know when something goes wrong or if anything could be improved. This document describe the basics to monitor your GitLab CI infrastructure when using the Hetzner Fleeting plugin.
+With the dynamic nature of auto scaling, it is recommended to monitor your GitLab CI infrastructure to know when something goes wrong or if anything could be improved. This document describes the basics to monitor your GitLab CI infrastructure when using the Hetzner Fleeting plugin.
 
 ## Collect the gitlab-runner metrics
 
@@ -36,7 +36,7 @@ groups:
         for: 1m
 ```
 
-The following Prometheus alert rule is used to trigger an alert when a warnings occur in the gitlab-runner. Please note that most problems in the gitlab-runner are considered as warnings:
+The following Prometheus alert rule is used to trigger an alert when a warning occurs in the gitlab-runner. Please note that most problems in the gitlab-runner are considered as warnings:
 
 ```yml
 groups:
@@ -56,7 +56,7 @@ groups:
         for: 5s
 ```
 
-The following Prometheus alert rule is used to trigger an alert when an error occur in the gitlab-runner:
+The following Prometheus alert rule is used to trigger an alert when an error occurs in the gitlab-runner:
 
 ```yml
 groups:
@@ -74,7 +74,7 @@ groups:
 
 ## Dashboard
 
-A dashboard presents information on how the gitlab-runner is behaving, for example if you need to reduce costs, to provide enough capacity or research which server type works best for you.
+A dashboard presents information on how the gitlab-runner is behaving. For example, if you need to reduce costs, to provide enough capacity or research which server type works best for you.
 
 Below is a dashboard example:
 

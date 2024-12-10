@@ -1,10 +1,10 @@
-# Attach volumes
+# Attach Volumes
 
-If your instance storage requirements are not met by the server type you need, you can attach volumes to your instances to increase the storage capacity. This document describe the steps to attach volumes to your instances using the Hetzner Fleeting plugin.
+If your instance storage requirements are not met by the server type you need, you can attach Volumes to your instances to increase the storage capacity. This document describes the steps to attach Volumes to your instances using the Hetzner fleeting plugin.
 
-## Configure the desired volume size
+## Configure the desired Volume size
 
-First, you must define the size of the volume you want to attach to your instances:
+First, you must define the size of the Volume you want to attach to your instances:
 
 ```diff
  // ...
@@ -34,9 +34,9 @@ First, you must define the size of the volume you want to attach to your instanc
 
 For more details about the `volume_size` config, see the [plugin configuration reference](../references/configuration.md#plugin-configuration).
 
-## Format and mount the volume
+## Format and mount the Volume
 
-With the volume attached to the instance, you must now format and mount the volume in your operating system. This can be accomplished using `cloud-init`:
+With the Volume attached to the instance, you must now format and mount the Volume in your operating system. This can be accomplished using `cloud-init`:
 
 ```diff
  // ...
@@ -68,10 +68,11 @@ With the volume attached to the instance, you must now format and mount the volu
  """
 ```
 
-> Note that the above commands assume you have a single volume attached to your server.
+> Note that the above commands assume you have a single Volume attached to your server.
 
-## Use the volume
+## Use the Volume
 
 The additional storage capacity can now be used. Below are some examples how to:
 
-- [Configure directories for the container build and cache ](https://docs.gitlab.com/runner/executors/docker.html#configure-directories-for-the-container-build-and-cache) and [Mount a host directory as a data volume](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#example-2-mount-a-host-directory-as-a-data-volume).
+- [Configure directories for the container build and cache ](https://docs.gitlab.com/runner/executors/docker.html#configure-directories-for-the-container-build-and-cache)
+- [Mount a host directory as a data volume](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#example-2-mount-a-host-directory-as-a-data-volume)

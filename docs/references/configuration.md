@@ -1,12 +1,12 @@
 # Configuration reference
 
-This page references the different configuration for the Hetzner Cloud fleeting plugin.
+This page references the different configurations for the Hetzner Cloud fleeting plugin.
 
 [TOC]
 
 ## Plugin configuration
 
-The [`[runners.autoscaler.plugin_config]` section](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-runnersautoscalerplugin_config-section) support the following parameters:
+The [`[runners.autoscaler.plugin_config]` section](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-runnersautoscalerplugin_config-section) supports the following parameters:
 
 <table>
   <tr>
@@ -18,7 +18,7 @@ The [`[runners.autoscaler.plugin_config]` section](https://docs.gitlab.com/runne
     <td><code>name</code></td>
     <td>string (<strong>required</strong>)</td>
     <td>
-      Name of the fleeting plugin instance group. The created instances name will be
+      Name of the fleeting plugin instance group. The created instance names will be
       prefixed using this name.
     </td>
   </tr>
@@ -27,7 +27,7 @@ The [`[runners.autoscaler.plugin_config]` section](https://docs.gitlab.com/runne
     <td>string (<strong>required</strong>)</td>
     <td>
       <a href="https://docs.hetzner.com/cloud/api/getting-started/generating-api-token">Hetzner Cloud API token</a>
-      to access your Hetzner Cloud Project.
+      to access your Hetzner Cloud project.
     </td>
   </tr>
   <tr>
@@ -70,7 +70,7 @@ The [`[runners.autoscaler.plugin_config]` section](https://docs.gitlab.com/runne
     <td><code>public_ipv4_disabled</code> and <code>public_ipv6_disabled</code></td>
     <td>boolean</td>
     <td>
-      Disable the instances public ipv4/ipv6. If no public IPs are enabled, you must
+      Disable the instances public IPv4/IPv6. If no public IPs are enabled, you must
       enable a private network (see the <code>private_networks</code> config) to be able
       to communicate with the instances.
     </td>
@@ -89,7 +89,7 @@ The [`[runners.autoscaler.plugin_config]` section](https://docs.gitlab.com/runne
     <td>string</td>
     <td>
       [Label selector](https://docs.hetzner.cloud/#label-selector) used to filter the
-      Hetzner Cloud Primary IPs in your Hetzner Cloud Project when populating the public
+      Hetzner Cloud Primary IPs in your Hetzner Cloud project when populating the public
       IP pool.
     </td>
   </tr>
@@ -97,7 +97,7 @@ The [`[runners.autoscaler.plugin_config]` section](https://docs.gitlab.com/runne
     <td><code>private_networks</code></td>
     <td>list of string</td>
     <td>
-      List of Hetzner Cloud networks the instances will be attached to. To communicate
+      List of Hetzner Cloud Networks the instances will be attached to. To communicate
       with the instances via the private network, you must configure the connector to
       use the internal address (see the connector <code>use_external_addr</code> config).
     </td>
@@ -106,7 +106,7 @@ The [`[runners.autoscaler.plugin_config]` section](https://docs.gitlab.com/runne
     <td><code>user_data</code> and <code>user_data_file</code></td>
     <td>string</td>
     <td>
-      Configuration for the provisioning utility that run during the instances creation.
+      Configuration for the provisioning utility that runs during the instances creation.
       On Ubuntu, you can provide a Cloud Init configuration to setup the instances. Make
       sure to wait for the instances to be ready before scheduling jobs on them by using
       the autoscaler <code>instance_ready_command</code> config.
@@ -117,8 +117,8 @@ The [`[runners.autoscaler.plugin_config]` section](https://docs.gitlab.com/runne
     <td><code>volume_size</code></td>
     <td>integer</td>
     <td>
-      Size in GB for the <a href="https://docs.hetzner.com/cloud/volumes/overview">volume</a>
-      that will be attached to each instance. No volume will be attached if the
+      Size in GB for the <a href="https://docs.hetzner.com/cloud/volumes/overview">Volume</a>
+      that will be attached to each instance. No Volume will be attached if the
       <code>volume_size</code> is 0 GB. The minimal <code>volume_size</code> is 10 GB.
     </td>
   </tr>

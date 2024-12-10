@@ -1,6 +1,6 @@
 # Setup a GitLab CI test infrastructure from scratch
 
-This tutorial serves a learning material to setup a GitLab CI test infrastructure from scratch, using the Hetzner Cloud Fleeting plugin.
+This tutorial provides learning material to setup a GitLab CI test infrastructure from scratch, using the Hetzner Cloud fleeting plugin.
 
 [TOC]
 
@@ -9,18 +9,18 @@ This tutorial serves a learning material to setup a GitLab CI test infrastructur
 Before we start, make sure that you:
 
 - know how to use a command line interface,
-- have a [Hetzner Cloud account](https://accounts.hetzner.com/login),
+- have a [Hetzner Cloud account](https://console.hetzner.cloud/),
 - have the [`hcloud` CLI](https://github.com/hetznercloud/cli) installed on your device.
 
 ## 1. Create the infrastructure
 
 ### 1.1. Setup a Hetzner Cloud project
 
-Let's start by creating a new Hetzner Cloud project named `gitlab-ci` using the Hetzner Cloud Console: https://console.hetzner.cloud/projects
+Let's start by creating a new Hetzner Cloud project named `gitlab-ci` using the Hetzner Cloud Console: https://console.hetzner.cloud/
 
-Using a dedicated Hetzner Cloud project for your CI workloads only is recommended as it will reduce the risk of running into project rate limits, and possibly break your other workloads.
+Using a dedicated Hetzner Cloud project for your CI workloads only, is recommended as it will reduce the risk of running into project rate limits, and possibly breaking your other workloads.
 
-Next, for the fleeting plugin to communicate with Hetzner Cloud API, we [generate a new API token](https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/) with read and write access.
+Next, we [generate a new API token](https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/) for the fleeting plugin to communicate with the Hetzner Cloud API.
 
 Save the API token in a new `hcloud` CLI context, named after the project:
 
@@ -37,10 +37,10 @@ Context gitlab-ci created and activated
 
 </details>
 
-### 1.2. Upload our public ssh key
+### 1.2. Upload your public SSH key
 
-Then, we upload our public ssh key to be able to connect to the future instances without
-relying on a password based authentication.
+Then, upload your public SSH key to be able to connect to the future instances without
+relying on password-based authentication.
 
 ```sh
 hcloud ssh-key create --name dev --public-key-from-file ~/.ssh/id_ed25519.pub
@@ -56,7 +56,11 @@ SSH key 22155019 created
 
 ### 1.3. Create the `runner-manager` instance
 
-The GitLab Runner Manager will be responsible for scaling up and down the instances, executing your CI jobs on the instances, and forwarding the jobs logs to your GitLab instance.
+The GitLab Runner Manager will be responsible for:
+
+- Scaling up and down the instances
+- Executing your CI jobs on the instances
+- Forwarding the jobs logs to your GitLab instance
 
 We create a single `runner-manager` server that will be used as our GitLab Runner Manager:
 
@@ -70,16 +74,16 @@ hcloud server create --name runner-manager --image debian-12 --type cpx11 --loca
  ✓ Waiting for create_server       100% 8.6s (server: 55574479)
  ✓ Waiting for start_server        100% 8.6s (server: 55574479)
 Server 55574479 created
-IPv4: 65.109.174.102
-IPv6: 2a01:4f9:c012:1a18::1
-IPv6 Network: 2a01:4f9:c012:1a18::/64
+IPv4: 203.0.113.1
+IPv6: 2001:db8:5678::1
+IPv6 Network: 2001:db8:5678::/64
 ```
 
 </details>
 
-### 1.4. Configure firewalls
+### 1.4. Configure Firewalls
 
-To increase the security of our CI instances, we create a firewall that allows only ICMP and SSH access to the instances:
+To increase the security of our CI instances, we create a Firewall that allows only ICMP and SSH access to the instances:
 
 ```sh
 hcloud firewall create --name runner --rules-file <(echo '[{
@@ -106,7 +110,7 @@ Firewall 1733905 created
 
 </details>
 
-After creating the firewall, we will apply the firewall on the servers that match a label selector, in our case `runner`:
+After creating the Firewall, we will apply the Firewall to the servers that match a specific label selector, in our case `runner`:
 
 ```sh
 hcloud firewall apply-to-resource runner --type label_selector --label-selector runner
@@ -123,7 +127,7 @@ Firewall 1733905 applied to resource
 
 ### 1.5. Overview
 
-We just finished to create the base of the infrastructure, you may have an overview using the `hcloud` CLI:
+We just finished creating the base infrastructure. You can get an overview of all resources using the `hcloud` CLI:
 
 ```sh
 hcloud all list
@@ -135,13 +139,13 @@ hcloud all list
 SERVERS
 ---
 ID         NAME              STATUS    IPV4              IPV6                      PRIVATE NET   DATACENTER   AGE
-55574479   runner-manager    running   65.109.174.102    2a01:4f9:c012:1a18::/64   -             hel1-dc2     6m
+55574479   runner-manager    running   203.0.113.1       2001:db8:e45b::/64        -             hel1-dc2     6m
 
 PRIMARY IPS
 ---
 ID         TYPE   NAME                  IP                        ASSIGNEE                 DNS                                             AUTO DELETE   AGE
-74302282   ipv4   primary_ip-74302282   65.109.174.102            Server runner-manager    static.102.174.109.65.clients.your-server.de    yes           6m
-74302283   ipv6   primary_ip-74302283   2a01:4f9:c012:1a18::/64   Server runner-manager    -                                               yes           6m
+74302282   ipv4   primary_ip-74302282   203.0.113.1               Server runner-manager    static.1.113.0.203.clients.your-server.de       yes           6m
+74302283   ipv6   primary_ip-74302283   2001:db8:e45b::/64        Server runner-manager    -                                               yes           6m
 
 FIREWALLS
 ---
@@ -160,7 +164,7 @@ Now that the base infrastructure has been created, we will deploy the `gitlab-ru
 
 ## 2. Deploy the GitLab Runner Manager
 
-Every step in this section must be executed on the server that was created in the step [1.3](#13-create-the-runner-manager-instance). To connect to the `runner-manager`, run the following command:
+You have to execute every step in this section on the server that was created in step [1.3](#13-create-the-runner-manager-instance). To connect to the `runner-manager`, run the following command:
 
 ```sh
 hcloud server ssh runner-manager
@@ -169,7 +173,7 @@ hcloud server ssh runner-manager
 <details><summary>Output</summary>
 
 ```
-Linux runner-manager 6.1.0-26-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.112-1 (2024-09-30) x86_64
+Linux runner-manager 6.1.0-27-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.115-1 (2024-11-01) x86_64
 
 The programs included with the Debian GNU/Linux system are free software;
 the exact distribution terms for each program are described in the
@@ -212,7 +216,7 @@ The repository is setup! You can now install packages.
 </details>
 
 ```sh
-sudo apt install gitlab-runner
+apt install gitlab-runner
 ```
 
 <details><summary>Output</summary>
@@ -292,9 +296,9 @@ You can find more details on the [GitLab Runner installation documentation](http
 
 ### 2.2. Get a runner authentication token
 
-For the GitLab Runner to retrieve jobs from your GitLab instance, we must get a runner authentication token. You may choose between [an instance runner](https://docs.gitlab.com/ee/ci/runners/runners_scope.html#create-an-instance-runner-with-a-runner-authentication-token), [a group runner](https://docs.gitlab.com/ee/ci/runners/runners_scope.html#create-a-group-runner-with-a-runner-authentication-token) or [a project runner](https://docs.gitlab.com/ee/ci/runners/runners_scope.html#create-a-project-runner-with-a-runner-authentication-token).
+The **GitLab Runner** needs a runner authentication token to retrieve jobs from your GitLab instance. You may choose between [an instance runner](https://docs.gitlab.com/ee/ci/runners/runners_scope.html#create-an-instance-runner-with-a-runner-authentication-token), [a group runner](https://docs.gitlab.com/ee/ci/runners/runners_scope.html#create-a-group-runner-with-a-runner-authentication-token) or [a project runner](https://docs.gitlab.com/ee/ci/runners/runners_scope.html#create-a-project-runner-with-a-runner-authentication-token).
 
-### 2.3. Configure the Fleeting plugin
+### 2.3. Configure the fleeting plugin
 
 Open the `/etc/gitlab-runner/config.toml` file, and replace the content with the configuration below:
 
@@ -306,7 +310,7 @@ log_format = "text"
 
 [[runners]]
 name = "hetzner-docker-autoscaler"
-url = "https://gitlab.com" # TODO: Change me with the GitLab instance url for the runner
+url = "https://gitlab.com" # TODO: Change me with the GitLab instance URL for the runner
 token = "$RUNNER_TOKEN" # TODO: Change me with the runner authentication token
 
 executor = "docker-autoscaler"
@@ -361,7 +365,7 @@ idle_count = 8
 idle_time = "1h"
 ```
 
-Make sure that you updated the values for the runner url, runner token, and the Hetzner Cloud token.
+Make sure that you updated the values for the runner URL, runner token, and the Hetzner Cloud token.
 
 ```sh
 gitlab-runner fleeting install
@@ -433,9 +437,9 @@ time="2024-11-13T09:59:05Z" level=info msg="instance is ready" instance="runner-
 
 </details>
 
-We can see that the 2 idle instances are ready after ~1 minute, we can now start running CI pipelines using the new gitlab runner.
+We can see that the 2 idle instances are ready after ~1 minute. We can now start running CI pipelines using the new GitLab Runner.
 
-To verify, we list all our resources again:
+To verify, we list all resources again:
 
 ```sh
 hcloud all list
@@ -447,19 +451,19 @@ hcloud all list
 SERVERS
 ---
 ID         NAME                                STATUS    IPV4              IPV6                      PRIVATE NET   DATACENTER   AGE
-55574479   runner-manager                      running   65.109.174.102    2a01:4f9:c012:1a18::/64   -             hel1-dc2     39m
-55575096   runner-docker-autoscaler-3cfc018b   running   135.181.24.22     2a01:4f9:c012:f3cf::/64   -             hel1-dc2     17m
-55575097   runner-docker-autoscaler-dca4e0eb   running   135.181.107.212   2a01:4f9:c011:ad4c::/64   -             hel1-dc2     17m
+55574479   runner-manager                      running   203.0.113.1       2001:db8:e45b::/64        -             hel1-dc2     39m
+55575096   runner-docker-autoscaler-3cfc018b   running   203.0.113.35      2001:db8:9b55::/64        -             hel1-dc2     17m
+55575097   runner-docker-autoscaler-dca4e0eb   running   203.0.113.37      2001:db8:dcf1::/64        -             hel1-dc2     17m
 
 PRIMARY IPS
 ---
 ID         TYPE   NAME                  IP                        ASSIGNEE                                   DNS                                             AUTO DELETE   AGE
-74302282   ipv4   primary_ip-74302282   65.109.174.102            Server runner-manager                      static.102.174.109.65.clients.your-server.de    yes           39m
-74302283   ipv6   primary_ip-74302283   2a01:4f9:c012:1a18::/64   Server runner-manager                      -                                               yes           39m
-74303426   ipv4   primary_ip-74303426   135.181.24.22             Server runner-docker-autoscaler-3cfc018b   static.22.24.181.135.clients.your-server.de     yes           17m
-74303427   ipv6   primary_ip-74303427   2a01:4f9:c012:f3cf::/64   Server runner-docker-autoscaler-3cfc018b   -                                               yes           17m
-74303428   ipv4   primary_ip-74303428   135.181.107.212           Server runner-docker-autoscaler-dca4e0eb   static.212.107.181.135.clients.your-server.de   yes           17m
-74303429   ipv6   primary_ip-74303429   2a01:4f9:c011:ad4c::/64   Server runner-docker-autoscaler-dca4e0eb   -                                               yes           17m
+74302282   ipv4   primary_ip-74302282   203.0.113.1               Server runner-manager                      static.1.113.0.203.clients.your-server.de       yes           39m
+74302283   ipv6   primary_ip-74302283   2001:db8:e45b::/64        Server runner-manager                      -                                               yes           39m
+74303426   ipv4   primary_ip-74303426   203.0.113.35              Server runner-docker-autoscaler-3cfc018b   static.35.113.0.203.clients.your-server.de      yes           17m
+74303427   ipv6   primary_ip-74303427   2001:db8:9b55::/64        Server runner-docker-autoscaler-3cfc018b   -                                               yes           17m
+74303428   ipv4   primary_ip-74303428   203.0.113.37              Server runner-docker-autoscaler-dca4e0eb   static.37.113.0.203.clients.your-server.de      yes           17m
+74303429   ipv6   primary_ip-74303429   2001:db8:dcf1::/64        Server runner-docker-autoscaler-dca4e0eb   -                                               yes           17m
 
 FIREWALLS
 ---
@@ -477,8 +481,8 @@ ID         NAME                       FINGERPRINT                               
 
 ## 3. Next steps
 
-We have configured a basic GitLab CI infrastructure, the next steps are to:
+We have configured a basic GitLab CI infrastructure. The next steps are to:
 
 - [Configure a shared cache](../guides/shared-cache.md)
 - [Configure monitoring](../guides/monitoring.md)
-- If needed, [configure volumes](../guides/volumes.md)
+- If needed, [configure Volumes](../guides/volumes.md)
