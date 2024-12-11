@@ -38,8 +38,26 @@ test:
     - go test -v -timeout=30m -coverprofile=coverage.txt -covermode count ./...
     - go run github.com/boumenot/gocover-cobertura -ignore-files 'zz_.*\.go$' < coverage.txt > coverage.xml
   artifacts:
+    paths:
+      - coverage.txt
     reports:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
   coverage: "/coverage: \\d+.\\d+% of statements/"
+
+coverage:
+  stage: test
+
+  image: python:3.13
+  extends:
+    - .rules:merge_request_or_release
+  needs:
+    - test
+  before_script:
+    - curl -Os https://cli.codecov.io/latest/linux/codecov
+    - curl -Os https://cli.codecov.io/latest/linux/codecov.SHA256SUM
+    - shasum -a 256 -c codecov.SHA256SUM
+    - chmod +x codecov
+  script:
+    - ./codecov upload-process
