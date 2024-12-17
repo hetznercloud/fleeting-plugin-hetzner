@@ -28,32 +28,12 @@ groups:
     rules:
       - alert: NoMetrics
         annotations:
-          summary: No metrics were scraped for more than 1m.
+          summary: No metrics were scraped for the past 1m.
         expr: >
           absent(up{job="gitlab-runner"})
           or
           up{job="gitlab-runner"} == 0
         for: 1m
-```
-
-The following Prometheus alert rule is used to trigger an alert when a warning occurs in the gitlab-runner. Please note that most problems in the gitlab-runner are considered as warnings:
-
-```yml
-groups:
-  - name: GitLab Runner
-    rules:
-      - alert: GitLabRunnerWarnings
-        annotations:
-          summary: GitLab Runner warning rate is more than 0 for the past 5m.
-        # We remove the increase of failed jobs from the increase of warnings to not
-        # be alerted on failed jobs. Note that 1 failed job should produces 2 warnings.
-        expr: >
-          (
-            increase(gitlab_runner_errors_total{job="gitlab-runner", level="warning"}[5m])
-            - on (job, instance)
-            increase(gitlab_runner_failed_jobs_total{job="gitlab-runner", failure_reason="script_failure"}[5m]) * 2
-          ) > 0
-        for: 5s
 ```
 
 The following Prometheus alert rule is used to trigger an alert when an error occurs in the gitlab-runner:
@@ -67,9 +47,59 @@ groups:
           summary: GitLab Runner error rate is more than 0 for the past 5m.
         expr: >
           increase(
-            gitlab_runner_errors_total{job="gitlab-runner", level="error|fatal|panic"}[5m]
+            gitlab_runner_errors_total{job="gitlab-runner", level=~"error|fatal|panic"}[1m]
           ) > 0
-        for: 5s
+        for: 5m
+```
+
+The following Prometheus alert rule is used to trigger an alert when worker processing errors occurs in the gitlab-runner (e.g. the fleeting plugin could not be started):
+
+```yml
+groups:
+  - name: GitLab Runner
+    rules:
+      - alert: GitLabRunnerWorkerProcessingErrors
+        annotations:
+          summary: GitLab Runner worker processing error rate is more than 0 for the past 5m.
+        expr: >
+          increase(
+            gitlab_runner_worker_processing_failures_total{job="gitlab-runner", failure_type="other"}[1m]
+          ) > 0
+        for: 5m
+```
+
+The following Prometheus alert rule is used to trigger an alert when GitLab API request errors occurs in the gitlab-runner:
+
+```yml
+groups:
+  - name: GitLab Runner
+    rules:
+      - alert: GitLabAPIRequestErrors
+        annotations:
+          summary: GitLab API request error rate is more than 0 for the past 5m.
+        expr: >
+          increase(
+            gitlab_runner_api_request_statuses_total{job="gitlab-runner", status=~"(4|5).."}[1m]
+          ) > 0
+        for: 5m
+```
+
+The following Prometheus alert rule is used to trigger an alert when GitLab API request errors occurs in the gitlab-runner:
+
+```yml
+groups:
+  - name: GitLab Runner
+    rules:
+      - alert: GitLabRunnerJobQueueDuration
+        annotations:
+          summary: GitLab Runner job queue duration is more than 5 seconds for the past 5m.
+        expr: >
+          sum (
+            increase(gitlab_runner_job_queue_duration_seconds_sum{job="gitlab-runner"}[1m])
+            /
+            increase(gitlab_runner_job_queue_duration_seconds_count{job="gitlab-runner"}[1m])
+          ) by (job) > 5
+        for: 5m
 ```
 
 ## Dashboard
