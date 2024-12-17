@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.7.1](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v0.7.1)
+
+### Bug Fixes
+
+- **deps**: update gitlab.com/gitlab-org/fleeting/fleeting digest to e4f2f6f (hetznercloud/fleeting-plugin-hetzner!179)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.17.0 (hetznercloud/fleeting-plugin-hetzner!174)
+- **deps**: update module github.com/stretchr/testify to v1.10.0 (hetznercloud/fleeting-plugin-hetzner!175)
+
 ## [v0.7.0](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v0.7.0)
 
 ### Features

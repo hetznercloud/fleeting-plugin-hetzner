@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := build
 
 export NAME ?= $(shell basename $(shell pwd))
-export VERSION := v0.7.0 # x-releaser-pleaser-version
+export VERSION := v0.7.1 # x-releaser-pleaser-version
 export OUT_PATH ?= out
 export CGO_ENABLED ?= 0
 
