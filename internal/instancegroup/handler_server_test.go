@@ -69,6 +69,31 @@ func TestServerHandlerCleanup(t *testing.T) {
 		assert.NotNil(t, instance.waitFn)
 	})
 
+	t.Run("success not found", func(t *testing.T) {
+		ctx := context.Background()
+		config := DefaultTestConfig
+
+		group := setupInstanceGroup(t, config, []mockutil.Request{
+			{
+				Method: "DELETE", Path: "/servers/1",
+				Status: 404,
+				JSON: schema.ErrorResponse{
+					Error: schema.Error{Code: "not_found"},
+				},
+			},
+		})
+
+		instance := &Instance{Name: "fleeting-a", ID: 1}
+
+		handler := &ServerHandler{}
+
+		require.NoError(t, handler.Cleanup(ctx, group, instance))
+
+		assert.Equal(t, "fleeting-a", instance.Name)
+		assert.Equal(t, int64(1), instance.ID)
+		assert.Nil(t, instance.waitFn)
+	})
+
 	t.Run("passthrough", func(t *testing.T) {
 		ctx := context.Background()
 		config := DefaultTestConfig

@@ -467,3 +467,66 @@ func TestConnectInfo(t *testing.T) {
 		})
 	}
 }
+
+func TestShutdown(t *testing.T) {
+	testCases := []struct {
+		name string
+		run  func(t *testing.T, group *InstanceGroup, server *mockutil.Server)
+	}{
+		{name: "success",
+			run: func(t *testing.T, group *InstanceGroup, server *mockutil.Server) {
+				group.sshKey = &hcloud.SSHKey{ID: 1, Name: "fleeting"}
+
+				server.Expect([]mockutil.Request{
+					{
+						Method: "DELETE", Path: "/ssh_keys/1",
+						Status: 204,
+					},
+				})
+
+				err := group.Shutdown(context.Background())
+				require.NoError(t, err)
+			},
+		},
+		{name: "failure",
+			run: func(t *testing.T, group *InstanceGroup, server *mockutil.Server) {
+				group.sshKey = &hcloud.SSHKey{ID: 1, Name: "fleeting"}
+
+				server.Expect([]mockutil.Request{
+					{
+						Method: "DELETE", Path: "/ssh_keys/1",
+						Status: 500,
+					},
+				})
+
+				err := group.Shutdown(context.Background())
+				require.EqualError(t, err, "hcloud: server responded with status code 500")
+			},
+		},
+		{name: "passthrough",
+			run: func(t *testing.T, group *InstanceGroup, server *mockutil.Server) {
+				server.Expect([]mockutil.Request{})
+
+				err := group.Shutdown(context.Background())
+				require.NoError(t, err)
+			},
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			server := mockutil.NewServer(t, nil)
+			client := testutils.MakeTestClient(server.URL)
+
+			ctrl := gomock.NewController(t)
+			mock := instancegroup.NewMockInstanceGroup(ctrl)
+			group := &InstanceGroup{
+				log:      hclog.New(hclog.DefaultOptions),
+				settings: provider.Settings{},
+				group:    mock,
+				client:   client,
+			}
+
+			testCase.run(t, group, server)
+		})
+	}
+}
