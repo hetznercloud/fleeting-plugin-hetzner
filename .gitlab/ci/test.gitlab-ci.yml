@@ -36,7 +36,7 @@ test:
   script:
     - go mod download
     - go test -v -timeout=30m -coverprofile=coverage.txt -covermode count ./...
-    - go run github.com/boumenot/gocover-cobertura -ignore-files 'zz_.*\.go$' < coverage.txt > coverage.xml
+    - go run github.com/boumenot/gocover-cobertura -ignore-gen-files < coverage.txt > coverage.xml
   artifacts:
     paths:
       - coverage.txt
@@ -44,7 +44,6 @@ test:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
-  coverage: "/coverage: \\d+.\\d+% of statements/"
 
 coverage:
   stage: test

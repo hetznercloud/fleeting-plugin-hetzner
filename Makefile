@@ -45,6 +45,10 @@ all:$(TARGETS)
 test: .mods
 	go test -v -timeout=30m ./...
 
+coverage:
+	go test -v -timeout=30m -coverprofile=coverage.txt -covermode count ./...
+	go run github.com/boumenot/gocover-cobertura -ignore-gen-files < coverage.txt > coverage.xml
+
 .PHONY: clean
 clean:
 	rm -fr $(OUT_PATH)

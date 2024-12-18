@@ -3,7 +3,6 @@ package instancegroup
 import (
 	"context"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/hashicorp/go-hclog"
@@ -26,57 +25,127 @@ var (
 	}
 )
 
+func TestNew(t *testing.T) {
+	New(hcloud.NewClient(), hclog.Default(), "fleeting", DefaultTestConfig)
+}
+
 func TestInit(t *testing.T) {
 	testCases := []struct {
 		name   string
 		config Config
-		want   func(t *testing.T, group *instanceGroup)
+		run    func(t *testing.T, group *instanceGroup, server *mockutil.Server)
 	}{
 		{
-			name:   "success",
-			config: DefaultTestConfig,
-			want: func(t *testing.T, group *instanceGroup) {
-				require.NotNil(t, group.location)
-				require.NotNil(t, group.serverType)
-				require.NotNil(t, group.image)
-				require.Equal(t, map[string]string{"instance-group": "fleeting"}, group.labels)
+			name: "success",
+			config: Config{
+				Location:        "hel1",
+				ServerType:      "cpx11",
+				Image:           "debian-12",
+				VolumeSize:      10,
+				PrivateNetworks: []string{"network"},
+				SSHKeys:         []string{"ssh-key"},
+				Labels:          map[string]string{"key": "value"},
+			},
+			run: func(t *testing.T, group *instanceGroup, server *mockutil.Server) {
+				server.Expect([]mockutil.Request{
+					testutils.GetLocationHel1Request,
+					testutils.GetServerTypeCPX11Request,
+					testutils.GetImageDebian12Request,
+					{
+						Method: "GET", Path: "/networks?name=network",
+						Status: 200,
+						JSON: schema.NetworkListResponse{
+							Networks: []schema.Network{{ID: 1, Name: "network"}},
+						},
+					},
+					{
+						Method: "GET", Path: "/ssh_keys?name=ssh-key",
+						Status: 200,
+						JSON: schema.SSHKeyListResponse{
+							SSHKeys: []schema.SSHKey{{ID: 1, Name: "ssh-key"}},
+						},
+					},
+				})
+
+				err := group.Init(context.Background())
+				require.NoError(t, err)
+
+				require.Equal(t, "hel1", group.location.Name)
+				require.Equal(t, "cpx11", group.serverType.Name)
+				require.Equal(t, "debian-12", group.image.Name)
+				require.Equal(t, "network", group.privateNetworks[0].Name)
+				require.Equal(t, "ssh-key", group.sshKeys[0].Name)
+				require.Equal(t, map[string]string{"instance-group": "fleeting", "key": "value"}, group.labels)
 			},
 		},
 		{
-			name: "success extra labels",
-			config: Config{
-				Location:   "hel1",
-				ServerType: "cpx11",
-				Image:      "debian-12",
-				Labels:     map[string]string{"foo": "bar"},
+			name:   "invalid location",
+			config: DefaultTestConfig,
+			run: func(t *testing.T, group *instanceGroup, server *mockutil.Server) {
+				server.Expect([]mockutil.Request{
+					{
+						Method: "GET", Path: "/locations?name=hel1",
+						Status: 200,
+						JSON: schema.LocationListResponse{
+							Locations: []schema.Location{},
+						},
+					},
+				})
+
+				err := group.Init(context.Background())
+				require.EqualError(t, err, "location not found: hel1")
 			},
-			want: func(t *testing.T, group *instanceGroup) {
-				require.NotNil(t, group.location)
-				require.NotNil(t, group.serverType)
-				require.NotNil(t, group.image)
-				require.Equal(t, map[string]string{"instance-group": "fleeting", "foo": "bar"}, group.labels)
+		},
+		{
+			name:   "invalid server type",
+			config: DefaultTestConfig,
+			run: func(t *testing.T, group *instanceGroup, server *mockutil.Server) {
+				server.Expect([]mockutil.Request{
+					testutils.GetLocationHel1Request,
+					{
+						Method: "GET", Path: "/server_types?name=cpx11",
+						Status: 200,
+						JSON: schema.ServerTypeListResponse{
+							ServerTypes: []schema.ServerType{},
+						},
+					},
+				})
+
+				err := group.Init(context.Background())
+				require.EqualError(t, err, "server type not found: cpx11")
+			},
+		},
+		{
+			name:   "invalid image",
+			config: DefaultTestConfig,
+			run: func(t *testing.T, group *instanceGroup, server *mockutil.Server) {
+				server.Expect([]mockutil.Request{
+					testutils.GetLocationHel1Request,
+					testutils.GetServerTypeCPX11Request,
+					{
+						Method: "GET", Path: "/images?architecture=x86&include_deprecated=true&name=debian-12",
+						Status: 200,
+						JSON: schema.ImageListResponse{
+							Images: []schema.Image{},
+						},
+					},
+				})
+
+				err := group.Init(context.Background())
+				require.EqualError(t, err, "image not found: debian-12")
 			},
 		},
 	}
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			server := httptest.NewServer(mockutil.Handler(t,
-				[]mockutil.Request{
-					testutils.GetLocationHel1Request,
-					testutils.GetServerTypeCPX11Request,
-					testutils.GetImageDebian12Request,
-				},
-			))
-
+			server := mockutil.NewServer(t, nil)
 			client := testutils.MakeTestClient(server.URL)
 
 			log := hclog.New(hclog.DefaultOptions)
 
 			group := &instanceGroup{name: "fleeting", config: testCase.config, log: log, client: client}
-			err := group.Init(context.Background())
-			require.NoError(t, err)
 
-			testCase.want(t, group)
+			testCase.run(t, group, server)
 		})
 	}
 }
@@ -370,6 +439,60 @@ func TestDecrease(t *testing.T) {
 		deleted, err := group.Decrease(ctx, []string{"fleeting-a:1", "fleeting-b:2"})
 		require.NoError(t, err)
 		require.Equal(t, []string{"fleeting-a:1", "fleeting-b:2"}, deleted)
+	})
+}
+
+func TestList(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		ctx := context.Background()
+		config := DefaultTestConfig
+
+		group := setupInstanceGroup(t, config,
+			[]mockutil.Request{
+				{
+					Method: "GET", Path: "/servers?label_selector=instance-group%3Dfleeting&page=1",
+					Status: 200,
+					JSON: schema.ServerListResponse{
+						Servers: []schema.Server{
+							{ID: 1, Name: "fleeting-a"},
+							{ID: 2, Name: "fleeting-b"},
+						},
+					},
+				},
+			},
+		)
+
+		result, err := group.List(ctx)
+		require.NoError(t, err)
+		require.Len(t, result, 2)
+		require.Equal(t, int64(1), result[0].ID)
+		require.Equal(t, "fleeting-a", result[0].Name)
+		require.Equal(t, int64(2), result[1].ID)
+		require.Equal(t, "fleeting-b", result[1].Name)
+	})
+}
+
+func TestGet(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		ctx := context.Background()
+		config := DefaultTestConfig
+
+		group := setupInstanceGroup(t, config,
+			[]mockutil.Request{
+				{
+					Method: "GET", Path: "/servers/1",
+					Status: 200,
+					JSON: schema.ServerGetResponse{
+						Server: schema.Server{ID: 1, Name: "fleeting-a"},
+					},
+				},
+			},
+		)
+
+		result, err := group.Get(ctx, "fleeting-a:1")
+		require.NoError(t, err)
+		require.Equal(t, int64(1), result.ID)
+		require.Equal(t, "fleeting-a", result.Name)
 	})
 }
 

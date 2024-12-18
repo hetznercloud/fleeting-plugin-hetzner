@@ -15,6 +15,7 @@ func TestIPPoolHandlerCreate(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		ctx := context.Background()
 		config := DefaultTestConfig
+		config.PublicIPv4Disabled = false
 		config.PublicIPPoolEnabled = true
 		config.PublicIPPoolSelector = "fleeting"
 
@@ -35,9 +36,28 @@ func TestIPPoolHandlerCreate(t *testing.T) {
 						},
 						{
 							ID:           2,
+							Name:         "fleeting-a-ipv4",
+							IP:           "201.55.32.12",
+							Type:         "ipv4",
+							AssigneeID:   nil,
+							AssigneeType: "server",
+							Datacenter:   schema.Datacenter{ID: 3, Name: "hel1-dc2", Location: schema.Location{ID: 3, Name: "hel1"}},
+						},
+						{
+							ID:           3,
 							Name:         "fleeting-b-ipv6",
 							IP:           "2a01:4f9:c010:cfdf::/64",
 							Type:         "ipv6",
+							AssigneeID:   nil,
+							AssigneeType: "server",
+							Datacenter:   schema.Datacenter{ID: 3, Name: "hel1-dc2", Location: schema.Location{ID: 3, Name: "hel1"}},
+						},
+
+						{
+							ID:           4,
+							Name:         "fleeting-b-ipv4",
+							IP:           "201.23.56.76",
+							Type:         "ipv4",
 							AssigneeID:   nil,
 							AssigneeType: "server",
 							Datacenter:   schema.Datacenter{ID: 3, Name: "hel1-dc2", Location: schema.Location{ID: 3, Name: "hel1"}},
@@ -58,9 +78,10 @@ func TestIPPoolHandlerCreate(t *testing.T) {
 		require.NoError(t, handler.PreIncrease(ctx, group))
 		require.NoError(t, handler.Create(ctx, group, instance))
 
-		assert.Nil(t, instance.opts.PublicNet.IPv4)
 		assert.NotNil(t, instance.opts.PublicNet.IPv6)
+		assert.NotNil(t, instance.opts.PublicNet.IPv4)
 		assert.Equal(t, int64(1), instance.opts.PublicNet.IPv6.ID)
+		assert.Equal(t, int64(2), instance.opts.PublicNet.IPv4.ID)
 	})
 
 	t.Run("disabled", func(t *testing.T) {
