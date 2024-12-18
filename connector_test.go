@@ -156,7 +156,7 @@ func TestUploadSSHPublicKey(t *testing.T) {
 
 			group := &InstanceGroup{
 				Name:     "fleeting",
-				log:      hclog.NewNullLogger(),
+				log:      hclog.New(hclog.DefaultOptions),
 				settings: provider.Settings{},
 				group:    mock,
 				client:   client,

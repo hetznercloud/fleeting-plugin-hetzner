@@ -41,7 +41,7 @@ func (h *ServerHandler) Cleanup(ctx context.Context, group *instanceGroup, insta
 	result, _, err := group.client.Server.DeleteWithResult(ctx, &hcloud.Server{ID: instance.ID})
 	if err != nil {
 		if hcloud.IsError(err, hcloud.ErrorCodeNotFound) {
-			group.log.Warn("tried to delete a server that do not exist: %s", instance.Name)
+			group.log.Warn("tried to delete a server that do not exist", "name", instance.Name, "id", instance.ID)
 			return nil
 		}
 		return fmt.Errorf("could not request instance deletion: %w", err)

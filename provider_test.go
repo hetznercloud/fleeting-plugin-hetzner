@@ -160,7 +160,7 @@ func TestInit(t *testing.T) {
 				client: hcloud.NewClient(),
 			}
 			ctx := context.Background()
-			log := hclog.NewNullLogger()
+			log := hclog.New(hclog.DefaultOptions)
 			settings := provider.Settings{}
 
 			testCase.run(t, group, ctx, log, settings)
@@ -215,7 +215,7 @@ func TestIncrease(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			mock := instancegroup.NewMockInstanceGroup(ctrl)
 			group := &InstanceGroup{
-				log:      hclog.NewNullLogger(),
+				log:      hclog.New(hclog.DefaultOptions),
 				settings: provider.Settings{},
 				group:    mock,
 			}
@@ -274,7 +274,7 @@ func TestDecrease(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			mock := instancegroup.NewMockInstanceGroup(ctrl)
 			group := &InstanceGroup{
-				log:      hclog.NewNullLogger(),
+				log:      hclog.New(hclog.DefaultOptions),
 				settings: provider.Settings{},
 				group:    mock,
 			}
@@ -328,7 +328,7 @@ func TestUpdate(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			mock := instancegroup.NewMockInstanceGroup(ctrl)
 			group := &InstanceGroup{
-				log:      hclog.NewNullLogger(),
+				log:      hclog.New(hclog.DefaultOptions),
 				settings: provider.Settings{},
 				group:    mock,
 			}
@@ -455,7 +455,7 @@ func TestConnectInfo(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			mock := instancegroup.NewMockInstanceGroup(ctrl)
 			group := &InstanceGroup{
-				log:      hclog.NewNullLogger(),
+				log:      hclog.New(hclog.DefaultOptions),
 				settings: provider.Settings{},
 				group:    mock,
 			}

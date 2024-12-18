@@ -89,7 +89,7 @@ func (h *VolumeHandler) Cleanup(ctx context.Context, group *instanceGroup, insta
 	_, err := group.client.Volume.Delete(ctx, volume)
 	if err != nil {
 		if hcloud.IsError(err, hcloud.ErrorCodeNotFound) {
-			group.log.Warn("tried to delete a volume that do not exist: %s", instance.Name)
+			group.log.Warn("tried to delete a volume that do not exist", "name", volume.Name, "id", volume.ID)
 			return nil
 		}
 		return fmt.Errorf("could not request volume deletion: %w", err)
@@ -115,7 +115,7 @@ func (h *VolumeHandler) Sanity(ctx context.Context, group *instanceGroup) error 
 			continue
 		}
 
-		group.log.Warn("deleting dangling volume", "name", volume.Name)
+		group.log.Warn("deleting dangling volume", "name", volume.Name, "id", volume.ID)
 		_, err := group.client.Volume.Delete(ctx, volume)
 		if err != nil {
 			return fmt.Errorf("could not request volume deletion: %w", err)
