@@ -1,7 +1,7 @@
 # [Fleeting Plugin Hetzner](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner)
 
 [![Pipeline Status](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/badges/main/pipeline.svg)](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/pipelines?scope=branches&ref=main)
-[![Coverage](https://codecov.io/gl/hetznercloud/fleeting-plugin-hetzner/graph/badge.svg?token=ZUMV13U94Z)](https://codecov.io/gl/hetznercloud/fleeting-plugin-hetzner)
+[![Coverage](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/badges/main/coverage.svg?job=test)](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/pipelines?scope=branches&ref=main)
 [![Go Report](https://goreportcard.com/badge/gitlab.com/hetznercloud/fleeting-plugin-hetzner)](https://goreportcard.com/report/gitlab.com/hetznercloud/fleeting-plugin-hetzner)
 [![Releases](https://img.shields.io/gitlab/v/release/hetznercloud%2Ffleeting-plugin-hetzner)](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases)
 ![Maturity](https://img.shields.io/badge/maturity-experiment-orange)

@@ -1,2 +1,0 @@
-ignore:
-  - "**/zz_*.go" # Ignore generated files

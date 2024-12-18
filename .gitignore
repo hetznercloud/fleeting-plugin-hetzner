@@ -13,5 +13,4 @@ out/*
 cmd/fleeting-plugin-hetzner/fleeting-plugin-hetzner
 
 # Coverage
-coverage.txt
-coverage.xml
+/coverage.*

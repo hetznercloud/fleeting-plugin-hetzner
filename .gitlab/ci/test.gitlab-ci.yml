@@ -35,8 +35,10 @@ test:
     - export HCLOUD_TOKEN="$(hack/get-tmp-hcloud-token.sh)"
   script:
     - go mod download
-    - go test -v -timeout=30m -coverprofile=coverage.txt -covermode count ./...
-    - go run github.com/boumenot/gocover-cobertura -ignore-gen-files < coverage.txt > coverage.xml
+    - go test -v -timeout=30m -coverprofile=coverage.tmp -covermode count ./...
+    - grep -v -e 'zz_.*.go' coverage.tmp > coverage.txt
+    - go run github.com/boumenot/gocover-cobertura < coverage.txt > coverage.xml
+    - go tool cover -func=coverage.txt
   artifacts:
     paths:
       - coverage.txt
@@ -44,22 +46,4 @@ test:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
-
-coverage:
-  stage: test
-
-  image: python:3.13
-  extends:
-    - .rules:merge_request_or_release
-  needs:
-    - test
-  before_script:
-    - curl -s https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --import
-    - curl -Os https://cli.codecov.io/latest/linux/codecov
-    - curl -Os https://cli.codecov.io/latest/linux/codecov.SHA256SUM
-    - curl -Os https://cli.codecov.io/latest/linux/codecov.SHA256SUM.sig
-    - gpg --verify codecov.SHA256SUM.sig codecov.SHA256SUM
-    - shasum -a 256 -c codecov.SHA256SUM
-    - chmod +x codecov
-  script:
-    - ./codecov upload-coverage
+  coverage: /total:\s+\(statements\)\s+\d+.\d+%/
