@@ -4,13 +4,12 @@
 [![Coverage](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/badges/main/coverage.svg?job=test)](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/pipelines?scope=branches&ref=main)
 [![Go Report](https://goreportcard.com/badge/gitlab.com/hetznercloud/fleeting-plugin-hetzner)](https://goreportcard.com/report/gitlab.com/hetznercloud/fleeting-plugin-hetzner)
 [![Releases](https://img.shields.io/gitlab/v/release/hetznercloud%2Ffleeting-plugin-hetzner)](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases)
-![Maturity](https://img.shields.io/badge/maturity-experiment-orange)
+![Maturity](https://img.shields.io/badge/maturity-general%20availability-yellow)
 [![License](https://img.shields.io/gitlab/license/hetznercloud%2Ffleeting-plugin-hetzner)](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/blob/main/LICENSE)
 
-This is a [fleeting](https://gitlab.com/gitlab-org/fleeting/fleeting) plugin for [Hetzner Cloud](https://www.hetzner.com/cloud/).
+A [fleeting](https://gitlab.com/gitlab-org/fleeting/fleeting) plugin for [Hetzner Cloud](https://www.hetzner.com/cloud/).
 
-> This plugin is experimental, breaking changes may occur without notice. You can expect
-> the plugin to be experimental until we reach version 1.0.0.
+This tool was created to leverage GitLab's [Next Runner Auto-scaling Architecture](https://handbook.gitlab.com/handbook/engineering/architecture/design-documents/runner_scaling/) with [Hetzner Cloud](https://www.hetzner.com/cloud/), and take advantage of the new features that comes with it.
 
 ## Docs
 
@@ -19,6 +18,32 @@ This is a [fleeting](https://gitlab.com/gitlab-org/fleeting/fleeting) plugin for
 
 For more information, see the [documentation](docs/).
 
+## Releases
+
+This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+Please read the [changelog](CHANGELOG.md) before upgrading.
+
+## Contribute
+
+First and foremost, thank you! We appreciate that you want to contribute to this project.
+
+When submitting your contribution to this project, make sure that:
+
+- all the `pre-commit` hooks passes:
+
+  ```bash
+  pre-commit run --all
+  ```
+
+- all tests passes:
+
+  ```bash
+  make test
+  ```
+
+- any relevant documentation is updated with your changes.
+
 ## Development
 
 ### Building the plugin
@@ -26,7 +51,7 @@ For more information, see the [documentation](docs/).
 To build the binary, ensure that your go version is up-to-date, and run the following:
 
 ```sh
-make build
+$ make build
 ```
 
 ### Testing the plugin locally
@@ -93,9 +118,6 @@ make -C dev down
 ```
 
 ### Creating a new release
-
-**Follow [Semantic Versioning](https://semver.org/)**. Don't be afraid to bump the major version
-when you are making changes to the public API.
 
 We leverage the [releaser-pleaser](https://github.com/apricote/releaser-pleaser) tool to
 prepare and cut releases. To cut a new release, you need to merge the Merge Request that

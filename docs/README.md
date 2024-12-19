@@ -10,4 +10,5 @@ This documentation is written and organized following the [Diátaxis guidelines]
 
 ## Getting help
 
-- :bug: Report bugs using [our ticket tracker](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/issues).
+- :bug: Report bugs using [our ticket tracker](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/issues/new?issuable_template=bug-report).
+- :raising_hand: If you need help, reach us using the [Support Center](https://console.hetzner.cloud/support).
