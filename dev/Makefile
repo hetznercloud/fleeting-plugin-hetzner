@@ -19,6 +19,7 @@ up: files/id_ed25519 files/config.toml
 
 down:
 	docker compose down
+	bash destroy.sh
 
 clean: down
 	rm -Rf files/

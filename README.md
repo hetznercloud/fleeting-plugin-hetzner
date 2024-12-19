@@ -60,6 +60,38 @@ Use an approach like this:
 1. Make a CI job run using this runner, perhaps using special `tags:` or similar (to avoid breaking
    things for other CI jobs on the same GitLab installation).
 
+### Setup a development environment
+
+To setup a development environment, make sure you installed the following tools:
+
+- [hcloud](https://github.com/hetznercloud/cli)
+- [docker](https://www.docker.com/) (with the compose plugin)
+
+1. Configure a `HCLOUD_TOKEN` and a `RUNNER_TOKEN` in your shell session.
+
+> [!WARNING]
+> The development environment creates Hetzner Cloud servers which will induce costs.
+
+2. Run the development environment:
+
+```sh
+make -C dev up
+```
+
+> Also run this command to update the development environment with your latest code changes.
+
+3. Check that the development environment is healthy:
+
+```sh
+docker compose logs
+```
+
+⚠️ Do not forget to clean up the development cluster once are finished:
+
+```sh
+make -C dev down
+```
+
 ### Creating a new release
 
 **Follow [Semantic Versioning](https://semver.org/)**. Don't be afraid to bump the major version
