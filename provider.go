@@ -176,9 +176,11 @@ func (g *InstanceGroup) Update(ctx context.Context, update func(string, provider
 
 		case hcloud.ServerStatusMigrating, hcloud.ServerStatusRebuilding, hcloud.ServerStatusUnknown:
 			g.log.Debug("unhandled instance status", "id", id, "status", instance.Server.Status)
+			continue
 
 		default:
 			g.log.Error("unexpected instance status", "id", id, "status", instance.Server.Status)
+			continue
 		}
 
 		update(id, state)
