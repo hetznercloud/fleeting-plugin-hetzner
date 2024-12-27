@@ -34,9 +34,4 @@ var (
 			},
 		},
 	}
-	ListServerEmptyRequest = mockutil.Request{
-		Method: "GET", Path: "/servers?label_selector=instance-group%3Dfleeting&page=1",
-		Status: 200,
-		JSON:   schema.ServerListResponse{},
-	}
 )
