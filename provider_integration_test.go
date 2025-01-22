@@ -12,9 +12,8 @@ import (
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/kit/randutil"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/kit/sshutil"
-
-	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/utils"
 )
 
 func TestProvisioning(t *testing.T) {
@@ -40,7 +39,7 @@ func TestProvisioning(t *testing.T) {
 	t.Run("generated credentials", func(t *testing.T) {
 		t.Parallel()
 
-		name := "fleeting-" + utils.GenerateRandomID()
+		name := "fleeting-" + randutil.GenerateID()
 
 		integration.TestProvisioning(t,
 			pluginBinary,
@@ -70,7 +69,7 @@ func TestProvisioning(t *testing.T) {
 	t.Run("static credentials", func(t *testing.T) {
 		t.Parallel()
 
-		name := "fleeting-" + utils.GenerateRandomID()
+		name := "fleeting-" + randutil.GenerateID()
 
 		sshPrivateKey, _, err := sshutil.GenerateKeyPair()
 		require.NoError(t, err)
@@ -107,7 +106,7 @@ func TestProvisioning(t *testing.T) {
 	t.Run("public ip pool", func(t *testing.T) {
 		t.Parallel()
 
-		name := "fleeting-" + utils.GenerateRandomID()
+		name := "fleeting-" + randutil.GenerateID()
 
 		sshPrivateKey, _, err := sshutil.GenerateKeyPair()
 		require.NoError(t, err)
@@ -173,7 +172,7 @@ func TestProvisioning(t *testing.T) {
 	t.Run("ipv6 only", func(t *testing.T) {
 		t.Parallel()
 
-		name := "fleeting-" + utils.GenerateRandomID()
+		name := "fleeting-" + randutil.GenerateID()
 
 		integration.TestProvisioning(t,
 			pluginBinary,
@@ -205,7 +204,7 @@ func TestProvisioning(t *testing.T) {
 	t.Run("volume", func(t *testing.T) {
 		t.Parallel()
 
-		name := "fleeting-" + utils.GenerateRandomID()
+		name := "fleeting-" + randutil.GenerateID()
 
 		integration.TestProvisioning(t,
 			pluginBinary,

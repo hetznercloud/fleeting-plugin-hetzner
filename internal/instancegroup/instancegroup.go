@@ -11,9 +11,9 @@ import (
 	"github.com/hashicorp/go-hclog"
 
 	"github.com/hetznercloud/hcloud-go/v2/hcloud"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/kit/randutil"
 
 	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/ippool"
-	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/utils"
 )
 
 type InstanceGroup interface {
@@ -62,7 +62,7 @@ type instanceGroup struct {
 func (g *instanceGroup) Init(ctx context.Context) (err error) {
 	if g.randomNameFn == nil {
 		g.randomNameFn = func() string {
-			return g.name + "-" + utils.GenerateRandomID()
+			return g.name + "-" + randutil.GenerateID()
 		}
 	}
 
