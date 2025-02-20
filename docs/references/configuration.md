@@ -28,6 +28,9 @@ The [`[runners.autoscaler.plugin_config]` section](https://docs.gitlab.com/runne
     <td>
       <a href="https://docs.hetzner.com/cloud/api/getting-started/generating-api-token">Hetzner Cloud API token</a>
       to access your Hetzner Cloud project.
+      <br>
+      You may also use the <code>HCLOUD_TOKEN</code> or <code>HCLOUD_TOKEN_FILE</code> environment variable
+      to configure the token.
     </td>
   </tr>
   <tr>
@@ -35,6 +38,9 @@ The [`[runners.autoscaler.plugin_config]` section](https://docs.gitlab.com/runne
     <td>string</td>
     <td>
       Hetzner Cloud API endpoint to use.
+      <br>
+      You may also use the <code>HCLOUD_ENDPOINT</code> or <code>HCLOUD_ENDPOINT_FILE</code> environment variable
+      to configure the endpoint.
     </td>
   </tr>
   <tr>

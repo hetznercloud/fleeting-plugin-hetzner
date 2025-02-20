@@ -6,6 +6,8 @@ import (
 	"os"
 
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
+
+	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/kit/envutil"
 )
 
 func (g *InstanceGroup) validate() error {
@@ -18,6 +20,24 @@ func (g *InstanceGroup) validate() error {
 
 	if g.settings.Username == "" {
 		g.settings.Username = "root"
+	}
+
+	// Environment variables
+	{
+		value, err := envutil.LookupEnvWithFile("HCLOUD_TOKEN")
+		if err != nil {
+			errs = append(errs, err)
+		} else if value != "" {
+			g.Token = value
+		}
+	}
+	{
+		value, err := envutil.LookupEnvWithFile("HCLOUD_ENDPOINT")
+		if err != nil {
+			errs = append(errs, err)
+		} else if value != "" {
+			g.Endpoint = value
+		}
 	}
 
 	// Checks

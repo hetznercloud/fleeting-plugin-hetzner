@@ -14,6 +14,7 @@ func TestValidate(t *testing.T) {
 	testCases := []struct {
 		name   string
 		group  InstanceGroup
+		env    map[string]string
 		assert func(t *testing.T, group InstanceGroup, err error)
 	}{
 		{
@@ -30,6 +31,25 @@ func TestValidate(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, provider.ProtocolSSH, group.settings.Protocol)
 				assert.Equal(t, "root", group.settings.Username)
+			},
+		},
+		{
+			name: "valid with env",
+			group: InstanceGroup{
+				Name:       "fleeting",
+				Token:      "dummy",
+				Location:   "hel1",
+				ServerType: "cpx11",
+				Image:      "debian-12",
+			},
+			env: map[string]string{
+				"HCLOUD_TOKEN":    "value",
+				"HCLOUD_ENDPOINT": "value",
+			},
+			assert: func(t *testing.T, group InstanceGroup, err error) {
+				assert.NoError(t, err)
+				assert.Equal(t, "value", group.Token)
+				assert.Equal(t, "value", group.Endpoint)
 			},
 		},
 		{
@@ -97,6 +117,13 @@ missing required plugin config: image`, err.Error())
 	}
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Setenv("HCLOUD_TOKEN", "")
+			t.Setenv("HCLOUD_ENDPOINT", "")
+
+			for key, value := range testCase.env {
+				t.Setenv(key, value)
+			}
+
 			err := testCase.group.validate()
 			testCase.assert(t, testCase.group, err)
 		})
