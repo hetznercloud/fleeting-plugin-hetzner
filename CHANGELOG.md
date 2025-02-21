@@ -1,5 +1,23 @@
 # Changelog
 
+## [v1.0.0](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v1.0.0)
+
+### Features
+
+- configure hcloud token and endpoint using env vars (hetznercloud/fleeting-plugin-hetzner!221)
+- promote to general availability (hetznercloud/fleeting-plugin-hetzner!187)
+
+### Bug Fixes
+
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.19.1 (hetznercloud/fleeting-plugin-hetzner!213)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.19.0 (hetznercloud/fleeting-plugin-hetzner!212)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.18.0 (hetznercloud/fleeting-plugin-hetzner!208)
+- **deps**: update gitlab.com/gitlab-org/fleeting/fleeting digest to 5d69933 (hetznercloud/fleeting-plugin-hetzner!204)
+- **deps**: update gitlab.com/gitlab-org/fleeting/fleeting digest to 760fee2 (hetznercloud/fleeting-plugin-hetzner!203)
+- do not send unhandled empty state update (hetznercloud/fleeting-plugin-hetzner!197)
+- invalid keys in log messages (hetznercloud/fleeting-plugin-hetzner!191)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.17.1 (hetznercloud/fleeting-plugin-hetzner!185)
+
 ## [v0.7.1](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v0.7.1)
 
 ### Bug Fixes
