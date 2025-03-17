@@ -50,9 +50,9 @@ func TestProvisioning(t *testing.T) {
 					Token:    os.Getenv("HCLOUD_TOKEN"),
 					Endpoint: os.Getenv("HCLOUD_ENDPOINT"),
 
-					Location:   "hel1",
-					ServerType: "cpx11",
-					Image:      "debian-12",
+					Location:    "hel1",
+					ServerTypes: []string{"cx22", "cpx11"},
+					Image:       "debian-12",
 				},
 				ConnectorConfig: provider.ConnectorConfig{
 					Timeout: 10 * time.Minute,
@@ -83,9 +83,9 @@ func TestProvisioning(t *testing.T) {
 					Token:    os.Getenv("HCLOUD_TOKEN"),
 					Endpoint: os.Getenv("HCLOUD_ENDPOINT"),
 
-					Location:   "hel1",
-					ServerType: "cpx11",
-					Image:      "debian-12",
+					Location:    "hel1",
+					ServerTypes: []string{"cx22", "cpx11"},
+					Image:       "debian-12",
 				},
 				ConnectorConfig: provider.ConnectorConfig{
 					Timeout: 10 * time.Minute,
@@ -146,9 +146,9 @@ func TestProvisioning(t *testing.T) {
 					Token:    os.Getenv("HCLOUD_TOKEN"),
 					Endpoint: os.Getenv("HCLOUD_ENDPOINT"),
 
-					Location:   "hel1",
-					ServerType: "cpx11",
-					Image:      "debian-12",
+					Location:    "hel1",
+					ServerTypes: []string{"cpx11"},
+					Image:       "debian-12",
 
 					PublicIPPoolEnabled:  true,
 					PublicIPPoolSelector: fmt.Sprintf("pool=%s", name),
@@ -183,9 +183,9 @@ func TestProvisioning(t *testing.T) {
 					Token:    os.Getenv("HCLOUD_TOKEN"),
 					Endpoint: os.Getenv("HCLOUD_ENDPOINT"),
 
-					Location:   "hel1",
-					ServerType: "cpx11",
-					Image:      "debian-12",
+					Location:    "hel1",
+					ServerTypes: []string{"cpx11"},
+					Image:       "debian-12",
 
 					PublicIPv4Disabled: true,
 				},
@@ -215,10 +215,10 @@ func TestProvisioning(t *testing.T) {
 					Token:    os.Getenv("HCLOUD_TOKEN"),
 					Endpoint: os.Getenv("HCLOUD_ENDPOINT"),
 
-					Location:   "hel1",
-					ServerType: "cpx11",
-					Image:      "debian-12",
-					VolumeSize: 10,
+					Location:    "hel1",
+					ServerTypes: []string{"cpx11"},
+					Image:       "debian-12",
+					VolumeSize:  10,
 				},
 				ConnectorConfig: provider.ConnectorConfig{
 					Timeout: 10 * time.Minute,

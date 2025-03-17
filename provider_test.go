@@ -150,12 +150,12 @@ func TestInit(t *testing.T) {
 			server := httptest.NewServer(mockutil.Handler(t, testCase.requests))
 
 			group := &InstanceGroup{
-				Name:       "fleeting",
-				Token:      "dummy",
-				Endpoint:   server.URL,
-				Location:   "hel1",
-				ServerType: "cpx11",
-				Image:      "debian-12",
+				Name:        "fleeting",
+				Token:       "dummy",
+				Endpoint:    server.URL,
+				Location:    "hel1",
+				ServerTypes: []string{"cpx11"},
+				Image:       "debian-12",
 
 				client: hcloud.NewClient(),
 			}

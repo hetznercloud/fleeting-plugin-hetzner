@@ -49,12 +49,13 @@ type instanceGroup struct {
 	client *hcloud.Client
 	ipPool *ippool.IPPool
 
-	location        *hcloud.Location
-	serverType      *hcloud.ServerType
-	image           *hcloud.Image
-	privateNetworks []*hcloud.Network
-	sshKeys         []*hcloud.SSHKey
-	labels          map[string]string
+	location                *hcloud.Location
+	serverTypes             []*hcloud.ServerType
+	serverTypesArchitecture hcloud.Architecture
+	image                   *hcloud.Image
+	privateNetworks         []*hcloud.Network
+	sshKeys                 []*hcloud.SSHKey
+	labels                  map[string]string
 
 	randomNameFn func() string
 }
@@ -75,17 +76,27 @@ func (g *instanceGroup) Init(ctx context.Context) (err error) {
 		return fmt.Errorf("location not found: %s", g.config.Location)
 	}
 
-	// Server Type
-	g.serverType, _, err = g.client.ServerType.Get(ctx, g.config.ServerType)
-	if err != nil {
-		return fmt.Errorf("could not get server type: %w", err)
-	}
-	if g.serverType == nil {
-		return fmt.Errorf("server type not found: %s", g.config.ServerType)
+	// Server Types
+	for _, serverTypeID := range g.config.ServerTypes {
+		serverType, _, err := g.client.ServerType.Get(ctx, serverTypeID)
+		if err != nil {
+			return fmt.Errorf("could not get server type: %w", err)
+		}
+		if serverType == nil {
+			return fmt.Errorf("server type not found: %s", serverTypeID)
+		}
+
+		if g.serverTypesArchitecture == "" {
+			g.serverTypesArchitecture = serverType.Architecture
+		} else if g.serverTypesArchitecture != serverType.Architecture {
+			return fmt.Errorf("unexpected server type architecture found: %s (%s)", serverType.Architecture, serverTypeID)
+		}
+
+		g.serverTypes = append(g.serverTypes, serverType)
 	}
 
 	// Image
-	g.image, _, err = g.client.Image.GetForArchitecture(ctx, g.config.Image, g.serverType.Architecture)
+	g.image, _, err = g.client.Image.GetForArchitecture(ctx, g.config.Image, g.serverTypesArchitecture)
 	if err != nil {
 		return fmt.Errorf("could not get image: %w", err)
 	}

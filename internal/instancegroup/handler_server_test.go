@@ -41,6 +41,85 @@ func TestServerHandlerCreate(t *testing.T) {
 		assert.NotNil(t, instance.ID)
 		assert.NotNil(t, instance.waitFn)
 	})
+	t.Run("success with second server type", func(t *testing.T) {
+		ctx := context.Background()
+		config := DefaultTestConfig
+
+		group := setupInstanceGroup(t, config, []mockutil.Request{
+			{
+				Method: "POST", Path: "/servers",
+				Status: 412,
+				JSON: schema.ErrorResponse{
+					Error: schema.Error{
+						Message: "resource unavailable",
+						Code:    "resource_unavailable",
+					},
+				},
+			},
+			{
+				Method: "POST", Path: "/servers",
+				Status: 201,
+				JSON: schema.ServerCreateResponse{
+					Server:      schema.Server{ID: 1, Name: "fleeting-a"},
+					Action:      schema.Action{ID: 101, Status: "running"},
+					NextActions: []schema.Action{{ID: 102, Status: "running"}},
+				},
+			},
+		})
+
+		instance := NewInstance("fleeting-a")
+		{
+			handler := &BaseHandler{}
+			require.NoError(t, handler.Create(ctx, group, instance))
+		}
+
+		handler := &ServerHandler{}
+
+		require.NoError(t, handler.Create(ctx, group, instance))
+
+		assert.NotNil(t, instance.ID)
+		assert.NotNil(t, instance.waitFn)
+	})
+	t.Run("failure with second server type", func(t *testing.T) {
+		ctx := context.Background()
+		config := DefaultTestConfig
+
+		group := setupInstanceGroup(t, config, []mockutil.Request{
+			{
+				Method: "POST", Path: "/servers",
+				Status: 412,
+				JSON: schema.ErrorResponse{
+					Error: schema.Error{
+						Message: "resource unavailable",
+						Code:    "resource_unavailable",
+					},
+				},
+			},
+			{
+				Method: "POST", Path: "/servers",
+				Status: 412,
+				JSON: schema.ErrorResponse{
+					Error: schema.Error{
+						Message: "resource unavailable",
+						Code:    "resource_unavailable",
+					},
+				},
+			},
+		})
+
+		instance := NewInstance("fleeting-a")
+		{
+			handler := &BaseHandler{}
+			require.NoError(t, handler.Create(ctx, group, instance))
+		}
+
+		handler := &ServerHandler{}
+
+		require.EqualError(t,
+			handler.Create(ctx, group, instance),
+			"could not request instance creation: resource unavailable (resource_unavailable)",
+		)
+	})
 }
 
 func TestServerHandlerCleanup(t *testing.T) {

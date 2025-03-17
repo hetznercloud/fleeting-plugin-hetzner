@@ -55,10 +55,12 @@ The [`[runners.autoscaler.plugin_config]` section](https://docs.gitlab.com/runne
   </tr>
   <tr>
     <td><code>server_type</code></td>
-    <td>string (<strong>required</strong>)</td>
+    <td>string or list of string (<strong>required</strong>)</td>
     <td>
       <a href="https://docs.hetzner.com/cloud/servers/overview/">Hetzner Cloud server type</a>
-      on which the instances will run.
+      on which the instances will run. Using a list of server types allows you to define
+      additional server types to fallback to in case of unavailable resource errors. All
+      servers types must have the same CPU architecture.
       <br>
       You can list the available server types by running <code>hcloud server-type list</code>.
     </td>

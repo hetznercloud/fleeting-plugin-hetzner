@@ -27,11 +27,11 @@ type InstanceGroup struct {
 	Token    string `json:"token"`
 	Endpoint string `json:"endpoint"`
 
-	Location     string `json:"location"`
-	ServerType   string `json:"server_type"`
-	Image        string `json:"image"`
-	UserData     string `json:"user_data"`
-	UserDataFile string `json:"user_data_file"`
+	Location     string        `json:"location"`
+	ServerTypes  LaxStringList `json:"server_type"`
+	Image        string        `json:"image"`
+	UserData     string        `json:"user_data"`
+	UserDataFile string        `json:"user_data_file"`
 
 	VolumeSize int `json:"volume_size"`
 
@@ -116,7 +116,7 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 	// Create instance group
 	groupConfig := instancegroup.Config{
 		Location:             g.Location,
-		ServerType:           g.ServerType,
+		ServerTypes:          g.ServerTypes,
 		Image:                g.Image,
 		UserData:             g.UserData,
 		PublicIPv4Disabled:   g.PublicIPv4Disabled,

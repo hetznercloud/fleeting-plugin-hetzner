@@ -53,7 +53,7 @@ func (g *InstanceGroup) validate() error {
 		errs = append(errs, fmt.Errorf("missing required plugin config: location"))
 	}
 
-	if g.ServerType == "" {
+	if len(g.ServerTypes) == 0 {
 		errs = append(errs, fmt.Errorf("missing required plugin config: server_type"))
 	}
 

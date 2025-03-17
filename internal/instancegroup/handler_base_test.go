@@ -24,7 +24,4 @@ func TestBaseHandlerCreate(t *testing.T) {
 
 	assert.Equal(t, "fleeting-a", instance.Name)
 	assert.Equal(t, int64(0), instance.ID)
-
-	assert.NotNil(t, instance.opts)
-	assert.Equal(t, "fleeting-a", instance.opts.Name)
 }

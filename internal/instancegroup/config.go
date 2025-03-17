@@ -5,9 +5,9 @@ type Config struct {
 	// Run `hcloud location list` to list available locations.
 	Location string
 
-	// ServerType is the Hetzner Cloud "Server Type" (name or id) to create the server
+	// ServerTypes is a list of Hetzner Cloud "Server Type" (name or id) to create the server
 	// with. Run `hcloud server-type list` to list available server types.
-	ServerType string
+	ServerTypes []string
 
 	// Image is the Hetzner Cloud "Image" (name or id) to create the server with. Run
 	// `hcloud image list` to list available images.

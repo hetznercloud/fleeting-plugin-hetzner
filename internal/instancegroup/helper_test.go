@@ -30,6 +30,7 @@ func setupInstanceGroup(t *testing.T, config Config, requests []mockutil.Request
 		[]mockutil.Request{
 			testutils.GetLocationHel1Request,
 			testutils.GetServerTypeCPX11Request,
+			testutils.GetServerTypeCX22Request,
 			testutils.GetImageDebian12Request,
 		},
 		requests...,

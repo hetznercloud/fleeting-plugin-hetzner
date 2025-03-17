@@ -20,12 +20,12 @@ func TestValidate(t *testing.T) {
 		{
 			name: "valid",
 			group: InstanceGroup{
-				Name:       "fleeting",
-				Token:      "dummy",
-				Location:   "hel1",
-				ServerType: "cpx11",
-				Image:      "debian-12",
-				VolumeSize: 15,
+				Name:        "fleeting",
+				Token:       "dummy",
+				Location:    "hel1",
+				ServerTypes: []string{"cpx11"},
+				Image:       "debian-12",
+				VolumeSize:  15,
 			},
 			assert: func(t *testing.T, group InstanceGroup, err error) {
 				assert.NoError(t, err)
@@ -36,11 +36,11 @@ func TestValidate(t *testing.T) {
 		{
 			name: "valid with env",
 			group: InstanceGroup{
-				Name:       "fleeting",
-				Token:      "dummy",
-				Location:   "hel1",
-				ServerType: "cpx11",
-				Image:      "debian-12",
+				Name:        "fleeting",
+				Token:       "dummy",
+				Location:    "hel1",
+				ServerTypes: []string{"cpx11"},
+				Image:       "debian-12",
 			},
 			env: map[string]string{
 				"HCLOUD_TOKEN":    "value",
@@ -67,11 +67,11 @@ missing required plugin config: image`, err.Error())
 		{
 			name: "winrm",
 			group: InstanceGroup{
-				Name:       "fleeting",
-				Token:      "dummy",
-				Location:   "hel1",
-				ServerType: "cpx11",
-				Image:      "debian-12",
+				Name:        "fleeting",
+				Token:       "dummy",
+				Location:    "hel1",
+				ServerTypes: []string{"cpx11"},
+				Image:       "debian-12",
 				settings: provider.Settings{
 					ConnectorConfig: provider.ConnectorConfig{
 						Protocol: "winrm",
@@ -89,7 +89,7 @@ missing required plugin config: image`, err.Error())
 				Name:         "fleeting",
 				Token:        "dummy",
 				Location:     "hel1",
-				ServerType:   "cpx11",
+				ServerTypes:  []string{"cpx11"},
 				Image:        "debian-12",
 				UserData:     "dummy",
 				UserDataFile: "dummy",
@@ -102,12 +102,12 @@ missing required plugin config: image`, err.Error())
 		{
 			name: "volume size",
 			group: InstanceGroup{
-				Name:       "fleeting",
-				Token:      "dummy",
-				Location:   "hel1",
-				ServerType: "cpx11",
-				Image:      "debian-12",
-				VolumeSize: 8,
+				Name:        "fleeting",
+				Token:       "dummy",
+				Location:    "hel1",
+				ServerTypes: []string{"cpx11"},
+				Image:       "debian-12",
+				VolumeSize:  8,
 			},
 			assert: func(t *testing.T, group InstanceGroup, err error) {
 				assert.Error(t, err)

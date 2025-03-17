@@ -25,6 +25,15 @@ var (
 			},
 		},
 	}
+	GetServerTypeCX22Request = mockutil.Request{
+		Method: "GET", Path: "/server_types?name=cx22",
+		Status: 200,
+		JSON: schema.ServerTypeListResponse{
+			ServerTypes: []schema.ServerType{
+				{ID: 2, Name: "cx22", Architecture: "x86"},
+			},
+		},
+	}
 	GetImageDebian12Request = mockutil.Request{
 		Method: "GET", Path: "/images?architecture=x86&include_deprecated=true&name=debian-12",
 		Status: 200,

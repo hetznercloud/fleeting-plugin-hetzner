@@ -15,7 +15,29 @@ var _ CreateHandler = (*ServerHandler)(nil)
 var _ CleanupHandler = (*ServerHandler)(nil)
 
 func (h *ServerHandler) Create(ctx context.Context, group *instanceGroup, instance *Instance) error {
-	result, _, err := group.client.Server.Create(ctx, *instance.opts)
+	instance.opts.Name = instance.Name
+	instance.opts.Labels = group.labels
+	instance.opts.Location = group.location
+	instance.opts.Image = group.image
+	instance.opts.SSHKeys = group.sshKeys
+	instance.opts.UserData = group.config.UserData
+	instance.opts.PublicNet.EnableIPv4 = !group.config.PublicIPv4Disabled
+	instance.opts.PublicNet.EnableIPv6 = !group.config.PublicIPv6Disabled
+	instance.opts.Networks = group.privateNetworks
+
+	var result hcloud.ServerCreateResult
+	var err error
+
+	for _, serverType := range group.serverTypes {
+		instance.opts.ServerType = serverType
+
+		result, _, err = group.client.Server.Create(ctx, *instance.opts)
+		if err != nil && hcloud.IsError(err, hcloud.ErrorCodeResourceUnavailable) {
+			group.log.Warn("resource unavailable", "server_type", serverType.Name, "err", err)
+			continue
+		}
+		break
+	}
 	if err != nil {
 		return fmt.Errorf("could not request instance creation: %w", err)
 	}

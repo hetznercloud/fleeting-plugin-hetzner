@@ -18,7 +18,7 @@ import (
 var (
 	DefaultTestConfig = Config{
 		Location:           "hel1",
-		ServerType:         "cpx11",
+		ServerTypes:        []string{"cpx11", "cx22"},
 		Image:              "debian-12",
 		VolumeSize:         10,
 		PublicIPv4Disabled: true,
@@ -39,7 +39,7 @@ func TestInit(t *testing.T) {
 			name: "success",
 			config: Config{
 				Location:        "hel1",
-				ServerType:      "cpx11",
+				ServerTypes:     []string{"cpx11"},
 				Image:           "debian-12",
 				VolumeSize:      10,
 				PrivateNetworks: []string{"network"},
@@ -71,7 +71,7 @@ func TestInit(t *testing.T) {
 				require.NoError(t, err)
 
 				require.Equal(t, "hel1", group.location.Name)
-				require.Equal(t, "cpx11", group.serverType.Name)
+				require.Equal(t, "cpx11", group.serverTypes[0].Name)
 				require.Equal(t, "debian-12", group.image.Name)
 				require.Equal(t, "network", group.privateNetworks[0].Name)
 				require.Equal(t, "ssh-key", group.sshKeys[0].Name)
@@ -122,6 +122,7 @@ func TestInit(t *testing.T) {
 				server.Expect([]mockutil.Request{
 					testutils.GetLocationHel1Request,
 					testutils.GetServerTypeCPX11Request,
+					testutils.GetServerTypeCX22Request,
 					{
 						Method: "GET", Path: "/images?architecture=x86&include_deprecated=true&name=debian-12",
 						Status: 200,
