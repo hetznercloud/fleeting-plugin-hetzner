@@ -77,7 +77,7 @@ func TestInit(t *testing.T) {
 			run: func(t *testing.T, group *InstanceGroup, ctx context.Context, log hclog.Logger, settings provider.Settings) {
 				info, err := group.Init(ctx, log, settings)
 				require.NoError(t, err)
-				require.Equal(t, "hetzner/hel1/cpx11/fleeting", info.ID)
+				require.Equal(t, "hetzner/hel1/fleeting", info.ID)
 			},
 		},
 		{name: "static ssh key upload",
@@ -114,7 +114,7 @@ func TestInit(t *testing.T) {
 
 				info, err := group.Init(ctx, log, settings)
 				require.NoError(t, err)
-				require.Equal(t, "hetzner/hel1/cpx11/fleeting", info.ID)
+				require.Equal(t, "hetzner/hel1/fleeting", info.ID)
 			},
 		},
 		{name: "static ssh key existing",
@@ -141,7 +141,7 @@ func TestInit(t *testing.T) {
 
 				info, err := group.Init(ctx, log, settings)
 				require.NoError(t, err)
-				require.Equal(t, "hetzner/hel1/cpx11/fleeting", info.ID)
+				require.Equal(t, "hetzner/hel1/fleeting", info.ID)
 			},
 		},
 	}

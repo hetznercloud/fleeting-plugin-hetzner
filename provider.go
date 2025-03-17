@@ -139,7 +139,7 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 	}
 
 	return provider.ProviderInfo{
-		ID:        path.Join("hetzner", g.Location, g.ServerType, g.Name),
+		ID:        path.Join("hetzner", g.Location, g.Name),
 		MaxSize:   math.MaxInt,
 		Version:   Version.String(),
 		BuildInfo: Version.BuildInfo(),
