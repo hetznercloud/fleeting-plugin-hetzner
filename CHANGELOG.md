@@ -1,5 +1,12 @@
 # Changelog
 
+## [v1.1.0](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v1.1.0)
+
+### Features
+
+- allow defining fallback server types (hetznercloud/fleeting-plugin-hetzner!227)
+- remove server type from provider info id (hetznercloud/fleeting-plugin-hetzner!225)
+
 ## [v1.0.0](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v1.0.0)
 
 ### Features
