@@ -23,7 +23,7 @@ func TestIPPoolHandlerCreate(t *testing.T) {
 			{
 				Method: "GET", Path: "/primary_ips?label_selector=fleeting&page=1",
 				Status: 200,
-				JSON: schema.PrimaryIPListResult{
+				JSON: schema.PrimaryIPListResponse{
 					PrimaryIPs: []schema.PrimaryIP{
 						{
 							ID:           1,

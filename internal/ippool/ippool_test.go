@@ -33,7 +33,7 @@ func TestNextIP(t *testing.T) {
 			{
 				Method: "GET", Path: "/primary_ips?label_selector=instance-group%3Dfleeting&page=1",
 				Status: 200,
-				JSON:   schema.PrimaryIPListResult{},
+				JSON:   schema.PrimaryIPListResponse{},
 			},
 		}))
 		testClient := testutils.MakeTestClient(testServer.URL)
@@ -59,7 +59,7 @@ func TestNextIP(t *testing.T) {
 			{
 				Method: "GET", Path: "/primary_ips?label_selector=instance-group%3Dfleeting&page=1",
 				Status: 200,
-				JSON: schema.PrimaryIPListResult{
+				JSON: schema.PrimaryIPListResponse{
 					PrimaryIPs: []schema.PrimaryIP{
 						{ID: 41, IP: "1.1.1.1", Type: "ipv4", AssigneeID: hcloud.Ptr(int64(0)), Datacenter: datacenterHel1},
 						{ID: 42, IP: "2.2.2.2", Type: "ipv4", AssigneeID: hcloud.Ptr(int64(1)), Datacenter: datacenterHel1},
