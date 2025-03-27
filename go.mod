@@ -7,7 +7,7 @@ toolchain go1.24.1
 require (
 	github.com/boumenot/gocover-cobertura v1.3.0
 	github.com/hashicorp/go-hclog v1.6.3
-	github.com/hetznercloud/hcloud-go/v2 v2.20.1
+	github.com/hetznercloud/hcloud-go/v2 v2.21.0
 	github.com/stretchr/testify v1.10.0
 	gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20250116074924-5d69933ca3b8
 	go.uber.org/mock v0.5.0
