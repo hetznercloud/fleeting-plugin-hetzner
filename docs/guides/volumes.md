@@ -32,7 +32,7 @@ First, you must define the size of the Volume you want to attach to your instanc
  """
 ```
 
-For more details about the `volume_size` config, see the [plugin configuration reference](../references/configuration.md#plugin-configuration).
+For more details about the `volume_size` config, see the [plugin configuration reference](../reference/configuration.md#plugin-configuration).
 
 ## Format and mount the Volume
 

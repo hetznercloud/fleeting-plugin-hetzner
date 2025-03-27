@@ -6,7 +6,7 @@ This documentation is written and organized following the [Diátaxis guidelines]
 
 - [Tutorials](tutorials)
 - [Guides](guides)
-- [References](references)
+- [Reference](reference)
 
 ## Getting help
 
