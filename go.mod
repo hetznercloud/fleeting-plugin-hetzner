@@ -10,7 +10,7 @@ require (
 	github.com/hetznercloud/hcloud-go/v2 v2.21.0
 	github.com/stretchr/testify v1.10.0
 	gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20250331223446-30f1dda488b1
-	go.uber.org/mock v0.5.0
+	go.uber.org/mock v0.5.1
 )
 
 require (
