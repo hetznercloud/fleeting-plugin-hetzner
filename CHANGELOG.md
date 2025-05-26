@@ -1,5 +1,16 @@
 # Changelog
 
+## [v1.1.1](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v1.1.1)
+
+### Bug Fixes
+
+- **deps**: update gitlab.com/gitlab-org/fleeting/fleeting digest to 60977cd (hetznercloud/fleeting-plugin-hetzner!240)
+- **deps**: update module go.uber.org/mock to v0.5.2 (hetznercloud/fleeting-plugin-hetzner!241)
+- **deps**: update module go.uber.org/mock to v0.5.1 (hetznercloud/fleeting-plugin-hetzner!238)
+- **deps**: update gitlab.com/gitlab-org/fleeting/fleeting digest to 30f1dda (hetznercloud/fleeting-plugin-hetzner!236)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.21.0 (hetznercloud/fleeting-plugin-hetzner!234)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.20.1 (hetznercloud/fleeting-plugin-hetzner!230)
+
 ## [v1.1.0](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v1.1.0)
 
 ### Features
