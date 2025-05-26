@@ -256,6 +256,11 @@ func (g *InstanceGroup) ConnectInfo(ctx context.Context, iid string) (provider.C
 	return info, err
 }
 
+func (g *InstanceGroup) Heartbeat(_ context.Context, _ string) error {
+	// no-op
+	return nil
+}
+
 func (g *InstanceGroup) Shutdown(ctx context.Context) error {
 	errs := make([]error, 0)
 
