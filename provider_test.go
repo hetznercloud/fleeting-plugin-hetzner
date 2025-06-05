@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/go-hclog"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
 	"go.uber.org/mock/gomock"
@@ -75,9 +76,13 @@ func TestInit(t *testing.T) {
 				},
 			},
 			run: func(t *testing.T, group *InstanceGroup, ctx context.Context, log hclog.Logger, settings provider.Settings) {
+				group.Labels = map[string]string{"key": "value"}
+
 				info, err := group.Init(ctx, log, settings)
 				require.NoError(t, err)
 				require.Equal(t, "hetzner/hel1/fleeting", info.ID)
+
+				assert.Equal(t, map[string]string{"key": "value", "managed-by": "fleeting-plugin-hetzner"}, group.labels)
 			},
 		},
 		{name: "static ssh key upload",

@@ -3,6 +3,7 @@ package hetzner
 import (
 	"errors"
 	"fmt"
+	"maps"
 	"os"
 
 	"gitlab.com/gitlab-org/fleeting/fleeting/provider"
@@ -88,6 +89,7 @@ func (g *InstanceGroup) populate() error {
 	g.labels = map[string]string{
 		"managed-by": Version.Name,
 	}
+	maps.Copy(g.labels, g.Labels)
 
 	return nil
 }

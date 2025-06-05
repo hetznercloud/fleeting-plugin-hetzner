@@ -130,6 +130,14 @@ The [`[runners.autoscaler.plugin_config]` section](https://docs.gitlab.com/runne
       <code>volume_size</code> is 0 GB. The minimal <code>volume_size</code> is 10 GB.
     </td>
   </tr>
+  <tr>
+    <td><code>labels</code></td>
+    <td>map of string</td>
+    <td>
+      User-defined <a href="https://docs.hetzner.cloud/#labels">labels</a> (key/value pairs)
+      that will be set on the instances.
+    </td>
+  </tr>
 </table>
 
 ## Autoscaler configuration

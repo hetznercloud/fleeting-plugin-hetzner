@@ -42,6 +42,8 @@ type InstanceGroup struct {
 
 	PrivateNetworks []string `json:"private_networks"`
 
+	Labels map[string]string `json:"labels"`
+
 	sshKey *hcloud.SSHKey
 	labels map[string]string
 

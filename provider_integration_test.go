@@ -53,6 +53,8 @@ func TestProvisioning(t *testing.T) {
 					Location:    "hel1",
 					ServerTypes: []string{"cx22", "cpx11"},
 					Image:       "debian-12",
+
+					Labels: map[string]string{"key": "value"},
 				},
 				ConnectorConfig: provider.ConnectorConfig{
 					Timeout: 10 * time.Minute,
