@@ -1,5 +1,15 @@
 # Changelog
 
+## [v1.2.0](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v1.2.0)
+
+### Features
+
+- allow setting custom labels on the instances (hetznercloud/fleeting-plugin-hetzner!249)
+
+### Bug Fixes
+
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.21.1 (hetznercloud/fleeting-plugin-hetzner!247)
+
 ## [v1.1.1](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v1.1.1)
 
 ### Bug Fixes
