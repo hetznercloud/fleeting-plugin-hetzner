@@ -2,7 +2,7 @@ module gitlab.com/hetznercloud/fleeting-plugin-hetzner
 
 go 1.23.0
 
-toolchain go1.24.3
+toolchain go1.24.4
 
 require (
 	github.com/boumenot/gocover-cobertura v1.3.0
