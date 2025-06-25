@@ -11,7 +11,7 @@ import (
 
 // IPPool defines a pool of both IPv4 and IPv6 Primary IPs, populated with unused
 // Primary IPs from the Hetzner Cloud "Project". The Primary IPs can be filtered using a
-// label selector (https://docs.hetzner.cloud/#label-selector).
+// label selector (https://docs.hetzner.cloud/reference/cloud#label-selector).
 type IPPool struct {
 	location      string
 	labelSelector string
