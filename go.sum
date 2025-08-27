@@ -14,6 +14,8 @@ github.com/boumenot/gocover-cobertura v1.2.0 h1:g+VROIASoEHBrEilIyaCmgo7HGm+AV5y
 github.com/boumenot/gocover-cobertura v1.2.0/go.mod h1:fz7ly8dslE42VRR5ZWLt2OHGDHjkTiA2oNvKgJEjLT0=
 github.com/boumenot/gocover-cobertura v1.3.0 h1:eRfSAPjRrVRQYq6B7LxFotmZ7oZeFrM10VSMC+/SPYE=
 github.com/boumenot/gocover-cobertura v1.3.0/go.mod h1:LPGJ9Np5WCq1Yf7ym1FEejcg9kvZvUax1x3hbcFgCC8=
+github.com/boumenot/gocover-cobertura v1.4.0 h1:ACJAt5wRi1HU+P9xNDgzWXgLMEVYUWeOgQWZwH+36kU=
+github.com/boumenot/gocover-cobertura v1.4.0/go.mod h1:Vme2O66tGa5gNpw5kwB+qzpULOnWSmnAHA5NYAOWFv8=
 github.com/bufbuild/protocompile v0.4.0 h1:LbFKd2XowZvQ/kajzguUp2DC9UEIQhIq77fZZlaQsNA=
 github.com/bufbuild/protocompile v0.4.0/go.mod h1:3v93+mbWn/v3xzN+31nwkJfrEpAUwp+BagBSZWx+TP8=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
