@@ -1,5 +1,16 @@
 # Changelog
 
+## [v1.2.1](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v1.2.1)
+
+### Bug Fixes
+
+- **deps**: update module github.com/stretchr/testify to v1.11.1 (hetznercloud/fleeting-plugin-hetzner!274)
+- **deps**: update gitlab.com/gitlab-org/fleeting/fleeting digest to 82a2c0d (hetznercloud/fleeting-plugin-hetzner!265)
+- **deps**: update module github.com/boumenot/gocover-cobertura to v1.4.0 (hetznercloud/fleeting-plugin-hetzner!268)
+- **deps**: update module go.uber.org/mock to v0.6.0 (hetznercloud/fleeting-plugin-hetzner!269)
+- **deps**: update module github.com/stretchr/testify to v1.11.0 (hetznercloud/fleeting-plugin-hetzner!273)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.22.0 (hetznercloud/fleeting-plugin-hetzner!259)
+
 ## [v1.2.0](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v1.2.0)
 
 ### Features
