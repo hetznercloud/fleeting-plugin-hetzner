@@ -12,7 +12,7 @@ include:
   - local: /.gitlab/ci/upload.gitlab-ci.yml
   - local: /.gitlab/ci/release.gitlab-ci.yml
 
-  - component: $CI_SERVER_FQDN/apricote/releaser-pleaser/run@v0.6.1
+  - component: $CI_SERVER_FQDN/apricote/releaser-pleaser/run@v0.7.0
     inputs:
       stage: release
 
