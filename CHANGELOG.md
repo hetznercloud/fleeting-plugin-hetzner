@@ -1,5 +1,14 @@
 # Changelog
 
+## [v1.2.2](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v1.2.2)
+
+### Bug Fixes
+
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.25.0 (hetznercloud/fleeting-plugin-hetzner!281)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.24.0 (hetznercloud/fleeting-plugin-hetzner!280)
+- **deps**: update gitlab.com/gitlab-org/fleeting/fleeting digest to db769f3 (hetznercloud/fleeting-plugin-hetzner!275)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.23.0 (hetznercloud/fleeting-plugin-hetzner!277)
+
 ## [v1.2.1](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v1.2.1)
 
 ### Bug Fixes
