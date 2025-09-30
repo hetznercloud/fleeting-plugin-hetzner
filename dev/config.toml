@@ -28,8 +28,6 @@ instance_ready_command = "cloud-init status --wait || test $? -eq 2"
 
 [runners.autoscaler.plugin_config]
 name = "dev-docker-autoscaler"
-token = "$HCLOUD_TOKEN"
-endpoint = "http://proxy:8080/v1"
 
 location = "hel1"
 server_type = "cpx21"
@@ -65,6 +63,10 @@ use_external_addr = true
 use_static_credentials = true
 username = "root"
 key_path = "./id_ed25519"
+
+[runners.autoscaler.scale_throttle]
+limit = 1
+burst = 5
 
 [[runners.autoscaler.policy]]
 idle_count = 4
