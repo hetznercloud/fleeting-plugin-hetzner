@@ -22,7 +22,7 @@ func buildBinary(t *testing.T) string {
 		binaryName += ".exe"
 	}
 
-	cmd := exec.Command("go", "build", "-o", binaryName)
+	cmd := exec.CommandContext(t.Context(), "go", "build", "-o", binaryName)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 

@@ -212,8 +212,8 @@ func TestIncrease(t *testing.T) {
 						require.Equal(t, int64(114690387), payload.Image.ID)
 						require.Equal(t, int64(1), payload.ServerType.ID)
 						require.Equal(t, int64(1), payload.Volumes[0])
-						require.Equal(t, false, payload.PublicNet.EnableIPv4)
-						require.Equal(t, true, payload.PublicNet.EnableIPv6)
+						require.False(t, payload.PublicNet.EnableIPv4)
+						require.True(t, payload.PublicNet.EnableIPv6)
 					},
 					Status: 201,
 					JSON: schema.ServerCreateResponse{
@@ -233,8 +233,8 @@ func TestIncrease(t *testing.T) {
 						require.Equal(t, int64(114690387), payload.Image.ID)
 						require.Equal(t, int64(1), payload.ServerType.ID)
 						require.Equal(t, int64(2), payload.Volumes[0])
-						require.Equal(t, false, payload.PublicNet.EnableIPv4)
-						require.Equal(t, true, payload.PublicNet.EnableIPv6)
+						require.False(t, payload.PublicNet.EnableIPv4)
+						require.True(t, payload.PublicNet.EnableIPv6)
 					},
 					Status: 201,
 					JSON: schema.ServerCreateResponse{

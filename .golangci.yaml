@@ -1,56 +1,96 @@
----
-linters-settings:
-  exhaustive:
-    default-signifies-exhaustive: true
-  gci:
-    sections:
-      - standard
-      - default
-      - prefix(github.com/hetznercloud)
-      - prefix(gitlab.com/hetznercloud)
-  forbidigo:
-    forbid:
-      - ^print.*$
-      - ^fmt\.Print.*$
-  misspell:
-    locale: "US"
+version: "2"
+
+run:
+  timeout: 5m
 
 linters:
-  disable-all: true
   enable:
+    - asasalint
+    - asciicheck
+    - bidichk
     - bodyclose
+    - contextcheck
+    - copyloopvar
     - dupl
+    - durationcheck
     - errcheck
+    - errchkjson
     - errname
+    - errorlint
     - exhaustive
     - forbidigo
-    - gci
+    - gocheckcompilerdirectives
+    - gochecksumtype
     - gocritic
     - godot
-    - goimports
+    - gomoddirectives
     - gomodguard
     - gosec
-    - gosimple
+    - gosmopolitan
     - govet
+    - importas
     - ineffassign
+    - loggercheck
+    - makezero
     - misspell
+    - musttag
+    - nilerr
+    - nilnesserr
+    - noctx
     - prealloc
+    - protogetter
+    - reassign
+    - recvcheck
     - revive
     - rowserrcheck
+    - spancheck
     - staticcheck
-    - typecheck
+    - testifylint
     - unparam
     - unused
     - whitespace
 
-issues:
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - dupl
-        - errcheck
-        - gosec
-    - path: _test\.go
-      linters:
-        - revive
-      text: unused-parameter
+  settings:
+    exhaustive:
+      default-signifies-exhaustive: true
+
+    forbidigo:
+      forbid:
+        - pattern: ^print.*$
+        - pattern: ^fmt\.Print.*$
+
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - std-error-handling
+    rules:
+      - linters:
+          - testifylint
+        text: require-error
+      - linters:
+          - dupl
+          - errcheck
+          - gosec
+        path: _test\.go
+      - linters:
+          - revive
+        path: _test\.go
+        text: unused-parameter
+
+formatters:
+  enable:
+    - gci
+    - goimports
+
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/hetznercloud)
+        - prefix(gitlab.com/hetznercloud)
+
+  exclusions:
+    generated: lax

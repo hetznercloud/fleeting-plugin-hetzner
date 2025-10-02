@@ -245,7 +245,7 @@ func ensureNoServers(t *testing.T, ctx context.Context, client *hcloud.Client, n
 		},
 	})
 	require.NoError(t, err)
-	require.Len(t, result, 0)
+	require.Empty(t, result)
 }
 
 // Ensure all volumes were cleaned.
@@ -258,5 +258,5 @@ func ensureNoVolumes(t *testing.T, ctx context.Context, client *hcloud.Client, n
 		},
 	})
 	require.NoError(t, err)
-	require.Len(t, result, 0)
+	require.Empty(t, result)
 }
