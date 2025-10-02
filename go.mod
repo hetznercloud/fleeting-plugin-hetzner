@@ -1,8 +1,8 @@
 module gitlab.com/hetznercloud/fleeting-plugin-hetzner
 
-go 1.23.0
+go 1.24.0
 
-toolchain go1.24.6
+toolchain go1.25.1
 
 require (
 	github.com/boumenot/gocover-cobertura v1.4.0
@@ -35,7 +35,6 @@ require (
 	github.com/jcmturner/goidentity/v6 v6.0.1 // indirect
 	github.com/jcmturner/gokrb5/v8 v8.4.4 // indirect
 	github.com/jcmturner/rpc/v2 v2.0.3 // indirect
-	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/masterzen/simplexml v0.0.0-20190410153822-31eea3082786 // indirect
 	github.com/masterzen/winrm v0.0.0-20240702205601-3fad6e106085 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
