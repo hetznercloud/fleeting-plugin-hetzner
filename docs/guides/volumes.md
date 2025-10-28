@@ -13,7 +13,7 @@ First, you must define the size of the Volume you want to attach to your instanc
  token = "<your-hetzner-cloud-token>"
 
  location = "fsn1"
- server_type = "cpx41"
+ server_type = "cpx42"
  image = "debian-12"
 +volume_size = 200
 
@@ -45,7 +45,7 @@ With the Volume attached to the instance, you must now format and mount the Volu
  token = "<your-hetzner-cloud-token>"
 
  location = "fsn1"
- server_type = "cpx41"
+ server_type = "cpx42"
  image = "debian-12"
  volume_size = 200
 

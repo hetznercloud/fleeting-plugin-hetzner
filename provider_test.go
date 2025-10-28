@@ -66,7 +66,7 @@ func TestInit(t *testing.T) {
 					JSON:   schema.SSHKeyCreateResponse{SSHKey: sshKey},
 				},
 				testutils.GetLocationHel1Request,
-				testutils.GetServerTypeCPX11Request,
+				testutils.GetServerTypeCPX22Request,
 				testutils.GetImageDebian12Request,
 				{Method: "GET", Path: "/ssh_keys?name=fleeting",
 					Status: 200,
@@ -104,7 +104,7 @@ func TestInit(t *testing.T) {
 					JSON:   schema.SSHKeyCreateResponse{SSHKey: sshKey},
 				},
 				testutils.GetLocationHel1Request,
-				testutils.GetServerTypeCPX11Request,
+				testutils.GetServerTypeCPX22Request,
 				testutils.GetImageDebian12Request,
 				{Method: "GET", Path: "/ssh_keys?name=fleeting",
 					Status: 200,
@@ -131,7 +131,7 @@ func TestInit(t *testing.T) {
 					},
 				},
 				testutils.GetLocationHel1Request,
-				testutils.GetServerTypeCPX11Request,
+				testutils.GetServerTypeCPX22Request,
 				testutils.GetImageDebian12Request,
 				{Method: "GET", Path: "/ssh_keys?name=fleeting",
 					Status: 200,
@@ -159,7 +159,7 @@ func TestInit(t *testing.T) {
 				Token:       "dummy",
 				Endpoint:    server.URL,
 				Location:    "hel1",
-				ServerTypes: []string{"cpx11"},
+				ServerTypes: []string{"cpx22"},
 				Image:       "debian-12",
 
 				client: hcloud.NewClient(),
@@ -365,7 +365,7 @@ func TestConnectInfo(t *testing.T) {
 								OSVersion: hcloud.Ptr("12"),
 							},
 							ServerType: schema.ServerType{
-								Name:         "cpx11",
+								Name:         "cpx22",
 								Architecture: "x86",
 							},
 							PublicNet: schema.ServerPublicNet{
@@ -412,7 +412,7 @@ func TestConnectInfo(t *testing.T) {
 								OSVersion: hcloud.Ptr("12"),
 							},
 							ServerType: schema.ServerType{
-								Name:         "cpx11",
+								Name:         "cpx22",
 								Architecture: "x86",
 							},
 							PublicNet: schema.ServerPublicNet{

@@ -30,7 +30,7 @@ instance_ready_command = "cloud-init status --wait || test $? -eq 2"
 name = "dev-docker-autoscaler"
 
 location = "hel1"
-server_type = "cpx21"
+server_type = "cpx22"
 image = "ubuntu-24.04"
 volume_size = 15
 

@@ -16,21 +16,21 @@ var (
 			},
 		},
 	}
-	GetServerTypeCPX11Request = mockutil.Request{
-		Method: "GET", Path: "/server_types?name=cpx11",
+	GetServerTypeCPX22Request = mockutil.Request{
+		Method: "GET", Path: "/server_types?name=cpx22",
 		Status: 200,
 		JSON: schema.ServerTypeListResponse{
 			ServerTypes: []schema.ServerType{
-				{ID: 1, Name: "cpx11", Architecture: "x86"},
+				{ID: 1, Name: "cpx22", Architecture: "x86"},
 			},
 		},
 	}
-	GetServerTypeCX22Request = mockutil.Request{
-		Method: "GET", Path: "/server_types?name=cx22",
+	GetServerTypeCX23Request = mockutil.Request{
+		Method: "GET", Path: "/server_types?name=cx23",
 		Status: 200,
 		JSON: schema.ServerTypeListResponse{
 			ServerTypes: []schema.ServerType{
-				{ID: 2, Name: "cx22", Architecture: "x86"},
+				{ID: 2, Name: "cx23", Architecture: "x86"},
 			},
 		},
 	}

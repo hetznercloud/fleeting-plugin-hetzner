@@ -18,7 +18,7 @@ import (
 var (
 	DefaultTestConfig = Config{
 		Location:           "hel1",
-		ServerTypes:        []string{"cpx11", "cx22"},
+		ServerTypes:        []string{"cpx22", "cx23"},
 		Image:              "debian-12",
 		VolumeSize:         10,
 		PublicIPv4Disabled: true,
@@ -39,7 +39,7 @@ func TestInit(t *testing.T) {
 			name: "success",
 			config: Config{
 				Location:        "hel1",
-				ServerTypes:     []string{"cpx11"},
+				ServerTypes:     []string{"cpx22"},
 				Image:           "debian-12",
 				VolumeSize:      10,
 				PrivateNetworks: []string{"network"},
@@ -49,7 +49,7 @@ func TestInit(t *testing.T) {
 			run: func(t *testing.T, group *instanceGroup, server *mockutil.Server) {
 				server.Expect([]mockutil.Request{
 					testutils.GetLocationHel1Request,
-					testutils.GetServerTypeCPX11Request,
+					testutils.GetServerTypeCPX22Request,
 					testutils.GetImageDebian12Request,
 					{
 						Method: "GET", Path: "/networks?name=network",
@@ -71,7 +71,7 @@ func TestInit(t *testing.T) {
 				require.NoError(t, err)
 
 				require.Equal(t, "hel1", group.location.Name)
-				require.Equal(t, "cpx11", group.serverTypes[0].Name)
+				require.Equal(t, "cpx22", group.serverTypes[0].Name)
 				require.Equal(t, "debian-12", group.image.Name)
 				require.Equal(t, "network", group.privateNetworks[0].Name)
 				require.Equal(t, "ssh-key", group.sshKeys[0].Name)
@@ -103,7 +103,7 @@ func TestInit(t *testing.T) {
 				server.Expect([]mockutil.Request{
 					testutils.GetLocationHel1Request,
 					{
-						Method: "GET", Path: "/server_types?name=cpx11",
+						Method: "GET", Path: "/server_types?name=cpx22",
 						Status: 200,
 						JSON: schema.ServerTypeListResponse{
 							ServerTypes: []schema.ServerType{},
@@ -112,7 +112,7 @@ func TestInit(t *testing.T) {
 				})
 
 				err := group.Init(context.Background())
-				require.EqualError(t, err, "server type not found: cpx11")
+				require.EqualError(t, err, "server type not found: cpx22")
 			},
 		},
 		{
@@ -121,8 +121,8 @@ func TestInit(t *testing.T) {
 			run: func(t *testing.T, group *instanceGroup, server *mockutil.Server) {
 				server.Expect([]mockutil.Request{
 					testutils.GetLocationHel1Request,
-					testutils.GetServerTypeCPX11Request,
-					testutils.GetServerTypeCX22Request,
+					testutils.GetServerTypeCPX22Request,
+					testutils.GetServerTypeCX23Request,
 					{
 						Method: "GET", Path: "/images?architecture=x86&include_deprecated=true&name=debian-12",
 						Status: 200,

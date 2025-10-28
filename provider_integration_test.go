@@ -51,7 +51,7 @@ func TestProvisioning(t *testing.T) {
 					Endpoint: os.Getenv("HCLOUD_ENDPOINT"),
 
 					Location:    "hel1",
-					ServerTypes: []string{"cx22", "cpx11"},
+					ServerTypes: []string{"cx23", "cpx22"},
 					Image:       "debian-12",
 
 					Labels: map[string]string{"key": "value"},
@@ -86,7 +86,7 @@ func TestProvisioning(t *testing.T) {
 					Endpoint: os.Getenv("HCLOUD_ENDPOINT"),
 
 					Location:    "hel1",
-					ServerTypes: []string{"cx22", "cpx11"},
+					ServerTypes: []string{"cx23", "cpx22"},
 					Image:       "debian-12",
 				},
 				ConnectorConfig: provider.ConnectorConfig{
@@ -149,7 +149,7 @@ func TestProvisioning(t *testing.T) {
 					Endpoint: os.Getenv("HCLOUD_ENDPOINT"),
 
 					Location:    "hel1",
-					ServerTypes: []string{"cpx11"},
+					ServerTypes: []string{"cpx22"},
 					Image:       "debian-12",
 
 					PublicIPPoolEnabled:  true,
@@ -186,7 +186,7 @@ func TestProvisioning(t *testing.T) {
 					Endpoint: os.Getenv("HCLOUD_ENDPOINT"),
 
 					Location:    "hel1",
-					ServerTypes: []string{"cpx11"},
+					ServerTypes: []string{"cpx22"},
 					Image:       "debian-12",
 
 					PublicIPv4Disabled: true,
@@ -218,7 +218,7 @@ func TestProvisioning(t *testing.T) {
 					Endpoint: os.Getenv("HCLOUD_ENDPOINT"),
 
 					Location:    "hel1",
-					ServerTypes: []string{"cpx11"},
+					ServerTypes: []string{"cpx22"},
 					Image:       "debian-12",
 					VolumeSize:  10,
 				},

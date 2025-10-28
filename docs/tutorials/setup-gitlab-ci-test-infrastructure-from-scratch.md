@@ -65,7 +65,7 @@ The GitLab Runner Manager will be responsible for:
 We create a single `runner-manager` server that will be used as our GitLab Runner Manager:
 
 ```sh
-hcloud server create --name runner-manager --image debian-12 --type cpx11 --location hel1 --ssh-key dev --label runner=
+hcloud server create --name runner-manager --image debian-12 --type cpx22 --location hel1 --ssh-key dev --label runner=
 ```
 
 <details><summary>Output</summary>
@@ -332,7 +332,7 @@ name = "runner-docker-autoscaler"
 token = "$HCLOUD_TOKEN" # TODO: Change me with the Hetzner Cloud authentication token
 
 location = "hel1"
-server_type = "cpx21"
+server_type = "cpx22"
 image = "debian-12"
 
 user_data = """#cloud-config
@@ -404,12 +404,12 @@ systemctl status --output=cat --no-pager gitlab-runner
 
 time="2024-11-13T09:57:25Z" level=info msg="plugin initialized" build info="sha=85c314ff; ref=refs/pipelines/1528252336; go=go1.23.2; built_at=2024-11-05T15:20:21+0000; os_arch=linux/amd64" runner=11Qjxy-Gi subsystem=taskscaler version=v0.6.0
 time="2024-11-13T09:57:26Z" level=info msg="required scaling change" capacity-info="instance_count:0,max_instance_count:5,acquired:0,unavailable_capacity:0,pending:0,reserved:0,idle_count:8,scale_factor:0,scale_factor_limit:0,capacity_per_instance:4" required=2 runner=11Qjxy-Gi subsystem=taskscaler
-time="2024-11-13T09:57:26Z" level=info msg="increasing instances" amount=2 group=hetzner/hel1/cpx21/runner-docker-autoscaler runner=11Qjxy-Gi subsystem=taskscaler
+time="2024-11-13T09:57:26Z" level=info msg="increasing instances" amount=2 group=hetzner/hel1/cpx22/runner-docker-autoscaler runner=11Qjxy-Gi subsystem=taskscaler
 time="2024-11-13T09:57:27Z" level=info msg="required scaling change" capacity-info="instance_count:2,max_instance_count:5,acquired:0,unavailable_capacity:0,pending:0,reserved:0,idle_count:8,scale_factor:0,scale_factor_limit:0,capacity_per_instance:4" required=0 runner=11Qjxy-Gi subsystem=taskscaler
-time="2024-11-13T09:57:42Z" level=info msg="increasing instances response" group=hetzner/hel1/cpx21/runner-docker-autoscaler num_requested=2 num_successful=2 runner=11Qjxy-Gi subsystem=taskscaler
-time="2024-11-13T09:57:42Z" level=info msg="increase update" group=hetzner/hel1/cpx21/runner-docker-autoscaler pending=2 requesting=0 runner=11Qjxy-Gi subsystem=taskscaler total_pending=2
-time="2024-11-13T09:57:42Z" level=info msg="instance discovery" cause=requested group=hetzner/hel1/cpx21/runner-docker-autoscaler id="runner-docker-autoscaler-3cfc018b:55575096" runner=11Qjxy-Gi state=running subsystem=taskscaler
-time="2024-11-13T09:57:42Z" level=info msg="instance discovery" cause=requested group=hetzner/hel1/cpx21/runner-docker-autoscaler id="runner-docker-autoscaler-dca4e0eb:55575097" runner=11Qjxy-Gi state=running subsystem=taskscaler
+time="2024-11-13T09:57:42Z" level=info msg="increasing instances response" group=hetzner/hel1/cpx22/runner-docker-autoscaler num_requested=2 num_successful=2 runner=11Qjxy-Gi subsystem=taskscaler
+time="2024-11-13T09:57:42Z" level=info msg="increase update" group=hetzner/hel1/cpx22/runner-docker-autoscaler pending=2 requesting=0 runner=11Qjxy-Gi subsystem=taskscaler total_pending=2
+time="2024-11-13T09:57:42Z" level=info msg="instance discovery" cause=requested group=hetzner/hel1/cpx22/runner-docker-autoscaler id="runner-docker-autoscaler-3cfc018b:55575096" runner=11Qjxy-Gi state=running subsystem=taskscaler
+time="2024-11-13T09:57:42Z" level=info msg="instance discovery" cause=requested group=hetzner/hel1/cpx22/runner-docker-autoscaler id="runner-docker-autoscaler-dca4e0eb:55575097" runner=11Qjxy-Gi state=running subsystem=taskscaler
 ```
 
 </details>
@@ -425,12 +425,12 @@ journalctl --output=cat -f -u gitlab-runner
 ```
 time="2024-11-13T09:57:25Z" level=info msg="plugin initialized" build info="sha=85c314ff; ref=refs/pipelines/1528252336; go=go1.23.2; built_at=2024-11-05T15:20:21+0000; os_arch=linux/amd64" runner=11Qjxy-Gi subsystem=taskscaler version=v0.6.0
 time="2024-11-13T09:57:26Z" level=info msg="required scaling change" capacity-info="instance_count:0,max_instance_count:5,acquired:0,unavailable_capacity:0,pending:0,reserved:0,idle_count:8,scale_factor:0,scale_factor_limit:0,capacity_per_instance:4" required=2 runner=11Qjxy-Gi subsystem=taskscaler
-time="2024-11-13T09:57:26Z" level=info msg="increasing instances" amount=2 group=hetzner/hel1/cpx21/runner-docker-autoscaler runner=11Qjxy-Gi subsystem=taskscaler
+time="2024-11-13T09:57:26Z" level=info msg="increasing instances" amount=2 group=hetzner/hel1/cpx22/runner-docker-autoscaler runner=11Qjxy-Gi subsystem=taskscaler
 time="2024-11-13T09:57:27Z" level=info msg="required scaling change" capacity-info="instance_count:2,max_instance_count:5,acquired:0,unavailable_capacity:0,pending:0,reserved:0,idle_count:8,scale_factor:0,scale_factor_limit:0,capacity_per_instance:4" required=0 runner=11Qjxy-Gi subsystem=taskscaler
-time="2024-11-13T09:57:42Z" level=info msg="increasing instances response" group=hetzner/hel1/cpx21/runner-docker-autoscaler num_requested=2 num_successful=2 runner=11Qjxy-Gi subsystem=taskscaler
-time="2024-11-13T09:57:42Z" level=info msg="increase update" group=hetzner/hel1/cpx21/runner-docker-autoscaler pending=2 requesting=0 runner=11Qjxy-Gi subsystem=taskscaler total_pending=2
-time="2024-11-13T09:57:42Z" level=info msg="instance discovery" cause=requested group=hetzner/hel1/cpx21/runner-docker-autoscaler id="runner-docker-autoscaler-3cfc018b:55575096" runner=11Qjxy-Gi state=running subsystem=taskscaler
-time="2024-11-13T09:57:42Z" level=info msg="instance discovery" cause=requested group=hetzner/hel1/cpx21/runner-docker-autoscaler id="runner-docker-autoscaler-dca4e0eb:55575097" runner=11Qjxy-Gi state=running subsystem=taskscaler
+time="2024-11-13T09:57:42Z" level=info msg="increasing instances response" group=hetzner/hel1/cpx22/runner-docker-autoscaler num_requested=2 num_successful=2 runner=11Qjxy-Gi subsystem=taskscaler
+time="2024-11-13T09:57:42Z" level=info msg="increase update" group=hetzner/hel1/cpx22/runner-docker-autoscaler pending=2 requesting=0 runner=11Qjxy-Gi subsystem=taskscaler total_pending=2
+time="2024-11-13T09:57:42Z" level=info msg="instance discovery" cause=requested group=hetzner/hel1/cpx22/runner-docker-autoscaler id="runner-docker-autoscaler-3cfc018b:55575096" runner=11Qjxy-Gi state=running subsystem=taskscaler
+time="2024-11-13T09:57:42Z" level=info msg="instance discovery" cause=requested group=hetzner/hel1/cpx22/runner-docker-autoscaler id="runner-docker-autoscaler-dca4e0eb:55575097" runner=11Qjxy-Gi state=running subsystem=taskscaler
 time="2024-11-13T09:58:47Z" level=info msg="instance is ready" instance="runner-docker-autoscaler-3cfc018b:55575096" runner=11Qjxy-Gi subsystem=taskscaler took=1m5.337683491s
 time="2024-11-13T09:59:05Z" level=info msg="instance is ready" instance="runner-docker-autoscaler-dca4e0eb:55575097" runner=11Qjxy-Gi subsystem=taskscaler took=1m22.654298839s
 ```

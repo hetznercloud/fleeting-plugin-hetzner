@@ -36,7 +36,7 @@ name = "hetzner-docker-autoscaler"
 token = "$HCLOUD_TOKEN" # TODO: Change me with the Hetzner Cloud authentication token
 
 location = "hel1"
-server_type = "cpx41"
+server_type = "cpx42"
 image = "debian-12"
 private_networks = []
 
