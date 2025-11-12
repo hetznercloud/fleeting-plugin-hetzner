@@ -32,6 +32,7 @@ func setupInstanceGroup(t *testing.T, config Config, requests []mockutil.Request
 			testutils.GetServerTypeCPX22Request,
 			testutils.GetServerTypeCX23Request,
 			testutils.GetImageDebian12Request,
+			testutils.GetVolumesRequest,
 		},
 		requests...,
 	)

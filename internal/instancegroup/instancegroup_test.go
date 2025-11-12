@@ -65,6 +65,7 @@ func TestInit(t *testing.T) {
 							SSHKeys: []schema.SSHKey{{ID: 1, Name: "ssh-key"}},
 						},
 					},
+					testutils.GetVolumesRequest,
 				})
 
 				err := group.Init(context.Background())
@@ -521,7 +522,7 @@ func TestSanity(t *testing.T) {
 			},
 		)
 
-		err := group.Sanity(ctx)
+		err := group.Sanity(ctx, false)
 		require.NoError(t, err)
 	})
 }

@@ -74,6 +74,7 @@ func TestInit(t *testing.T) {
 						SSHKeys: []schema.SSHKey{sshKey},
 					},
 				},
+				testutils.GetVolumesRequest,
 			},
 			run: func(t *testing.T, group *InstanceGroup, ctx context.Context, log hclog.Logger, settings provider.Settings) {
 				group.Labels = map[string]string{"key": "value"}
@@ -112,6 +113,7 @@ func TestInit(t *testing.T) {
 						SSHKeys: []schema.SSHKey{sshKey},
 					},
 				},
+				testutils.GetVolumesRequest,
 			},
 			run: func(t *testing.T, group *InstanceGroup, ctx context.Context, log hclog.Logger, settings provider.Settings) {
 				settings.UseStaticCredentials = true
@@ -139,6 +141,7 @@ func TestInit(t *testing.T) {
 						SSHKeys: []schema.SSHKey{sshKey},
 					},
 				},
+				testutils.GetVolumesRequest,
 			},
 			run: func(t *testing.T, group *InstanceGroup, ctx context.Context, log hclog.Logger, settings provider.Settings) {
 				settings.UseStaticCredentials = true
@@ -187,7 +190,7 @@ func TestIncrease(t *testing.T) {
 					Return([]string{"fleeting-a:1", "fleeting-b:2"}, nil)
 
 				mock.EXPECT().
-					Sanity(ctx).
+					Sanity(ctx, false).
 					Return(nil)
 
 				count, err := group.Increase(ctx, 2)
@@ -205,7 +208,7 @@ func TestIncrease(t *testing.T) {
 					Return([]string{"fleeting-a:1"}, fmt.Errorf("some error"))
 
 				mock.EXPECT().
-					Sanity(ctx).
+					Sanity(ctx, false).
 					Return(nil)
 
 				count, err := group.Increase(ctx, 2)
@@ -244,7 +247,7 @@ func TestDecrease(t *testing.T) {
 					Return([]string{"fleeting-a:1", "fleeting-b:2"}, nil)
 
 				mock.EXPECT().
-					Sanity(ctx).
+					Sanity(ctx, false).
 					Return(nil)
 
 				result, err := group.Decrease(ctx, []string{"fleeting-a:1", "fleeting-b:2"})
@@ -263,7 +266,7 @@ func TestDecrease(t *testing.T) {
 					Return([]string{"fleeting-a:1"}, fmt.Errorf("some error"))
 
 				mock.EXPECT().
-					Sanity(ctx).
+					Sanity(ctx, false).
 					Return(nil)
 
 				result, err := group.Decrease(ctx, []string{"fleeting-a:1", "fleeting-b:2"})

@@ -25,7 +25,7 @@ type InstanceGroup interface {
 	List(ctx context.Context) ([]*Instance, error)
 	Get(ctx context.Context, iid string) (*Instance, error)
 
-	Sanity(ctx context.Context) error
+	Sanity(ctx context.Context, init bool) error
 }
 
 var _ InstanceGroup = (*instanceGroup)(nil)
@@ -142,7 +142,8 @@ func (g *instanceGroup) Init(ctx context.Context) (err error) {
 		g.ipPool = ippool.New(g.config.Location, g.config.PublicIPPoolSelector)
 	}
 
-	return nil
+	// Run sanity checks before starting.
+	return g.Sanity(ctx, true)
 }
 
 func (g *instanceGroup) Increase(ctx context.Context, delta int) ([]string, error) {
@@ -344,9 +345,13 @@ func (g *instanceGroup) Get(ctx context.Context, iid string) (*Instance, error) 
 	return InstanceFromServer(server), nil
 }
 
-func (g *instanceGroup) Sanity(ctx context.Context) error {
-	handlers := []SanityHandler{
-		&VolumeHandler{}, // Delete dangling volumes.
+func (g *instanceGroup) Sanity(ctx context.Context, init bool) error {
+	handlers := []SanityHandler{}
+
+	// Only run volume handler when configured by the user or during init to clean left
+	// overs from a previous config.
+	if g.config.VolumeSize > 0 || init {
+		handlers = append(handlers, &VolumeHandler{}) // Delete dangling volumes.
 	}
 
 	// Run all sanity handlers
