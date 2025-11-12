@@ -1,5 +1,20 @@
 # Changelog
 
+## [v1.3.0](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v1.3.0)
+
+### Features
+
+- only run volume sanity check when configured or during init (hetznercloud/fleeting-plugin-hetzner!302)
+
+### Bug Fixes
+
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.30.0 (hetznercloud/fleeting-plugin-hetzner!301)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.29.0 (hetznercloud/fleeting-plugin-hetzner!298)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.28.0 (hetznercloud/fleeting-plugin-hetzner!294)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.27.0 (hetznercloud/fleeting-plugin-hetzner!289)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.26.0 (hetznercloud/fleeting-plugin-hetzner!288)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.25.1 (hetznercloud/fleeting-plugin-hetzner!283)
+
 ## [v1.2.2](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v1.2.2)
 
 ### Bug Fixes
