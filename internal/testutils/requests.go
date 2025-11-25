@@ -21,7 +21,16 @@ var (
 		Status: 200,
 		JSON: schema.ServerTypeListResponse{
 			ServerTypes: []schema.ServerType{
-				{ID: 1, Name: "cpx22", Architecture: "x86"},
+				{
+					ID:           1,
+					Name:         "cpx22",
+					Architecture: "x86",
+					Locations: []schema.ServerTypeLocation{
+						{ID: 1, Name: "fsn1"},
+						{ID: 2, Name: "nbg1"},
+						{ID: 3, Name: "hel1"},
+					},
+				},
 			},
 		},
 	}
@@ -30,7 +39,16 @@ var (
 		Status: 200,
 		JSON: schema.ServerTypeListResponse{
 			ServerTypes: []schema.ServerType{
-				{ID: 2, Name: "cx23", Architecture: "x86"},
+				{
+					ID:           2,
+					Name:         "cx23",
+					Architecture: "x86",
+					Locations: []schema.ServerTypeLocation{
+						{ID: 1, Name: "fsn1"},
+						{ID: 2, Name: "nbg1"},
+						{ID: 3, Name: "hel1"},
+					},
+				},
 			},
 		},
 	}

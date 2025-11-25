@@ -346,7 +346,9 @@ func (g *instanceGroup) Get(ctx context.Context, iid string) (*Instance, error) 
 }
 
 func (g *instanceGroup) Sanity(ctx context.Context, init bool) error {
-	handlers := []SanityHandler{}
+	handlers := []SanityHandler{
+		&DeprecationHandler{}, // Check deprecations.
+	}
 
 	// Only run volume handler when configured by the user or during init to clean left
 	// overs from a previous config.
