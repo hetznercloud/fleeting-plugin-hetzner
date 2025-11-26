@@ -10,6 +10,6 @@ RUN ls -al
 
 RUN go build ./cmd/fleeting-plugin-hetzner
 
-FROM gitlab/gitlab-runner:alpine-v18.6.1
+FROM gitlab/gitlab-runner:alpine-v18.6.2
 
 COPY --from=builder /build/fleeting-plugin-hetzner /bin/fleeting-plugin-hetzner
