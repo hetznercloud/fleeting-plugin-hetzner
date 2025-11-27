@@ -17,6 +17,7 @@ import (
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/kit/sshutil"
 
 	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/instancegroup"
+	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/limiter"
 )
 
 var _ provider.InstanceGroup = (*InstanceGroup)(nil)
@@ -54,6 +55,8 @@ type InstanceGroup struct {
 
 	client *hcloud.Client
 	group  instancegroup.InstanceGroup
+
+	limiter *limiter.Limiter
 }
 
 func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings provider.Settings) (info provider.ProviderInfo, err error) {
@@ -140,6 +143,15 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 		return
 	}
 
+	g.limiter = limiter.New(limiter.Opts{
+		BackoffAfter: 10,
+		BackoffFunc: hcloud.ExponentialBackoffWithOpts(hcloud.ExponentialBackoffOpts{
+			Base:       time.Second,
+			Multiplier: 2,
+			Cap:        60 * time.Second,
+		}),
+	})
+
 	return provider.ProviderInfo{
 		ID:        path.Join("hetzner", g.Location, g.Name),
 		MaxSize:   math.MaxInt,
@@ -192,7 +204,19 @@ func (g *InstanceGroup) Update(ctx context.Context, update func(string, provider
 }
 
 func (g *InstanceGroup) Increase(ctx context.Context, delta int) (int, error) {
+	op := g.limiter.Operation("increase")
+
+	if err := op.Limit(ctx, g.log); err != nil {
+		return 0, err
+	}
+
 	created, err := g.group.Increase(ctx, delta)
+
+	op.Increase(hcloud.IsError(err,
+		hcloud.ErrorCodeResourceUnavailable,
+		hcloud.ErrorCodeResourceLimitExceeded,
+		hcloud.ErrorCodeNotFound,
+	))
 
 	g.size += len(created)
 
@@ -208,7 +232,19 @@ func (g *InstanceGroup) Decrease(ctx context.Context, iids []string) ([]string, 
 		return nil, nil
 	}
 
+	op := g.limiter.Operation("decrease")
+
+	if err := op.Limit(ctx, g.log); err != nil {
+		return nil, err
+	}
+
 	deleted, err := g.group.Decrease(ctx, iids)
+
+	op.Increase(hcloud.IsError(err,
+		hcloud.ErrorCodeResourceUnavailable,
+		hcloud.ErrorCodeResourceLimitExceeded,
+		hcloud.ErrorCodeNotFound,
+	))
 
 	g.size -= len(deleted)
 

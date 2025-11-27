@@ -21,6 +21,7 @@ import (
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/schema"
 
 	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/instancegroup"
+	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/limiter"
 	"gitlab.com/hetznercloud/fleeting-plugin-hetzner/internal/testutils"
 )
 
@@ -165,7 +166,8 @@ func TestInit(t *testing.T) {
 				ServerTypes: []string{"cpx22"},
 				Image:       "debian-12",
 
-				client: hcloud.NewClient(),
+				client:  hcloud.NewClient(),
+				limiter: limiter.New(limiter.Opts{BackoffFunc: hcloud.ConstantBackoff(0)}),
 			}
 			ctx := context.Background()
 			log := hclog.New(hclog.DefaultOptions)
@@ -226,6 +228,7 @@ func TestIncrease(t *testing.T) {
 				log:      hclog.New(hclog.DefaultOptions),
 				settings: provider.Settings{},
 				group:    mock,
+				limiter:  limiter.New(limiter.Opts{BackoffFunc: hcloud.ConstantBackoff(0)}),
 			}
 
 			testCase.run(t, mock, group, context.Background())
@@ -285,6 +288,7 @@ func TestDecrease(t *testing.T) {
 				log:      hclog.New(hclog.DefaultOptions),
 				settings: provider.Settings{},
 				group:    mock,
+				limiter:  limiter.New(limiter.Opts{BackoffFunc: hcloud.ConstantBackoff(0)}),
 			}
 
 			testCase.run(t, mock, group, context.Background())
@@ -339,6 +343,7 @@ func TestUpdate(t *testing.T) {
 				log:      hclog.New(hclog.DefaultOptions),
 				settings: provider.Settings{},
 				group:    mock,
+				limiter:  limiter.New(limiter.Opts{BackoffFunc: hcloud.ConstantBackoff(0)}),
 			}
 
 			testCase.run(t, mock, group, context.Background())
@@ -466,6 +471,7 @@ func TestConnectInfo(t *testing.T) {
 				log:      hclog.New(hclog.DefaultOptions),
 				settings: provider.Settings{},
 				group:    mock,
+				limiter:  limiter.New(limiter.Opts{BackoffFunc: hcloud.ConstantBackoff(0)}),
 			}
 
 			group.settings.Protocol = "ssh"
@@ -532,6 +538,7 @@ func TestShutdown(t *testing.T) {
 				settings: provider.Settings{},
 				group:    mock,
 				client:   client,
+				limiter:  limiter.New(limiter.Opts{BackoffFunc: hcloud.ConstantBackoff(0)}),
 			}
 
 			testCase.run(t, group, server)
