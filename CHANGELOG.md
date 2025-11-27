@@ -1,5 +1,17 @@
 # Changelog
 
+## [v1.4.0](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v1.4.0)
+
+### Features
+
+- limit rate of increase and decrease when hitting too many API resource errors (hetznercloud/fleeting-plugin-hetzner!308)
+- log server type and image deprecations warnings (hetznercloud/fleeting-plugin-hetzner!285)
+
+### Bug Fixes
+
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.32.0 (hetznercloud/fleeting-plugin-hetzner!307)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.31.0 (hetznercloud/fleeting-plugin-hetzner!304)
+
 ## [v1.3.0](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v1.3.0)
 
 ### Features
