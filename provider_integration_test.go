@@ -124,7 +124,7 @@ func TestProvisioning(t *testing.T) {
 					Name:         fmt.Sprintf("%s-primary-%s-%d", name, ipTypeName, i),
 					Type:         ipType,
 					AssigneeType: "server",
-					Datacenter:   "hel1-dc2",
+					Location:     "hel1",
 					Labels:       map[string]string{"pool": name},
 				})
 				require.NoError(t, err)

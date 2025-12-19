@@ -57,7 +57,7 @@ func (o *IPPool) Refresh(ctx context.Context, client *hcloud.Client) error {
 	o.ipv6 = make([]*hcloud.PrimaryIP, 0, len(ips))
 
 	for _, ip := range ips {
-		if ip.Datacenter.Location.Name != o.location {
+		if ip.Location.Name != o.location {
 			continue
 		}
 		if ip.AssigneeID != 0 {

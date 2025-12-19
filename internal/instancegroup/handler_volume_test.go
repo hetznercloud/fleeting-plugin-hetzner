@@ -82,7 +82,7 @@ func TestVolumeHandlerCleanup(t *testing.T) {
 
 		group := setupInstanceGroup(t, config, []mockutil.Request{
 			{
-				Method: "GET", Path: "/volumes?label_selector=instance-group%3Dfleeting&page=1",
+				Method: "GET", Path: "/volumes?label_selector=instance-group%3Dfleeting&page=1&per_page=50",
 				Status: 200,
 				JSON: schema.VolumeListResponse{
 					Volumes: []schema.Volume{
@@ -112,7 +112,7 @@ func TestVolumeHandlerCleanup(t *testing.T) {
 
 		group := setupInstanceGroup(t, config, []mockutil.Request{
 			{
-				Method: "GET", Path: "/volumes?label_selector=instance-group%3Dfleeting&page=1",
+				Method: "GET", Path: "/volumes?label_selector=instance-group%3Dfleeting&page=1&per_page=50",
 				Status: 200,
 				JSON: schema.VolumeListResponse{
 					Volumes: []schema.Volume{

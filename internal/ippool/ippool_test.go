@@ -31,7 +31,7 @@ func TestNextIP(t *testing.T) {
 
 		testServer := httptest.NewServer(mockutil.Handler(t, []mockutil.Request{
 			{
-				Method: "GET", Path: "/primary_ips?label_selector=instance-group%3Dfleeting&page=1",
+				Method: "GET", Path: "/primary_ips?label_selector=instance-group%3Dfleeting&page=1&per_page=50",
 				Status: 200,
 				JSON:   schema.PrimaryIPListResponse{},
 			},
@@ -52,23 +52,23 @@ func TestNextIP(t *testing.T) {
 	t.Run("happy", func(t *testing.T) {
 		ipPool := New("hel1", "instance-group=fleeting")
 
-		datacenterHel1 := schema.Datacenter{Location: schema.Location{Name: "hel1"}}
-		datacenterFsn1 := schema.Datacenter{Location: schema.Location{Name: "fsn1"}}
+		locationHel1 := schema.Location{Name: "hel1"}
+		locationFsn1 := schema.Location{Name: "fsn1"}
 
 		testServer := httptest.NewServer(mockutil.Handler(t, []mockutil.Request{
 			{
-				Method: "GET", Path: "/primary_ips?label_selector=instance-group%3Dfleeting&page=1",
+				Method: "GET", Path: "/primary_ips?label_selector=instance-group%3Dfleeting&page=1&per_page=50",
 				Status: 200,
 				JSON: schema.PrimaryIPListResponse{
 					PrimaryIPs: []schema.PrimaryIP{
-						{ID: 41, IP: "1.1.1.1", Type: "ipv4", AssigneeID: hcloud.Ptr(int64(0)), Datacenter: datacenterHel1},
-						{ID: 42, IP: "2.2.2.2", Type: "ipv4", AssigneeID: hcloud.Ptr(int64(1)), Datacenter: datacenterHel1},
-						{ID: 43, IP: "3.3.3.3", Type: "ipv4", AssigneeID: hcloud.Ptr(int64(2)), Datacenter: datacenterFsn1},
-						{ID: 44, IP: "4.4.4.4", Type: "ipv4", AssigneeID: hcloud.Ptr(int64(0)), Datacenter: datacenterFsn1},
-						{ID: 61, IP: "2001:db8:c012:d011::/64", Type: "ipv6", AssigneeID: hcloud.Ptr(int64(0)), Datacenter: datacenterHel1},
-						{ID: 62, IP: "2001:db8:c012:d022::/64", Type: "ipv6", AssigneeID: hcloud.Ptr(int64(3)), Datacenter: datacenterHel1},
-						{ID: 63, IP: "2001:db8:c012:d033::/64", Type: "ipv6", AssigneeID: hcloud.Ptr(int64(4)), Datacenter: datacenterFsn1},
-						{ID: 64, IP: "2001:db8:c012:d044::/64", Type: "ipv6", AssigneeID: hcloud.Ptr(int64(0)), Datacenter: datacenterFsn1},
+						{ID: 41, IP: "1.1.1.1", Type: "ipv4", AssigneeID: hcloud.Ptr(int64(0)), Location: locationHel1},
+						{ID: 42, IP: "2.2.2.2", Type: "ipv4", AssigneeID: hcloud.Ptr(int64(1)), Location: locationHel1},
+						{ID: 43, IP: "3.3.3.3", Type: "ipv4", AssigneeID: hcloud.Ptr(int64(2)), Location: locationFsn1},
+						{ID: 44, IP: "4.4.4.4", Type: "ipv4", AssigneeID: hcloud.Ptr(int64(0)), Location: locationFsn1},
+						{ID: 61, IP: "2001:db8:c012:d011::/64", Type: "ipv6", AssigneeID: hcloud.Ptr(int64(0)), Location: locationHel1},
+						{ID: 62, IP: "2001:db8:c012:d022::/64", Type: "ipv6", AssigneeID: hcloud.Ptr(int64(3)), Location: locationHel1},
+						{ID: 63, IP: "2001:db8:c012:d033::/64", Type: "ipv6", AssigneeID: hcloud.Ptr(int64(4)), Location: locationFsn1},
+						{ID: 64, IP: "2001:db8:c012:d044::/64", Type: "ipv6", AssigneeID: hcloud.Ptr(int64(0)), Location: locationFsn1},
 					},
 				},
 			},

@@ -21,7 +21,7 @@ func TestIPPoolHandlerCreate(t *testing.T) {
 
 		group := setupInstanceGroup(t, config, []mockutil.Request{
 			{
-				Method: "GET", Path: "/primary_ips?label_selector=fleeting&page=1",
+				Method: "GET", Path: "/primary_ips?label_selector=fleeting&page=1&per_page=50",
 				Status: 200,
 				JSON: schema.PrimaryIPListResponse{
 					PrimaryIPs: []schema.PrimaryIP{
@@ -32,7 +32,7 @@ func TestIPPoolHandlerCreate(t *testing.T) {
 							Type:         "ipv6",
 							AssigneeID:   nil,
 							AssigneeType: "server",
-							Datacenter:   schema.Datacenter{ID: 3, Name: "hel1-dc2", Location: schema.Location{ID: 3, Name: "hel1"}},
+							Location:     schema.Location{ID: 3, Name: "hel1"},
 						},
 						{
 							ID:           2,
@@ -41,7 +41,7 @@ func TestIPPoolHandlerCreate(t *testing.T) {
 							Type:         "ipv4",
 							AssigneeID:   nil,
 							AssigneeType: "server",
-							Datacenter:   schema.Datacenter{ID: 3, Name: "hel1-dc2", Location: schema.Location{ID: 3, Name: "hel1"}},
+							Location:     schema.Location{ID: 3, Name: "hel1"},
 						},
 						{
 							ID:           3,
@@ -50,7 +50,7 @@ func TestIPPoolHandlerCreate(t *testing.T) {
 							Type:         "ipv6",
 							AssigneeID:   nil,
 							AssigneeType: "server",
-							Datacenter:   schema.Datacenter{ID: 3, Name: "hel1-dc2", Location: schema.Location{ID: 3, Name: "hel1"}},
+							Location:     schema.Location{ID: 3, Name: "hel1"},
 						},
 
 						{
@@ -60,7 +60,7 @@ func TestIPPoolHandlerCreate(t *testing.T) {
 							Type:         "ipv4",
 							AssigneeID:   nil,
 							AssigneeType: "server",
-							Datacenter:   schema.Datacenter{ID: 3, Name: "hel1-dc2", Location: schema.Location{ID: 3, Name: "hel1"}},
+							Location:     schema.Location{ID: 3, Name: "hel1"},
 						},
 					},
 				},
