@@ -1,5 +1,11 @@
 # Changelog
 
+## [v1.4.1](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v1.4.1)
+
+### Bug Fixes
+
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.33.0 (hetznercloud/fleeting-plugin-hetzner!322)
+
 ## [v1.4.0](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v1.4.0)
 
 ### Features
