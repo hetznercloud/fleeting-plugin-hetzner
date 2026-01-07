@@ -1,5 +1,11 @@
 # Changelog
 
+## [v1.4.3](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v1.4.3)
+
+### Bug Fixes
+
+- **deps**: update gitlab.com/gitlab-org/fleeting/fleeting digest to 5ca76af (hetznercloud/fleeting-plugin-hetzner!327)
+
 ## [v1.4.2](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v1.4.2)
 
 ### Bug Fixes
