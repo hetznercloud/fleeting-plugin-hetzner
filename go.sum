@@ -201,6 +201,8 @@ gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20250910083154-db769f38ab21 h1:1I
 gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20250910083154-db769f38ab21/go.mod h1:r7XJx6rZ+e2cZTvz8O9dsoDzF0Hf8mxP3+tmfNGMC3Q=
 gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20251222133154-8030bb4751d8 h1:bhGMk9dT24AHm4hCdeHGzgEy+PgrqUKncOrkKRBQVTs=
 gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20251222133154-8030bb4751d8/go.mod h1:KlQacyvHiKyVPyWxdttBl1olQMXX+DePepUVXOrVE38=
+gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20260107152956-5ca76afe7ef3 h1:4ROHYtUGOgnBWYQLjaa7e7Xj9Mvr4uUbJgz92TOf1sg=
+gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20260107152956-5ca76afe7ef3/go.mod h1:KlQacyvHiKyVPyWxdttBl1olQMXX+DePepUVXOrVE38=
 gitlab.com/gitlab-org/go/reopen v1.0.0 h1:6BujZ0lkkjGIejTUJdNO1w56mN1SI10qcVQyQlOPM+8=
 gitlab.com/gitlab-org/go/reopen v1.0.0/go.mod h1:D6OID8YJDzEVZNYW02R/Pkj0v8gYFSIhXFTArAsBQw8=
 gitlab.com/gitlab-org/labkit v1.28.1 h1:Is8PSG84PBgftYqielbIeij+XKABTtJHskT9mMGPSv8=
