@@ -7,7 +7,7 @@ toolchain go1.25.5
 require (
 	github.com/boumenot/gocover-cobertura v1.4.0
 	github.com/hashicorp/go-hclog v1.6.3
-	github.com/hetznercloud/hcloud-go/v2 v2.33.0
+	github.com/hetznercloud/hcloud-go/v2 v2.34.0
 	github.com/stretchr/testify v1.11.1
 	gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20260107152956-5ca76afe7ef3
 	go.uber.org/mock v0.6.0
@@ -61,7 +61,7 @@ require (
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.39.0 // indirect
 	golang.org/x/text v0.32.0 // indirect
-	golang.org/x/tools v0.39.0 // indirect
+	golang.org/x/tools v0.40.0 // indirect
 	google.golang.org/genproto v0.0.0-20220822174746-9e6da59bd2fc // indirect
 	google.golang.org/grpc v1.77.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
