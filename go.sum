@@ -128,6 +128,8 @@ github.com/tidwall/transform v0.0.0-20201103190739-32f242e2dbde/go.mod h1:MvrEmd
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20260107152956-5ca76afe7ef3 h1:4ROHYtUGOgnBWYQLjaa7e7Xj9Mvr4uUbJgz92TOf1sg=
 gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20260107152956-5ca76afe7ef3/go.mod h1:KlQacyvHiKyVPyWxdttBl1olQMXX+DePepUVXOrVE38=
+gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20260112165233-d8385ad2c46a h1:CQpMA2i0mZAQ3mTPty7gUFN59QYzN883zPZy046Av9U=
+gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20260112165233-d8385ad2c46a/go.mod h1:6f3ByqwVNNrQCpgSIjttr32r84qRVVD40CsbTud+Q48=
 gitlab.com/gitlab-org/go/reopen v1.0.0 h1:6BujZ0lkkjGIejTUJdNO1w56mN1SI10qcVQyQlOPM+8=
 gitlab.com/gitlab-org/go/reopen v1.0.0/go.mod h1:D6OID8YJDzEVZNYW02R/Pkj0v8gYFSIhXFTArAsBQw8=
 gitlab.com/gitlab-org/labkit v1.34.0 h1:wJrUZdfxbZrA9+qvnpk5gYJtceW+p7ceSJSg1BPZWTs=
@@ -160,6 +162,8 @@ golang.org/x/crypto v0.47.0/go.mod h1:ff3Y9VzzKbwSSEzWqJsJVBnWmRwRSHt/6Op5n9bQc4
 golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4/go.mod h1:jJ57K6gSWd91VN4djpZkiMVwK6gcyfeH4XE8wZrZaV4=
 golang.org/x/mod v0.31.0 h1:HaW9xtz0+kOcWKwli0ZXy79Ix+UW/vOfmWI5QVd2tgI=
 golang.org/x/mod v0.31.0/go.mod h1:43JraMp9cGx1Rx3AqioxrbrhNsLl2l/iNAvuBkrezpg=
+golang.org/x/mod v0.32.0 h1:9F4d3PHLljb6x//jOyokMv3eX+YDeepZSEo3mFJy93c=
+golang.org/x/mod v0.32.0/go.mod h1:SgipZ/3h2Ci89DlEtEXWUk/HteuRin+HHhN+WbNhguU=
 golang.org/x/net v0.0.0-20190620200207-3b0461eec859/go.mod h1:z5CRVTTTmAJ677TzLLGU+0bjPO0LkuOLi4/5GtJWs/s=
 golang.org/x/net v0.0.0-20200114155413-6afb5195e5aa/go.mod h1:z5CRVTTTmAJ677TzLLGU+0bjPO0LkuOLi4/5GtJWs/s=
 golang.org/x/net v0.0.0-20210226172049-e18ecbb05110/go.mod h1:m0MpNAwzfU5UDzcl9v0D8zg8gWTRqZa9RBIspLL5mdg=

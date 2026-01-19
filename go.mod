@@ -9,7 +9,7 @@ require (
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hetznercloud/hcloud-go/v2 v2.35.0
 	github.com/stretchr/testify v1.11.1
-	gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20260107152956-5ca76afe7ef3
+	gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20260112165233-d8385ad2c46a
 	go.uber.org/mock v0.6.0
 )
 
@@ -56,7 +56,7 @@ require (
 	gitlab.com/gitlab-org/labkit v1.34.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	golang.org/x/crypto v0.47.0 // indirect
-	golang.org/x/mod v0.31.0 // indirect
+	golang.org/x/mod v0.32.0 // indirect
 	golang.org/x/net v0.49.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.40.0 // indirect
