@@ -55,6 +55,8 @@ github.com/hetznercloud/hcloud-go/v2 v2.34.0 h1:mxasKipFPDPzni85xcMgwYci2PH8TalL
 github.com/hetznercloud/hcloud-go/v2 v2.34.0/go.mod h1:aF9x0XYNRRQ7N4gux/4cEJeGAHcggu7sX+BBA1rv8ks=
 github.com/hetznercloud/hcloud-go/v2 v2.35.0 h1:bXYsXZnyn6cbSOpvrs3/iwJ/cakzlsCqYDFLOU8ILFs=
 github.com/hetznercloud/hcloud-go/v2 v2.35.0/go.mod h1:MnN/QJEa/RYNQiiVoJjNHPntM7Z1wlYPgJ2HA40/cDE=
+github.com/hetznercloud/hcloud-go/v2 v2.36.0 h1:HlLL/aaVXUulqe+rsjoJmrxKhPi1MflL5O9iq5QEtvo=
+github.com/hetznercloud/hcloud-go/v2 v2.36.0/go.mod h1:MnN/QJEa/RYNQiiVoJjNHPntM7Z1wlYPgJ2HA40/cDE=
 github.com/jcmturner/aescts/v2 v2.0.0 h1:9YKLH6ey7H4eDBXW8khjYslgyqG2xZikXP0EQFKrle8=
 github.com/jcmturner/aescts/v2 v2.0.0/go.mod h1:AiaICIRyfYg35RUkr8yESTqvSy7csK90qZ5xfvvsoNs=
 github.com/jcmturner/dnsutils/v2 v2.0.0 h1:lltnkeZGL0wILNvrNiVCR6Ro5PGU/SeBvVO/8c/iPbo=
