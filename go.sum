@@ -132,6 +132,8 @@ gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20260107152956-5ca76afe7ef3 h1:4R
 gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20260107152956-5ca76afe7ef3/go.mod h1:KlQacyvHiKyVPyWxdttBl1olQMXX+DePepUVXOrVE38=
 gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20260112165233-d8385ad2c46a h1:CQpMA2i0mZAQ3mTPty7gUFN59QYzN883zPZy046Av9U=
 gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20260112165233-d8385ad2c46a/go.mod h1:6f3ByqwVNNrQCpgSIjttr32r84qRVVD40CsbTud+Q48=
+gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20260126140256-12019c8595a9 h1:lA4osRuvnW1/mKsPn79nxsc0UldpS8k9sVjdxenKh2U=
+gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20260126140256-12019c8595a9/go.mod h1:T0f6tE06G74BGLH7q/rihSQo1mKWY0rw3LS/fqrDwmI=
 gitlab.com/gitlab-org/go/reopen v1.0.0 h1:6BujZ0lkkjGIejTUJdNO1w56mN1SI10qcVQyQlOPM+8=
 gitlab.com/gitlab-org/go/reopen v1.0.0/go.mod h1:D6OID8YJDzEVZNYW02R/Pkj0v8gYFSIhXFTArAsBQw8=
 gitlab.com/gitlab-org/labkit v1.34.0 h1:wJrUZdfxbZrA9+qvnpk5gYJtceW+p7ceSJSg1BPZWTs=
@@ -224,6 +226,8 @@ google.golang.org/genproto v0.0.0-20220822174746-9e6da59bd2fc h1:Nf+EdcTLHR8qDNN
 google.golang.org/genproto v0.0.0-20220822174746-9e6da59bd2fc/go.mod h1:dbqgFATTzChvnt+ujMdZwITVAJHFtfyN1qUhDqEiIlk=
 google.golang.org/grpc v1.77.0 h1:wVVY6/8cGA6vvffn+wWK5ToddbgdU3d8MNENr4evgXM=
 google.golang.org/grpc v1.77.0/go.mod h1:z0BY1iVj0q8E1uSQCjL9cppRj+gnZjzDnzV0dHhrNig=
+google.golang.org/grpc v1.78.0 h1:K1XZG/yGDJnzMdd/uZHAkVqJE+xIDOcmdSFZkBUicNc=
+google.golang.org/grpc v1.78.0/go.mod h1:I47qjTo4OKbMkjA/aOOwxDIiPSBofUtQUI5EfpWvW7U=
 google.golang.org/protobuf v1.36.11 h1:fV6ZwhNocDyBLK0dj+fg8ektcVegBBuEolpbTQyBNVE=
 google.golang.org/protobuf v1.36.11/go.mod h1:HTf+CrKn2C3g5S8VImy6tdcUvCska2kB7j23XfzDpco=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
