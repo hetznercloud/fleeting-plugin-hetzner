@@ -148,6 +148,8 @@ gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20260216115711-f92a9a777da3 h1:2V
 gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20260216115711-f92a9a777da3/go.mod h1:DroPUy/cU/dhE8+quugAQx6LCMHffQ8vePINBCKO0UA=
 gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20260316122517-529ee35878cd h1:pqSPmM6PP2xIBAgvxXulVjPbEWvqpjYpB+yX7k5JbPM=
 gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20260316122517-529ee35878cd/go.mod h1:h7Reaszm3GKKXf286vydVzslSFzcBaWVYlktlnBGwSE=
+gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20260321091649-b5bd86a11597 h1:dYFsZHlo3uXpB5bu9GcLvWufb7Bi++MIfplaG1b+eq4=
+gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20260321091649-b5bd86a11597/go.mod h1:KuLaeBAm5KOo5UHB5huea5jfFRiDHGTxCVTydO3IYik=
 gitlab.com/gitlab-org/go/reopen v1.0.0 h1:6BujZ0lkkjGIejTUJdNO1w56mN1SI10qcVQyQlOPM+8=
 gitlab.com/gitlab-org/go/reopen v1.0.0/go.mod h1:D6OID8YJDzEVZNYW02R/Pkj0v8gYFSIhXFTArAsBQw8=
 gitlab.com/gitlab-org/labkit v1.34.0 h1:wJrUZdfxbZrA9+qvnpk5gYJtceW+p7ceSJSg1BPZWTs=
@@ -156,6 +158,8 @@ gitlab.com/gitlab-org/labkit v1.37.1 h1:eVa2A0wuIbttOXWplC4GV9GMNrbZ+ZNAPAKxImr3
 gitlab.com/gitlab-org/labkit v1.37.1/go.mod h1:JqQLdgjV/KKAZJ6gvNodaLStmWeTT9mxgJPIEi66VHI=
 gitlab.com/gitlab-org/labkit v1.51.0 h1:EK8iwDbOUZrFIwKb7IYqATpkuD6ZBOFU/K56hoEOA+M=
 gitlab.com/gitlab-org/labkit v1.51.0/go.mod h1:TSgFzQbzLZdtFLhqyFEzDBJrfwD3cfZp+zxsqx6UJac=
+gitlab.com/gitlab-org/labkit v1.53.1 h1:O2PIg1X8K/90xfoAwSdCAgHg4qcoCLlGUBIOtiA3zoo=
+gitlab.com/gitlab-org/labkit v1.53.1/go.mod h1:TSgFzQbzLZdtFLhqyFEzDBJrfwD3cfZp+zxsqx6UJac=
 go.opentelemetry.io/auto/sdk v1.2.1 h1:jXsnJ4Lmnqd11kwkBV2LgLoFMZKizbCi5fNZ/ipaZ64=
 go.opentelemetry.io/auto/sdk v1.2.1/go.mod h1:KRTj+aOaElaLi+wW1kO/DZRXwkF4C5xPbEe3ZiIhN7Y=
 go.opentelemetry.io/otel v1.38.0 h1:RkfdswUDRimDg0m2Az18RKOsnI8UDzppJAtj01/Ymk8=
