@@ -1,5 +1,19 @@
 # Changelog
 
+## [v1.4.4](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v1.4.4)
+
+### Bug Fixes
+
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.37.0 (hetznercloud/fleeting-plugin-hetzner!359)
+- **deps**: update gitlab.com/gitlab-org/fleeting/fleeting digest to b5bd86a (hetznercloud/fleeting-plugin-hetzner!357)
+- **deps**: update gitlab.com/gitlab-org/fleeting/fleeting digest to 529ee35 (hetznercloud/fleeting-plugin-hetzner!347)
+- **deps**: update gitlab.com/gitlab-org/fleeting/fleeting digest to f92a9a7 (hetznercloud/fleeting-plugin-hetzner!343)
+- **deps**: update gitlab.com/gitlab-org/fleeting/fleeting digest to 12019c8 (hetznercloud/fleeting-plugin-hetzner!341)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.36.0 (hetznercloud/fleeting-plugin-hetzner!340)
+- **deps**: update gitlab.com/gitlab-org/fleeting/fleeting digest to d8385ad (hetznercloud/fleeting-plugin-hetzner!334)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.35.0 (hetznercloud/fleeting-plugin-hetzner!338)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.34.0 (hetznercloud/fleeting-plugin-hetzner!330)
+
 ## [v1.4.3](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v1.4.3)
 
 ### Bug Fixes
