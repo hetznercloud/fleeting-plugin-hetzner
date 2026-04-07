@@ -1,16 +1,24 @@
 #!/usr/bin/env bash
 
-# This script assumes it is running within a
-# registry.gitlab.com/gitlab-org/release-cli:latest image, or at least that
-# `release-cli` is installed and in $PATH. Also note that this is very much a
-# bash script and does not run under plain sh.
+# This script assumes it is running within a registry.gitlab.com/gitlab-org/cli:latest image
 
-set -eo pipefail
+set -euo pipefail
 
-args=(create --name "Release ${CI_COMMIT_TAG}" --tag-name "${CI_COMMIT_TAG}")
-while read -r FILE; do
-  # TODO: change "filepath" to "direct_asset_path" when https://gitlab.com/gitlab-org/release-cli/-/issues/165 is fixed.
-  args+=(--assets-link "{\"name\":\"${FILE}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${CI_COMMIT_TAG}/${FILE}\", \"filepath\":\"/${FILE}\"}")
-done < manifest.txt
+# asset_link <file>
+asset_link() {
+  cat << EOF
+{"name": "${1}", "url": "${PACKAGE_REGISTRY_URL}/${CI_COMMIT_TAG}/${1}", "direct_asset_path": "/${1}"}
+EOF
+}
 
-release-cli "${args[@]}"
+# assets_links
+assets_links() {
+  assets=()
+  while read -r file; do
+    assets+=("$(asset_link "$file")")
+  done < manifest.txt
+  local IFS=,
+  echo "[${assets[*]}]"
+}
+
+glab release upload "${CI_COMMIT_TAG}" --assets-links "$(assets_links)"
