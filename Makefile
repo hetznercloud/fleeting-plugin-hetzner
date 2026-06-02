@@ -48,7 +48,7 @@ test: .mods
 coverage:
 	go test -v -timeout=30m -coverprofile=coverage.tmp -covermode count ./...
 	grep -v -e 'zz_.*.go' coverage.tmp > coverage.txt
-	go run github.com/boumenot/gocover-cobertura < coverage.txt > coverage.xml
+	go run -modfile=tools/go.mod github.com/boumenot/gocover-cobertura < coverage.txt > coverage.xml
 	go tool cover -func=coverage.txt
 
 .PHONY: clean
