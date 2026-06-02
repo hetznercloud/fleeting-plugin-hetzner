@@ -5,7 +5,7 @@ go 1.25.0
 toolchain go1.26.3
 
 require (
-	github.com/boumenot/gocover-cobertura v1.4.0
+	github.com/boumenot/gocover-cobertura v1.5.0
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hetznercloud/hcloud-go/v2 v2.42.0
 	github.com/stretchr/testify v1.11.1
