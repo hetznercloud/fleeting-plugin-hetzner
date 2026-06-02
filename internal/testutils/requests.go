@@ -1,7 +1,6 @@
 package testutils
 
 import (
-	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutil"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/schema"
 )
@@ -57,7 +56,7 @@ var (
 		Status: 200,
 		JSON: schema.ImageListResponse{
 			Images: []schema.Image{
-				{ID: 114690387, Name: hcloud.Ptr("debian-12"), OSFlavor: "debian", OSVersion: hcloud.Ptr("12"), Architecture: "x86"},
+				{ID: 114690387, Name: new("debian-12"), OSFlavor: "debian", OSVersion: new("12"), Architecture: "x86"},
 			},
 		},
 	}

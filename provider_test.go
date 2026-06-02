@@ -370,7 +370,7 @@ func TestConnectInfo(t *testing.T) {
 							Status: "running",
 							Image: &schema.Image{
 								OSFlavor:  "debian",
-								OSVersion: hcloud.Ptr("12"),
+								OSVersion: new("12"),
 							},
 							ServerType: schema.ServerType{
 								Name:         "cpx22",
@@ -417,7 +417,7 @@ func TestConnectInfo(t *testing.T) {
 							Status: "running",
 							Image: &schema.Image{
 								OSFlavor:  "debian",
-								OSVersion: hcloud.Ptr("12"),
+								OSVersion: new("12"),
 							},
 							ServerType: schema.ServerType{
 								Name:         "cpx22",

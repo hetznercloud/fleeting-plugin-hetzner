@@ -7,7 +7,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/exp/mockutil"
 	"github.com/hetznercloud/hcloud-go/v2/hcloud/schema"
 
@@ -61,14 +60,14 @@ func TestNextIP(t *testing.T) {
 				Status: 200,
 				JSON: schema.PrimaryIPListResponse{
 					PrimaryIPs: []schema.PrimaryIP{
-						{ID: 41, IP: "1.1.1.1", Type: "ipv4", AssigneeID: hcloud.Ptr(int64(0)), Location: locationHel1},
-						{ID: 42, IP: "2.2.2.2", Type: "ipv4", AssigneeID: hcloud.Ptr(int64(1)), Location: locationHel1},
-						{ID: 43, IP: "3.3.3.3", Type: "ipv4", AssigneeID: hcloud.Ptr(int64(2)), Location: locationFsn1},
-						{ID: 44, IP: "4.4.4.4", Type: "ipv4", AssigneeID: hcloud.Ptr(int64(0)), Location: locationFsn1},
-						{ID: 61, IP: "2001:db8:c012:d011::/64", Type: "ipv6", AssigneeID: hcloud.Ptr(int64(0)), Location: locationHel1},
-						{ID: 62, IP: "2001:db8:c012:d022::/64", Type: "ipv6", AssigneeID: hcloud.Ptr(int64(3)), Location: locationHel1},
-						{ID: 63, IP: "2001:db8:c012:d033::/64", Type: "ipv6", AssigneeID: hcloud.Ptr(int64(4)), Location: locationFsn1},
-						{ID: 64, IP: "2001:db8:c012:d044::/64", Type: "ipv6", AssigneeID: hcloud.Ptr(int64(0)), Location: locationFsn1},
+						{ID: 41, IP: "1.1.1.1", Type: "ipv4", AssigneeID: new(int64(0)), Location: locationHel1},
+						{ID: 42, IP: "2.2.2.2", Type: "ipv4", AssigneeID: new(int64(1)), Location: locationHel1},
+						{ID: 43, IP: "3.3.3.3", Type: "ipv4", AssigneeID: new(int64(2)), Location: locationFsn1},
+						{ID: 44, IP: "4.4.4.4", Type: "ipv4", AssigneeID: new(int64(0)), Location: locationFsn1},
+						{ID: 61, IP: "2001:db8:c012:d011::/64", Type: "ipv6", AssigneeID: new(int64(0)), Location: locationHel1},
+						{ID: 62, IP: "2001:db8:c012:d022::/64", Type: "ipv6", AssigneeID: new(int64(3)), Location: locationHel1},
+						{ID: 63, IP: "2001:db8:c012:d033::/64", Type: "ipv6", AssigneeID: new(int64(4)), Location: locationFsn1},
+						{ID: 64, IP: "2001:db8:c012:d044::/64", Type: "ipv6", AssigneeID: new(int64(0)), Location: locationFsn1},
 					},
 				},
 			},

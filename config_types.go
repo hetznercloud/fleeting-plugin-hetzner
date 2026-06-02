@@ -28,14 +28,14 @@ func (o *LaxStringList) UnmarshalJSON(data []byte) error {
 			} else {
 				return &json.UnmarshalTypeError{
 					Value: string(data),
-					Type:  reflect.TypeOf(*o),
+					Type:  reflect.TypeFor[LaxStringList](),
 				}
 			}
 		}
 	default:
 		return &json.UnmarshalTypeError{
 			Value: string(data),
-			Type:  reflect.TypeOf(*o),
+			Type:  reflect.TypeFor[LaxStringList](),
 		}
 	}
 

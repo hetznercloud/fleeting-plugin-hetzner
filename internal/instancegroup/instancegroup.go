@@ -172,7 +172,7 @@ func (g *instanceGroup) Increase(ctx context.Context, delta int) ([]string, erro
 	failed := make([]*Instance, 0, delta)
 
 	// Create a list of new instances
-	for i := 0; i < delta; i++ {
+	for range delta {
 		instances = append(instances, NewInstance(g.randomNameFn()))
 	}
 
