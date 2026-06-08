@@ -2,7 +2,7 @@ module tools
 
 go 1.26.0
 
-toolchain go1.26.3
+toolchain go1.26.4
 
 tool (
 	github.com/boumenot/gocover-cobertura
