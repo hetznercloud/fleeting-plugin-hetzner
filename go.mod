@@ -6,7 +6,7 @@ toolchain go1.26.4
 
 require (
 	github.com/hashicorp/go-hclog v1.6.3
-	github.com/hetznercloud/hcloud-go/v2 v2.42.0
+	github.com/hetznercloud/hcloud-go/v2 v2.44.0
 	github.com/stretchr/testify v1.11.1
 	gitlab.com/gitlab-org/fleeting/fleeting v0.0.0-20260321091649-b5bd86a11597
 	go.uber.org/mock v0.6.0
@@ -54,10 +54,10 @@ require (
 	gitlab.com/gitlab-org/go/reopen v1.0.0 // indirect
 	gitlab.com/gitlab-org/labkit v1.53.1 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
-	golang.org/x/crypto v0.51.0 // indirect
+	golang.org/x/crypto v0.52.0 // indirect
 	golang.org/x/mod v0.35.0 // indirect
-	golang.org/x/net v0.54.0 // indirect
-	golang.org/x/sys v0.44.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/text v0.37.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251213004720-97cd9d5aeac2 // indirect
 	google.golang.org/grpc v1.79.2 // indirect
