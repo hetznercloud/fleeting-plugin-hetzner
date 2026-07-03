@@ -153,10 +153,11 @@ func (g *InstanceGroup) Init(ctx context.Context, log hclog.Logger, settings pro
 	})
 
 	return provider.ProviderInfo{
-		ID:        path.Join("hetzner", g.Location, g.Name),
-		MaxSize:   math.MaxInt,
-		Version:   Version.String(),
-		BuildInfo: Version.BuildInfo(),
+		ID:           path.Join("hetzner", g.Location, g.Name),
+		MaxSize:      math.MaxInt,
+		Version:      Version.String(),
+		BuildInfo:    Version.BuildInfo(),
+		Capabilities: []provider.Capability{},
 	}, nil
 }
 
@@ -311,4 +312,12 @@ func (g *InstanceGroup) Shutdown(ctx context.Context) error {
 	}
 
 	return errors.Join(errs...)
+}
+
+func (g *InstanceGroup) Resume(_ context.Context, _ []string) ([]string, error) {
+	return nil, provider.ErrSuspendResumeNotSupported
+}
+
+func (g *InstanceGroup) Suspend(_ context.Context, _ []string) ([]string, error) {
+	return nil, provider.ErrSuspendResumeNotSupported
 }
