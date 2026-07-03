@@ -1,5 +1,15 @@
 # Changelog
 
+## [v1.4.5](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v1.4.5)
+
+### Bug Fixes
+
+- **deps**: update gitlab.com/gitlab-org/fleeting/fleeting digest to ef4ba33 (hetznercloud/fleeting-plugin-hetzner!366)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.44.0 (hetznercloud/fleeting-plugin-hetzner!381)
+- **deps**: update module github.com/boumenot/gocover-cobertura to v1.5.0 (hetznercloud/fleeting-plugin-hetzner!374)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.42.0 (hetznercloud/fleeting-plugin-hetzner!375)
+- **deps**: update module github.com/hetznercloud/hcloud-go/v2 to v2.40.0 (hetznercloud/fleeting-plugin-hetzner!368)
+
 ## [v1.4.4](https://gitlab.com/hetznercloud/fleeting-plugin-hetzner/-/releases/v1.4.4)
 
 ### Bug Fixes
