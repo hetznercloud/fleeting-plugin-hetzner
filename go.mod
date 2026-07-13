@@ -2,7 +2,7 @@ module gitlab.com/hetznercloud/fleeting-plugin-hetzner
 
 go 1.26.0
 
-toolchain go1.26.4
+toolchain go1.26.5
 
 require (
 	github.com/hashicorp/go-hclog v1.6.3
